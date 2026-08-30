@@ -197,9 +197,6 @@
     let GLOBAL_DAYS_DATA = [];
 
     // ================= 🌟 免代码配置图库映射 🌟 =================
-    // 以后上传图片，只需将图片命名为“景点名.jpg”（例如：泸沽湖.jpg）并传到 GitHub
-    // 系统将自动识别，无需在此处添加任何代码！
-    // 这里的列表仅用于处理别名（如"大熊猫"->"熊猫基地"）和网络连接图。
     const TEAM_CLOUD_IMAGES = {
       "大熊猫": "熊猫基地",
       "接机": "https://images.unsplash.com/photo-1563720225384-9a0264b3a4a1?w=800&q=80",
@@ -213,16 +210,14 @@
       const cleanPois = pois.filter(p => !p.includes("高铁") && !p.includes("前往"));
       const scenicSpotPois = cleanPois.filter(p => !CITY_BLACKLIST.includes(p.trim()));
 
-      // 1. 检查是否有接送机
       if (pois.some(p => p.includes("接机") || p.includes("送机"))) return TEAM_CLOUD_IMAGES["接机"];
 
-      // 2. 动态生成免代码图片 URL (您的专属 GitHub 链接)
       const GITHUB_BASE = "https://sallyzheng-lang.github.io/klook-tool/";
       
       if (scenicSpotPois.length > 0) {
         let spot = scenicSpotPois[0];
         if (TEAM_CLOUD_IMAGES[spot] && !TEAM_CLOUD_IMAGES[spot].startsWith("http")) {
-            spot = TEAM_CLOUD_IMAGES[spot]; // 处理别名
+            spot = TEAM_CLOUD_IMAGES[spot];
         }
         return GITHUB_BASE + spot + ".jpg";
       }
@@ -264,7 +259,8 @@
       "大理古城": "Dali Ancient Town", "丽江古城": "Lijiang Ancient Town", "沙溪古镇": "Shaxi Ancient Town",
       "白沙古镇": "Baisha Ancient Town", "喜洲古镇": "Xizhou Ancient Town", "双廊古镇": "Shuanglang Ancient Town",
       "理想邦": "Ideal State (Santorini)", "文笔村": "Wenbi Village", "磻溪村": "Panxi Village", "拉市海": "Lashi Lake",
-      "高铁": "High-Speed Rail", "前往": "to", "送机": "Airport Drop-off", "接机": "Airport Pick-up"
+      "猫鼻梁": "Maobiliang Viewpoint", "四姑娘山": "Mount Siguniang", "双桥沟": "Shuangqiao Valley", "丹巴": "Danba", "藏寨": "Tibetan Village",
+      "高铁": "High-Speed Rail", "前往": "to", "送机": "Airport Drop-off", "接机": "Airport Pick-up", "接站": "Pick-up"
     };
 
     async function translateText(text, lang) {
@@ -279,7 +275,7 @@
         let keys = Object.keys(EN_DICT).sort((a, b) => b.length - a.length);
         for (let key of keys) { result = result.replaceAll(key, EN_DICT[key]); }
         result = result.replaceAll('—', ' - ').replaceAll('、', ', ').replaceAll('；', '; ');
-        if (/[一-龥]/.test(result)) {
+        if (/[\u4e00-\u9fa5]/.test(result)) {
           try {
             const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q=${encodeURIComponent(result)}`);
             const data = await res.json();
@@ -296,7 +292,9 @@
       "磻溪村,喜洲": "晨起前往磻溪村S湾体验唯美骑行与摄影，漫步喜洲古镇品尝特色烤乳扇。随后前往双廊古镇感受苍洱风光，傍晚自由闲逛大理古城。",
       "沙溪,白沙": "大理出发，前往茶马古道上唯一幸存的古集市——沙溪古镇，探访古戏台与玉津桥。随后前往白沙古镇感受原生态纳西风情，傍晚入住丽江古城。",
       "玉龙雪山,蓝月谷": "乘车前往玉龙雪山风景区，途经甘海子高山草甸。乘坐大索道直达海拔4506米的冰川公园，随后游览自带滤镜的蓝月谷，观赏震撼的《印象丽江》实景演出。",
-      "拉市海,送机": "清晨前往拉市海湿地公园，感受候鸟天堂的宁静与茶马古道的悠远。根据您的航班时间，专属管家将安排专车送机，结束愉快的定制之旅。"
+      "拉市海,送机": "清晨前往拉市海湿地公园，感受候鸟天堂的宁静与茶马古道的悠远。根据您的航班时间，专属管家将安排专车送机，结束愉快的定制之旅。",
+      "猫鼻梁,四姑娘山": "成都接站后乘专车前往“蜀山后花园”四姑娘山。途经猫鼻梁观景台，远眺四姑娘山四大主峰雄姿，随后前往四姑娘山镇入住。",
+      "双桥沟,丹巴": "全天深度游览四姑娘山双桥沟，乘坐观光车游览雪山、森林、草甸与海子。随后前往“中国最美乡村”丹巴藏寨，感受浓郁的嘉绒藏族风情与碉楼建筑奇观。"
     };
 
     function getSmartDescCn(routeStr) {
@@ -306,7 +304,7 @@
         if (key.split(',').every(k => joinedPois.includes(k))) return SMART_ROUTE_DESCS_CN[key];
       }
       
-      const ignoreWords = ["高铁", "前往", "返回", "送机", "接机", "出发", "乘车"];
+      const ignoreWords = ["高铁", "前往", "返回", "送机", "接机", "出发", "乘车", "接站"];
       const mainSpots = rawPois.filter(p => !ignoreWords.some(ignore => p.includes(ignore)));
       
       if (mainSpots.length > 0) {
@@ -331,8 +329,7 @@
         block = block.trim();
         if (!block) continue;
 
-        const headerMatch = block.match(/^(?:Day\s*\d+|\d{1,2}月\d{1,2}日|\d{1,2}\.\d{1,2})[：:]\s*([^
-]+)/i);
+        const headerMatch = block.match(/^(?:Day\s*\d+|\d{1,2}月\d{1,2}日|\d{1,2}\.\d{1,2})[：:]\s*([^\r\n]+)/i);
         if (headerMatch) {
           const routeStrCn = headerMatch[1].trim();
           const rawPois = routeStrCn.split(/[—\-–>,\s]+/).filter(s => s.trim().length > 0);
@@ -390,7 +387,7 @@
                   <input type="file" accept="image/*" class="hidden" onchange="handleManualImageUpload(event, ${index})">
                 </label>
               </div>
-              <img src="${day.img}" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1527684651001-731c474aaf9a?w=800&q=80';" class="w-full h-32 object-cover rounded-lg border border-gray-200 shadow-xs">
+              <img src="${day.img}" onerror="if(!this.dataset.triedPng){this.dataset.triedPng='1'; this.src=this.src.replace('.jpg','.png');} else {this.onerror=null; this.src='https://images.unsplash.com/photo-1527684651001-731c474aaf9a?w=800&q=80';}" class="w-full h-32 object-cover rounded-lg border border-gray-200 shadow-xs">
             </div>
             <div>
               <label class="text-[10px] text-gray-500 font-bold mb-1 block">文案描述 (智能生成，可修改)</label>
@@ -461,7 +458,6 @@
         dailyContainer.innerHTML = GLOBAL_DAYS_DATA.map((d) => `
           <div class="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100">
             <div class="relative h-48 w-full overflow-hidden bg-gray-100 group">
-              <!-- 免代码匹配核心逻辑：若找不到JPG，降级到 PNG，若依然找不到，使用超美备用底图，不产生碎图 -->
               <img src="${d.img}" onerror="if(!this.dataset.triedPng){this.dataset.triedPng='1'; this.src=this.src.replace('.jpg','.png');} else {this.onerror=null; this.src='https://images.unsplash.com/photo-1543016843-f1c0fa5c4424?w=800&q=80';}" class="w-full h-full object-cover transform transition duration-700 group-hover:scale-105">
               <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent"></div>
               <div class="absolute bottom-2.5 left-3.5 right-3.5 flex justify-between items-end text-white">
@@ -481,10 +477,8 @@
         <div class="flex items-start gap-2.5 bg-white/90 p-2.5 rounded-lg border border-orange-100/70 shadow-2xs"><div class="w-6 h-6 rounded-lg bg-orange-100 text-klook flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold">📸</div><div><div class="font-bold text-gray-800 text-[11px] leading-tight">${dict.high3Title}</div><div class="text-[10px] text-gray-500 mt-0.5 leading-snug">${dict.high3Desc}</div></div></div>
       `;
 
-      let exRaw = document.getElementById('field-exclusions').value || "全程酒店住宿自理
-全程正餐及晚餐自理";
-      let canRaw = document.getElementById('field-cancellation').value || "提前6日至4日取消，扣除20%违约金；
-行程开始当日取消，扣除60%违约金。";
+      let exRaw = document.getElementById('field-exclusions').value || "全程酒店住宿自理\n全程正餐及晚餐自理";
+      let canRaw = document.getElementById('field-cancellation').value || "提前6日至4日取消，扣除20%违约金；\n行程开始当日取消，扣除60%违约金。";
       let hRaw = document.getElementById('field-hotel').value || "严选钻级精品客栈/高口碑酒店入住";
       let tickRaw = document.getElementById('field-tickets').value;
       let trafRaw = document.getElementById('field-traffic').value;
@@ -497,10 +491,8 @@
         if (trafRaw) trafRaw = await translateText(trafRaw, lang);
       }
 
-      document.getElementById('poster-exclusions').innerHTML = exRaw.split('
-').filter(s=>s.trim()).map(i => `<li>${i}</li>`).join('');
-      document.getElementById('poster-cancellation').innerHTML = canRaw.split('
-').filter(s=>s.trim()).map(l => `<p>• ${l}</p>`).join('');
+      document.getElementById('poster-exclusions').innerHTML = exRaw.split('\n').filter(s=>s.trim()).map(i => `<li>${i}</li>`).join('');
+      document.getElementById('poster-cancellation').innerHTML = canRaw.split('\n').filter(s=>s.trim()).map(l => `<p>• ${l}</p>`).join('');
       
       let incHTML = '';
       if (tickRaw) incHTML += `<div class="bg-orange-50/40 p-2.5 rounded-lg border border-orange-100"><span class="font-bold text-gray-800 block mb-1">${dict.lblTickets}</span><p class="text-gray-600 text-[11px]">${tickRaw}</p></div>`;
@@ -511,18 +503,12 @@
       document.getElementById('hotel-input-block').style.display = isHotelSelected ? 'block' : 'none';
       document.getElementById('poster-hotel-wrapper').style.display = isHotelSelected ? 'block' : 'none';
       if (isHotelSelected) {
-        document.getElementById('poster-hotel-list').innerHTML = hRaw.split('
-').filter(s=>s.trim()).map(h => `<div class="flex items-start gap-2 bg-gray-50 p-2 rounded-lg border border-gray-100"><span class="bg-klook/10 text-klook font-bold px-1.5 py-0.5 rounded text-[10px]">🏨</span><span class="text-gray-700 font-medium text-[11px]">${h}</span></div>`).join('');
+        document.getElementById('poster-hotel-list').innerHTML = hRaw.split('\n').filter(s=>s.trim()).map(h => `<div class="flex items-start gap-2 bg-gray-50 p-2 rounded-lg border border-gray-100"><span class="bg-klook/10 text-klook font-bold px-1.5 py-0.5 rounded text-[10px]">🏨</span><span class="text-gray-700 font-medium text-[11px]">${h}</span></div>`).join('');
       }
     }
     
     function loadTemplate() {
-      // ✅ 已经完全替换为纯云南经典线路
-      document.getElementById('field-itinerary').value = `Day 1: 昆明接机—高铁前往大理—理想邦—文笔村
-Day 2: 磻溪村S湾—喜洲古镇—文笔村—双廊古镇—大理
-Day 3: 大理—沙溪古镇—白沙古镇—丽江古城
-Day 4: 丽江—甘海子—玉龙雪山—冰川公园—蓝月谷
-Day 5: 丽江—拉市海—丽江送机`;
+      document.getElementById('field-itinerary').value = "Day 1: 昆明接机—高铁前往大理—理想邦—文笔村\nDay 2: 磻溪村S湾—喜洲古镇—文笔村—双廊古镇—大理\nDay 3: 大理—沙溪古镇—白沙古镇—丽江古城\nDay 4: 丽江—甘海子—玉龙雪山—冰川公园—蓝月谷\nDay 5: 丽江—拉市海—丽江送机";
       document.getElementById('field-date').value = "10月12日"; document.getElementById('field-group').value = "4大1小"; document.getElementById('field-price').value = "9000元/定制团";
       document.getElementById('field-tickets').value = "玉龙雪山大索道及环保车、印象丽江实景演出"; document.getElementById('field-traffic').value = "7座别克GL8商务车（含油费过路费司机食宿）";
       syncItineraryToDaysData();
