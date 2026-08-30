@@ -57,7 +57,7 @@
           <span class="flex items-center gap-1"><span>☁️</span> 团队公共图库</span>
           <span class="text-[9px] bg-emerald-200 text-emerald-800 px-1.5 py-0.5 rounded font-black">已连接</span>
         </label>
-        <div class="text-[10px] text-emerald-700 font-medium leading-tight">支持免代码热更新：上传名为“景点名.jpg”的图片至 GitHub，系统即可自动调用。</div>
+        <div class="text-[10px] text-emerald-700 font-medium leading-tight">支持免代码热更新：上传名为“景点名.jpg”或“景点名.png”的图片至 GitHub，系统即可自动调用。</div>
       </div>
 
       <div class="bg-gray-50 border border-gray-200 p-3 rounded-xl space-y-2.5">
@@ -196,7 +196,9 @@
     // ================= 全局状态管理 =================
     let GLOBAL_DAYS_DATA = [];
 
-    // ================= 🌟 免代码配置图库映射 🌟 =================
+    // 默认稳定国内兜底图（直接引用仓库里一定存在的丽江古城图）
+    const SAFE_FALLBACK_IMG = "https://sallyzheng-lang.github.io/klook-tool/丽江古城.jpg";
+
     const TEAM_CLOUD_IMAGES = {
       "大熊猫": "熊猫基地",
       "接机": "https://images.unsplash.com/photo-1563720225384-9a0264b3a4a1?w=800&q=80",
@@ -206,27 +208,31 @@
     const CITY_BLACKLIST = ["丽江", "大理", "昆明", "哈尔滨", "香格里拉", "成都", "三亚"];
 
     function findTeamCloudImage(pois) {
-      if (!pois || !Array.isArray(pois)) return null;
+      if (!pois || !Array.isArray(pois)) return SAFE_FALLBACK_IMG;
+      
       const cleanPois = pois.filter(p => !p.includes("高铁") && !p.includes("前往"));
-      const scenicSpotPois = cleanPois.filter(p => !CITY_BLACKLIST.includes(p.trim()));
-
-      if (pois.some(p => p.includes("接机") || p.includes("送机"))) return TEAM_CLOUD_IMAGES["接机"];
+      // 过滤掉城市名、接送机等词，只保留真正的景点
+      const scenicSpotPois = cleanPois.filter(p => !CITY_BLACKLIST.includes(p.trim()) && !p.includes("接机") && !p.includes("送机") && !p.includes("接站") && !p.includes("送站"));
 
       const GITHUB_BASE = "https://sallyzheng-lang.github.io/klook-tool/";
       
+      // 1. 最高优先级：查找具体景点（例如“理想邦”），绝不被“接机”覆盖
       if (scenicSpotPois.length > 0) {
         let spot = scenicSpotPois[0];
         if (TEAM_CLOUD_IMAGES[spot] && !TEAM_CLOUD_IMAGES[spot].startsWith("http")) {
             spot = TEAM_CLOUD_IMAGES[spot];
         }
-        return GITHUB_BASE + spot + ".jpg";
+        return GITHUB_BASE + spot + ".png"; // 默认先查 .png，找不到自动变 .jpg
       }
 
+      // 2. 第二优先级：如果当天路线纯粹是接送机，才调用专车图
+      if (pois.some(p => p.includes("接机") || p.includes("送机"))) return TEAM_CLOUD_IMAGES["接机"];
+
       if (cleanPois.length > 0) {
-        return GITHUB_BASE + cleanPois[0] + ".jpg";
+        return GITHUB_BASE + cleanPois[0] + ".png";
       }
       
-      return null;
+      return SAFE_FALLBACK_IMG;
     }
 
     // ================= 🌍 核心多语言翻译引擎 🌍 =================
@@ -387,7 +393,7 @@
                   <input type="file" accept="image/*" class="hidden" onchange="handleManualImageUpload(event, ${index})">
                 </label>
               </div>
-              <img src="${day.img}" onerror="if(!this.dataset.triedPng){this.dataset.triedPng='1'; this.src=this.src.replace('.jpg','.png');} else {this.onerror=null; this.src='https://images.unsplash.com/photo-1527684651001-731c474aaf9a?w=800&q=80';}" class="w-full h-32 object-cover rounded-lg border border-gray-200 shadow-xs">
+              <img src="${day.img}" onerror="if(!this.dataset.triedAlt){this.dataset.triedAlt='1'; this.src=this.src.endsWith('.png')?this.src.replace('.png','.jpg'):this.src.replace('.jpg','.png');} else {this.onerror=null; this.src='${SAFE_FALLBACK_IMG}';}" class="w-full h-32 object-cover rounded-lg border border-gray-200 shadow-xs">
             </div>
             <div>
               <label class="text-[10px] text-gray-500 font-bold mb-1 block">文案描述 (智能生成，可修改)</label>
@@ -458,7 +464,8 @@
         dailyContainer.innerHTML = GLOBAL_DAYS_DATA.map((d) => `
           <div class="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100">
             <div class="relative h-48 w-full overflow-hidden bg-gray-100 group">
-              <img src="${d.img}" onerror="if(!this.dataset.triedPng){this.dataset.triedPng='1'; this.src=this.src.replace('.jpg','.png');} else {this.onerror=null; this.src='https://images.unsplash.com/photo-1543016843-f1c0fa5c4424?w=800&q=80';}" class="w-full h-full object-cover transform transition duration-700 group-hover:scale-105">
+              <!-- .png 和 .jpg 智能互换兜底机制 -->
+              <img src="${d.img}" onerror="if(!this.dataset.triedAlt){this.dataset.triedAlt='1'; this.src=this.src.endsWith('.png')?this.src.replace('.png','.jpg'):this.src.replace('.jpg','.png');} else {this.onerror=null; this.src='${SAFE_FALLBACK_IMG}';}" class="w-full h-full object-cover transform transition duration-700 group-hover:scale-105">
               <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent"></div>
               <div class="absolute bottom-2.5 left-3.5 right-3.5 flex justify-between items-end text-white">
                 <div><span class="bg-klook text-white text-[10px] px-2 py-0.5 rounded font-black tracking-wider shadow-md">DAY ${d.dayNum}</span><h4 class="font-bold text-sm mt-1.5 leading-snug tracking-wide drop-shadow-md">${d.title}</h4></div>
