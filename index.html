@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Klook 私人定制行程生成器 (多语言旗舰版)</title>
+  <title>Klook 私人定制行程生成器 (旗舰完整版)</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -57,7 +57,7 @@
           <span class="flex items-center gap-1"><span>☁️</span> 团队公共图库</span>
           <span class="text-[9px] bg-emerald-200 text-emerald-800 px-1.5 py-0.5 rounded font-black">已连接</span>
         </label>
-        <div class="text-[10px] text-emerald-700 font-medium leading-tight">支持免代码热更新：上传名为“景点名.jpg”或“景点名.png”的图片至 GitHub，系统即可自动调用。</div>
+        <div class="text-[10px] text-emerald-700 font-medium leading-tight">支持免代码热更新：上传名为“景点名.jpg/png”的图片至 GitHub，系统即可自动调用。</div>
       </div>
 
       <div class="bg-gray-50 border border-gray-200 p-3 rounded-xl space-y-2.5">
@@ -105,7 +105,7 @@
         <span class="text-[10px] text-gray-400 bg-gray-100 px-2 py-1 rounded">Day Card Editor</span>
       </div>
       <div class="text-[11px] text-orange-600 bg-orange-50 p-2.5 rounded-lg border border-orange-100 leading-snug font-medium">
-        提示：系统已为您自动生成走心文案。若图片不满意，可点击 <strong class="font-bold text-orange-700">“上传新图片”</strong> 手动替换。
+        提示：系统已为您自动生成走心文案与去重匹配图。若图片不满意，可点击 <strong class="font-bold text-orange-700">“上传新图片”</strong> 手动替换。
       </div>
       <div id="day-editors-container" class="space-y-5 mt-4"></div>
     </div>
@@ -166,17 +166,41 @@
             <div class="bg-gray-50 p-3 rounded-xl border border-gray-200"><span class="font-bold text-gray-800 block mb-1">⚠️ <span id="ui-lbl-cancellation">退改政策</span></span><div id="poster-cancellation" class="text-gray-600 space-y-0.5"></div></div>
           </div>
 
-          <!-- 联系我们 -->
+          <!-- 🌟 Klook 品牌宗旨卡片 (已还原) 🌟 -->
+          <div class="bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 rounded-2xl p-4 text-white shadow-md space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="bg-white/20 backdrop-blur-md text-[10px] font-black px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-xs">✨ KLOOK TRAVEL 🧳</span>
+              <div class="flex gap-1 text-xs">✈️ 🌍 📸 📍</div>
+            </div>
+            <p id="ui-brand-p1" class="text-[11px] font-bold leading-snug drop-shadow-xs">🌟 让世界更轻松地探索中国，让每一次旅行都成为独特的体验。</p>
+            <p id="ui-brand-p2" class="text-[10px] text-amber-100 font-medium leading-snug">🚀 连接全球游客与中国目的地，用KLOOK的方式，让定制旅行更简单、更自由、更有趣。</p>
+          </div>
+
+          <!-- 联系我们 (含官方邮箱 Block & 二维码) -->
           <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 space-y-3">
-            <h3 class="text-xs font-bold text-gray-800 uppercase tracking-wider flex items-center justify-between border-b border-gray-100 pb-2"><span class="flex items-center gap-1.5">🎧 <span id="ui-heading-contact">联系我们 / Contact Us</span></span></h3>
+            <h3 class="text-xs font-bold text-gray-800 uppercase tracking-wider flex items-center justify-between border-b border-gray-100 pb-2">
+              <span class="flex items-center gap-1.5">🎧 <span id="ui-heading-contact">联系我们 / CONTACT US</span></span>
+              <span class="text-[9px] bg-orange-100 text-orange-700 px-2.5 py-0.5 rounded-full font-black tracking-wider">KLOOK EXCLUSIVE BUTLER</span>
+            </h3>
+
+            <!-- 🌟 官方邮箱 Block 🌟 -->
+            <div class="bg-orange-50/60 border border-orange-100 rounded-xl p-2.5 flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center shrink-0 font-bold text-xs shadow-2xs">✉️</div>
+              <div>
+                <div class="text-[9px] text-orange-600 font-bold uppercase tracking-wider">Official Email</div>
+                <div class="text-[11px] text-gray-800 font-extrabold tracking-tight">china_customized_travel@klook.com</div>
+              </div>
+            </div>
+
+            <!-- 二维码 -->
             <div class="grid grid-cols-2 gap-3 pt-1">
               <div class="bg-emerald-50/90 border border-emerald-400 rounded-xl p-3 flex flex-col items-center justify-between h-full">
-                <div class="bg-emerald-600 text-white font-black text-[10px] px-2.5 py-0.5 rounded-full inline-flex items-center gap-1 mb-2"><span>💬</span> WeChat</div>
+                <div class="bg-emerald-600 text-white font-black text-[10px] px-2.5 py-0.5 rounded-full inline-flex items-center gap-1 mb-2"><span>💬</span> 微信管家 / WeChat</div>
                 <div class="w-20 h-20 bg-white border border-emerald-200 rounded-lg p-1 overflow-hidden"><img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=KlookWechat" class="w-full h-full object-contain"></div>
                 <span id="ui-qr-wechat" class="text-[9px] text-emerald-800 font-extrabold mt-1.5">扫码添加微信管家</span>
               </div>
               <div class="bg-teal-50/90 border border-teal-400 rounded-xl p-3 flex flex-col items-center justify-between h-full">
-                <div class="bg-teal-700 text-white font-black text-[10px] px-2.5 py-0.5 rounded-full inline-flex items-center gap-1 mb-2"><span>📱</span> WhatsApp</div>
+                <div class="bg-teal-700 text-white font-black text-[10px] px-2.5 py-0.5 rounded-full inline-flex items-center gap-1 mb-2"><span>📱</span> WhatsApp / WA</div>
                 <div class="w-20 h-20 bg-white border border-teal-200 rounded-lg p-1 overflow-hidden"><img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://wa.me/8615181778005" class="w-full h-full object-contain"></div>
                 <span id="ui-qr-whatsapp" class="text-[9px] text-teal-900 font-extrabold mt-1.5">扫码添加 WhatsApp</span>
               </div>
@@ -186,6 +210,7 @@
           <!-- 页脚 -->
           <div class="text-center pt-2 border-t border-dashed border-gray-200 pb-2">
             <div class="text-xs font-extrabold text-klook tracking-wider">klook <span class="font-normal text-gray-400">| Private Customized Trip</span></div>
+            <div class="text-[9px] text-gray-400 font-medium mt-0.5" id="ui-footer-sub">Klook 官方品质保障 · 专属行程规划师为您服务</div>
           </div>
         </div>
       </div>
@@ -196,64 +221,126 @@
     // ================= 全局状态管理 =================
     let GLOBAL_DAYS_DATA = [];
 
-    // 默认稳定国内兜底图（直接引用仓库里一定存在的丽江古城图）
-    const SAFE_FALLBACK_IMG = "https://sallyzheng-lang.github.io/klook-tool/丽江古城.jpg";
+    // 精准映射 GitHub 上所有已上传的文件名（含具体后缀）
+    const EXACT_GITHUB_FILES = {
+      "理想邦": "理想邦.png",
+      "玉龙雪山": "玉龙雪山.jpg",
+      "喜洲": "喜洲古镇.jpg",
+      "白沙": "白沙古镇.png",
+      "丽江古城": "丽江古城.jpg",
+      "虎跳峡": "虎跳峡.png",
+      "纳帕海": "纳帕海.jpg",
+      "拉市海": "拉市海.jpg",
+      "建水": "建水古城.jpg",
+      "和顺": "和顺古镇.jpg",
+      "热带植物园": "热带植物园.jpg",
+      "热海": "热海.png",
+      "石林": "石林.jpg",
+      "猪槽船": "猪槽船.png",
+      "元阳梯田": "元阳梯田.jpg",
+      "云南民族村": "云南民族村.jpg",
+      "勐巴娜西": "勐巴娜西珍奇园.jpg",
+      "大金塔": "勐焕大金塔.jpg",
+      "十里画廊": "十里画廊.png",
+      "北海湿地": "北海湿地.jpg",
 
-    const TEAM_CLOUD_IMAGES = {
-      "大熊猫": "熊猫基地",
-      "接机": "https://images.unsplash.com/photo-1563720225384-9a0264b3a4a1?w=800&q=80",
-      "送机": "https://images.unsplash.com/photo-1563720225384-9a0264b3a4a1?w=800&q=80",
+      // 东北
+      "冰雪大世界": "冰雪大世界.jpg",
+      "伏尔加庄园": "伏尔加庄园.png",
+      "中央大街": "中央大街.jpg",
+      "亚布力": "亚布力滑雪场.jpg",
+      "东北虎": "东北虎林园.jpg",
+      "太阳岛": "太阳岛.png",
+      "中华巴洛克": "中华巴洛克.png",
+      "哈尔滨": "哈尔滨.png",
+      "北极村": "北极村.png",
+      "北红村": "北红村.png",
+
+      // 四川
+      "熊猫": "熊猫基地.jpg",
+      "九寨沟": "九寨沟.jpg",
+      "黄龙": "黄龙.jpg",
+      "都江堰": "都江堰.jpg",
+      "青城山": "青城山.png",
+      "乐山大佛": "乐山大佛.jpg",
+      "峨眉山": "峨眉山.png",
+      "四姑娘山": "四姑娘山.png",
+      "双桥沟": "四姑娘山-双桥沟.jpeg",
+      "宽窄巷子": "宽窄巷子.jpg",
+      "太古里": "太古里.png",
+      "IFS": "IFS国金中心.png",
+      "南桥": "南桥.jpg",
+
+      // 服务
+      "接机": "接机.png",
+      "送机": "送机.png"
     };
 
-    const CITY_BLACKLIST = ["丽江", "大理", "昆明", "哈尔滨", "香格里拉", "成都", "三亚"];
+    const MULTI_FALLBACK_IMAGES = [
+      "https://images.unsplash.com/photo-1527684651001-731c474aaf9a?w=800&q=80",
+      "https://images.unsplash.com/photo-1543016843-f1c0fa5c4424?w=800&q=80",
+      "https://images.unsplash.com/photo-1506197603052-3cc9c3a201bd?w=800&q=80",
+      "https://images.unsplash.com/photo-1548013146-72479768bada?w=800&q=80",
+      "https://images.unsplash.com/photo-1563720225384-9a0264b3a4a1?w=800&q=80"
+    ];
 
-    function findTeamCloudImage(pois) {
-      if (!pois || !Array.isArray(pois)) return SAFE_FALLBACK_IMG;
-      
-      const cleanPois = pois.filter(p => !p.includes("高铁") && !p.includes("前往"));
-      // 过滤掉城市名、接送机等词，只保留真正的景点
-      const scenicSpotPois = cleanPois.filter(p => !CITY_BLACKLIST.includes(p.trim()) && !p.includes("接机") && !p.includes("送机") && !p.includes("接站") && !p.includes("送站"));
-
+    function findTeamCloudImage(pois, dayIndex, usedImagesSet) {
       const GITHUB_BASE = "https://sallyzheng-lang.github.io/klook-tool/";
-      
-      // 1. 最高优先级：查找具体景点（例如“理想邦”），绝不被“接机”覆盖
-      if (scenicSpotPois.length > 0) {
-        let spot = scenicSpotPois[0];
-        if (TEAM_CLOUD_IMAGES[spot] && !TEAM_CLOUD_IMAGES[spot].startsWith("http")) {
-            spot = TEAM_CLOUD_IMAGES[spot];
+      const routeStr = pois.join(" ");
+
+      for (let key in EXACT_GITHUB_FILES) {
+        if (routeStr.includes(key)) {
+          const imgUrl = EXACT_GITHUB_FILES[key].startsWith("http") 
+            ? EXACT_GITHUB_FILES[key] 
+            : GITHUB_BASE + EXACT_GITHUB_FILES[key];
+
+          if (!usedImagesSet.has(imgUrl)) {
+            usedImagesSet.add(imgUrl);
+            return imgUrl;
+          }
         }
-        return GITHUB_BASE + spot + ".png"; // 默认先查 .png，找不到自动变 .jpg
       }
 
-      // 2. 第二优先级：如果当天路线纯粹是接送机，才调用专车图
-      if (pois.some(p => p.includes("接机") || p.includes("送机"))) return TEAM_CLOUD_IMAGES["接机"];
-
-      if (cleanPois.length > 0) {
-        return GITHUB_BASE + cleanPois[0] + ".png";
+      for (let fallback of MULTI_FALLBACK_IMAGES) {
+        if (!usedImagesSet.has(fallback)) {
+          usedImagesSet.add(fallback);
+          return fallback;
+        }
       }
-      
-      return SAFE_FALLBACK_IMG;
+
+      const fallback = MULTI_FALLBACK_IMAGES[dayIndex % MULTI_FALLBACK_IMAGES.length];
+      usedImagesSet.add(fallback);
+      return fallback;
     }
 
     // ================= 🌍 核心多语言翻译引擎 🌍 =================
     const I18N = {
       'zh-CN': { 
         bannerTag: "EXCLUSIVE PRIVATE CUSTOMIZATION", bannerTitle: "【Klook 专属私人定制】深度之旅", bannerSub: "Klook 专属私人管家服务 · 独立成团 · 纯玩无购物",
-        departPrefix: "出发", headingHighlights: '行程尊享亮点', headingItinerary: '详细行程安排', headingHotel: '酒店住宿安排 (钻级品质)', headingInclusions: '服务包含与说明', headingContact: '联系我们 / Contact Us',
+        departPrefix: "出发", headingHighlights: '行程尊享亮点', headingItinerary: '详细行程安排', headingHotel: '酒店住宿安排 (钻级品质)', headingInclusions: '服务包含与说明', headingContact: '联系我们 / CONTACT US',
         lblTickets: '🎫 包含门票明细', lblTraffic: '🚗 车辆交通明细', lblGuide: '🧭 专属导游服务', lblActivities: '🎁 体验与赠送明细', lblExclusions: '费用不含', lblCancellation: '退改政策', qrWechat: "扫码添加微信管家", qrWhatsapp: "扫码添加 WhatsApp",
-        high1Title: "纯玩私家团 · 1V1专车", high1Desc: "一团一导独立出行，不拼团、不购物，随走随停自由随心。", high2Title: "24H管家保障 · 随心畅游", high2Desc: "全程专属管家贴心服务，随时调整行程节奏，独立出行更自由。", high3Title: "深度自然人文 · 精彩打卡", high3Desc: "一站式打卡经典奇观与特色风土人情，定格绝美旅途记忆。"
+        high1Title: "纯玩私家团 · 1V1专车", high1Desc: "一团一导独立出行，不拼团、不购物，随走随停自由随心。", high2Title: "24H管家保障 · 随心畅游", high2Desc: "全程专属管家贴心服务，随时调整行程节奏，独立出行更自由。", high3Title: "深度自然人文 · 精彩打卡", high3Desc: "一站式打卡经典奇观与特色风土人情，定格绝美旅途记忆。",
+        brandP1: "🌟 让世界更轻松地探索中国，让每一次旅行都成为独特的体验。",
+        brandP2: "🚀 连接全球游客与中国目的地，用KLOOK的方式，让定制旅行更简单、更自由、更有趣。",
+        footerSub: "Klook 官方品质保障 · 专属行程规划师为您服务"
       },
       'zh-TW': { 
         bannerTag: "EXCLUSIVE PRIVATE CUSTOMIZATION", bannerTitle: "【Klook 專屬私人訂製】深度之旅", bannerSub: "Klook 專屬私人管家服務 · 獨立成團 · 純玩無購物",
-        departPrefix: "出發", headingHighlights: '行程尊享亮點', headingItinerary: '詳細行程安排', headingHotel: '酒店住宿安排 (鑽級品質)', headingInclusions: '服務包含與說明', headingContact: '聯絡我們 / Contact Us',
+        departPrefix: "出發", headingHighlights: '行程尊享亮點', headingItinerary: '詳細行程安排', headingHotel: '酒店住宿安排 (鑽級品質)', headingInclusions: '服務包含與說明', headingContact: '聯絡我們 / CONTACT US',
         lblTickets: '🎫 包含門票明細', lblTraffic: '🚗 車輛交通明細', lblGuide: '🧭 專屬導遊服務', lblActivities: '🎁 體驗與贈送明細', lblExclusions: '費用不含', lblCancellation: '退改政策', qrWechat: "掃碼添加微信管家", qrWhatsapp: "掃碼添加 WhatsApp",
-        high1Title: "純玩私家團 · 1V1專車", high1Desc: "一團一導獨立出行，不拼團、不購物，隨走隨停自由隨心。", high2Title: "24H管家保障 · 隨心暢遊", high2Desc: "全程專屬管家貼心服務，隨時調整行程節奏，獨立出行更自由。", high3Title: "深度自然人文 · 精彩打卡", high3Desc: "一站式打卡經典奇觀與特色風土人情，定格絕美旅途記憶。"
+        high1Title: "純玩私家團 · 1V1專車", high1Desc: "一團一導獨立出行，不拼團、不購物，隨走隨停自由隨心。", high2Title: "24H管家保障 · 隨心暢遊", high2Desc: "全程專屬管家貼心服務，隨時調整行程節奏，獨立出行更自由。", high3Title: "深度自然人文 · 精彩打卡", high3Desc: "一站式打卡經典奇觀與特色風土人情，定格絕美旅途記憶。",
+        brandP1: "🌟 讓世界更輕鬆地探索中國，讓每一次旅行都成為獨特的體驗。",
+        brandP2: "🚀 連接全球遊客與中國目的地，用KLOOK的方式，讓訂製旅行更簡單、更自由、更有趣。",
+        footerSub: "Klook 官方品質保障 · 專屬行程規劃師為您服務"
       },
       'en': { 
         bannerTag: "PRIVATE CUSTOMIZATION IN-DEPTH JOURNEY", bannerTitle: "[Klook Exclusive] In-Depth China Tour", bannerSub: "Private Butler Service · Independent Group · Pure Sightseeing",
         departPrefix: "Departure", headingHighlights: 'Tour Highlights', headingItinerary: 'Detailed Itinerary', headingHotel: 'Hotel Accommodation (Premium)', headingInclusions: 'Inclusions & Details', headingContact: 'Contact Us',
         lblTickets: '🎫 Tickets Included', lblTraffic: '🚗 Transport & Vehicles', lblGuide: '🧭 Private Tour Guide', lblActivities: '🎁 Activities & Bonus', lblExclusions: 'Exclusions', lblCancellation: 'Cancellation Policy', qrWechat: "Scan WeChat QR", qrWhatsapp: "Scan WhatsApp QR",
-        high1Title: "100% Private Tour & Vehicle", high1Desc: "Independent travel with dedicated driver/guide. Flexible and hassle-free with zero shopping.", high2Title: "24H Butler Service & Flexible Pace", high2Desc: "Dedicated travel specialist assistance throughout your trip. Travel at your own pace.", high3Title: "In-Depth Local Experiences", high3Desc: "Uncover breathtaking natural wonders and rich local ethnic culture."
+        high1Title: "100% Private Tour & Vehicle", high1Desc: "Independent travel with dedicated driver/guide. Flexible and hassle-free with zero shopping.", high2Title: "24H Butler Service & Flexible Pace", high2Desc: "Dedicated travel specialist assistance throughout your trip. Travel at your own pace.", high3Title: "In-Depth Local Experiences", high3Desc: "Uncover breathtaking natural wonders and rich local ethnic culture.",
+        brandP1: "🌟 Exploring China with ease, making every trip a unique and memorable adventure.",
+        brandP2: "🚀 Connecting global travelers with China — customized travel made simpler, freer, and more enjoyable.",
+        footerSub: "Klook Official Guarantee · Dedicated Travel Specialist at Your Service"
       }
     };
 
@@ -292,7 +379,6 @@
       return result;
     }
 
-    // ================= 🌟 深度走心文案引擎 🌟 =================
     const SMART_ROUTE_DESCS_CN = {
       "昆明,理想邦": "专车接机/站。昆明乘高铁前往大理，抵达后游览被誉为“中国版圣托里尼”的理想邦，随后前往文笔村，欣赏洱海绝美风光与日落，入住酒店。",
       "磻溪村,喜洲": "晨起前往磻溪村S湾体验唯美骑行与摄影，漫步喜洲古镇品尝特色烤乳扇。随后前往双廊古镇感受苍洱风光，傍晚自由闲逛大理古城。",
@@ -320,7 +406,6 @@
       return "专属私人管家与司机将全天为您服务，根据您的需求灵活安排行程，带您深度体验地道风土人情与绝美自然风物，享受惬意的定制假期之旅。";
     }
 
-    // ================= 核心业务逻辑 =================
     async function syncItineraryToDaysData() {
       const lang = document.getElementById('lang-select').value;
       const btn = document.getElementById('btn-sync-middle');
@@ -330,6 +415,7 @@
       const dayBlocks = itineraryRaw.split(/(?=Day\s*\d+|\d{1,2}月\d{1,2}日|\d{1,2}\.\d{1,2})/gi);
       let newDaysData = [];
       let dayCounter = 1;
+      let usedImagesSet = new Set();
 
       for (let block of dayBlocks) {
         block = block.trim();
@@ -344,7 +430,7 @@
           let titleTrans = await translateText(routeStrCn, lang);
           let descTrans = await translateText(smartDescCn, lang);
           
-          let matchedCloudImg = findTeamCloudImage(rawPois);
+          let matchedCloudImg = findTeamCloudImage(rawPois, dayCounter - 1, usedImagesSet);
           let existingData = GLOBAL_DAYS_DATA.find(d => d.dayNum === dayCounter);
           
           let finalImg = matchedCloudImg;
@@ -393,7 +479,7 @@
                   <input type="file" accept="image/*" class="hidden" onchange="handleManualImageUpload(event, ${index})">
                 </label>
               </div>
-              <img src="${day.img}" onerror="if(!this.dataset.triedAlt){this.dataset.triedAlt='1'; this.src=this.src.endsWith('.png')?this.src.replace('.png','.jpg'):this.src.replace('.jpg','.png');} else {this.onerror=null; this.src='${SAFE_FALLBACK_IMG}';}" class="w-full h-32 object-cover rounded-lg border border-gray-200 shadow-xs">
+              <img src="${day.img}" onerror="this.onerror=null; this.src='https://sallyzheng-lang.github.io/klook-tool/丽江古城.jpg';" class="w-full h-32 object-cover rounded-lg border border-gray-200 shadow-xs">
             </div>
             <div>
               <label class="text-[10px] text-gray-500 font-bold mb-1 block">文案描述 (智能生成，可修改)</label>
@@ -441,6 +527,10 @@
       document.getElementById('ui-qr-wechat').innerText = dict.qrWechat;
       document.getElementById('ui-qr-whatsapp').innerText = dict.qrWhatsapp;
 
+      document.getElementById('ui-brand-p1').innerText = dict.brandP1;
+      document.getElementById('ui-brand-p2').innerText = dict.brandP2;
+      document.getElementById('ui-footer-sub').innerText = dict.footerSub;
+
       let dateVal = document.getElementById('field-date').value || "10月12日";
       let groupVal = document.getElementById('field-group').value || "4大1小";
       let priceVal = document.getElementById('field-price').value || "9000元/定制团";
@@ -464,8 +554,7 @@
         dailyContainer.innerHTML = GLOBAL_DAYS_DATA.map((d) => `
           <div class="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100">
             <div class="relative h-48 w-full overflow-hidden bg-gray-100 group">
-              <!-- .png 和 .jpg 智能互换兜底机制 -->
-              <img src="${d.img}" onerror="if(!this.dataset.triedAlt){this.dataset.triedAlt='1'; this.src=this.src.endsWith('.png')?this.src.replace('.png','.jpg'):this.src.replace('.jpg','.png');} else {this.onerror=null; this.src='${SAFE_FALLBACK_IMG}';}" class="w-full h-full object-cover transform transition duration-700 group-hover:scale-105">
+              <img src="${d.img}" onerror="this.onerror=null; this.src='https://sallyzheng-lang.github.io/klook-tool/丽江古城.jpg';" class="w-full h-full object-cover transform transition duration-700 group-hover:scale-105">
               <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent"></div>
               <div class="absolute bottom-2.5 left-3.5 right-3.5 flex justify-between items-end text-white">
                 <div><span class="bg-klook text-white text-[10px] px-2 py-0.5 rounded font-black tracking-wider shadow-md">DAY ${d.dayNum}</span><h4 class="font-bold text-sm mt-1.5 leading-snug tracking-wide drop-shadow-md">${d.title}</h4></div>
