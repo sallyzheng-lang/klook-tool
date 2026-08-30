@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Klook 私人定制行程生成器 (全自动图库扫描版)</title>
+  <title>Klook 私人定制行程生成器 (旗舰完整版)</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -89,13 +89,44 @@
         </button>
       </div>
 
+      <!-- 动态显示/隐藏的服务模块明细输入框 -->
       <div class="space-y-3 pt-2">
-        <div id="hotel-input-block" style="display:none;"><label class="block text-[11px] font-bold text-gray-800 mb-1">🏨 酒店安排</label><textarea id="field-hotel" rows="2" class="w-full border border-gray-200 rounded-lg p-2 text-[10px] bg-gray-50"></textarea></div>
-        <div><label class="block text-[11px] font-bold text-gray-800 mb-1">🎫 门票明细</label><input type="text" id="field-tickets" class="w-full border border-gray-200 rounded-lg p-2 text-[10px] bg-gray-50"></div>
-        <div><label class="block text-[11px] font-bold text-gray-800 mb-1">🚗 车辆交通</label><input type="text" id="field-traffic" class="w-full border border-gray-200 rounded-lg p-2 text-[10px] bg-gray-50"></div>
-        <div><label class="block text-[11px] font-bold text-gray-800 mb-1">➖ 费用不含</label><textarea id="field-exclusions" rows="2" class="w-full border border-gray-200 rounded-lg p-2 text-[10px] bg-gray-50"></textarea></div>
-        <div><label class="block text-[11px] font-bold text-gray-800 mb-1">⚠️ 退改政策</label><textarea id="field-cancellation" rows="2" class="w-full border border-gray-200 rounded-lg p-2 text-[10px] bg-gray-50"></textarea></div>
+        <div id="hotel-input-block" style="display:none;">
+          <label class="block text-[11px] font-bold text-gray-800 mb-1">🏨 酒店安排</label>
+          <textarea id="field-hotel" rows="2" class="w-full border border-gray-200 rounded-lg p-2 text-[10px] bg-gray-50"></textarea>
+        </div>
+        
+        <div id="ticket-input-block">
+          <label class="block text-[11px] font-bold text-gray-800 mb-1">🎫 门票明细</label>
+          <input type="text" id="field-tickets" class="w-full border border-gray-200 rounded-lg p-2 text-[10px] bg-gray-50">
+        </div>
+
+        <div id="car-input-block">
+          <label class="block text-[11px] font-bold text-gray-800 mb-1">🚗 车辆交通</label>
+          <input type="text" id="field-traffic" class="w-full border border-gray-200 rounded-lg p-2 text-[10px] bg-gray-50">
+        </div>
+
+        <div id="guide-input-block">
+          <label class="block text-[11px] font-bold text-gray-800 mb-1">🧭 专属导游服务</label>
+          <input type="text" id="field-guide" class="w-full border border-gray-200 rounded-lg p-2 text-[10px] bg-gray-50">
+        </div>
+
+        <div id="exp-input-block">
+          <label class="block text-[11px] font-bold text-gray-800 mb-1">🎁 特色体验 (含骑行/赠品)</label>
+          <textarea id="field-exp" rows="2" class="w-full border border-gray-200 rounded-lg p-2 text-[10px] bg-gray-50" placeholder="例: 磻溪村S湾骑行、每人赠送大理烤乳扇与雪山氧气瓶"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-bold text-gray-800 mb-1">➖ 费用不含</label>
+          <textarea id="field-exclusions" rows="2" class="w-full border border-gray-200 rounded-lg p-2 text-[10px] bg-gray-50"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-bold text-gray-800 mb-1">⚠️ 退改政策</label>
+          <textarea id="field-cancellation" rows="2" class="w-full border border-gray-200 rounded-lg p-2 text-[10px] bg-gray-50"></textarea>
+        </div>
       </div>
+
     </div>
 
     <!-- ==================== 中间栏：图文卡片编辑器 ==================== -->
@@ -155,7 +186,7 @@
           </div>
 
           <!-- 服务包含与说明 -->
-          <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 space-y-3">
+          <div id="poster-inclusions-wrapper" class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 space-y-3">
             <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1"><span>🛡️</span> <span id="ui-heading-inclusions">服务包含与说明</span></h3>
             <div id="poster-inclusions-dynamic-list" class="space-y-2.5 text-xs"></div>
           </div>
@@ -220,7 +251,7 @@
   <script>
     // ================= 全局状态管理 =================
     let GLOBAL_DAYS_DATA = [];
-    let AUTO_CLOUD_IMAGES = {}; // 动态储存 API 实时扫描到的全量图片清单
+    let AUTO_CLOUD_IMAGES = {};
 
     const SAFE_FALLBACK_IMG = "https://sallyzheng-lang.github.io/klook-tool/丽江古城.jpg";
 
@@ -232,7 +263,6 @@
       "https://images.unsplash.com/photo-1563720225384-9a0264b3a4a1?w=800&q=80"
     ];
 
-    // 🌟 核心：通过 GitHub REST API 实时自动扫描全库图片 🌟
     async function scanGitHubRepositoryImages() {
       const GITHUB_BASE = "https://sallyzheng-lang.github.io/klook-tool/";
       try {
@@ -253,14 +283,13 @@
           }
         }
       } catch (e) {
-        console.warn("API scan fallback to local mapping:", e);
+        console.warn("API scan fallback:", e);
       }
     }
 
     function findTeamCloudImage(pois, dayIndex, usedImagesSet) {
       const routeStr = pois.join(" ");
 
-      // 1. 优先使用 GitHub API 动态扫描出的最新全库图片
       for (let key in AUTO_CLOUD_IMAGES) {
         if (key.length >= 2 && routeStr.includes(key)) {
           const imgUrl = AUTO_CLOUD_IMAGES[key];
@@ -271,7 +300,6 @@
         }
       }
 
-      // 2. 检查接送机专车图
       if (pois.some(p => p.includes("接机") || p.includes("送机"))) {
         const carUrl = "https://images.unsplash.com/photo-1563720225384-9a0264b3a4a1?w=800&q=80";
         if (!usedImagesSet.has(carUrl)) {
@@ -280,7 +308,6 @@
         }
       }
 
-      // 3. 去重备用风光图
       for (let fallback of MULTI_FALLBACK_IMAGES) {
         if (!usedImagesSet.has(fallback)) {
           usedImagesSet.add(fallback);
@@ -298,7 +325,7 @@
       'zh-CN': { 
         bannerTag: "EXCLUSIVE PRIVATE CUSTOMIZATION", bannerTitle: "【Klook 专属私人定制】深度之旅", bannerSub: "Klook 专属私人管家服务 · 独立成团 · 纯玩无购物",
         departPrefix: "出发", headingHighlights: '行程尊享亮点', headingItinerary: '详细行程安排', headingHotel: '酒店住宿安排 (钻级品质)', headingInclusions: '服务包含与说明', headingContact: '联系我们 / CONTACT US',
-        lblTickets: '🎫 包含门票明细', lblTraffic: '🚗 车辆交通明细', lblGuide: '🧭 专属导游服务', lblActivities: '🎁 体验与赠送明细', lblExclusions: '费用不含', lblCancellation: '退改政策', qrWechat: "扫码添加微信管家", qrWhatsapp: "扫码添加 WhatsApp",
+        lblTickets: '🎫 包含门票明细', lblTraffic: '🚗 车辆交通明细', lblGuide: '🧭 专属导游服务', lblActivities: '🎁 特色体验与赠送明细', lblExclusions: '费用不含', lblCancellation: '退改政策', qrWechat: "扫码添加微信管家", qrWhatsapp: "扫码添加 WhatsApp",
         high1Title: "纯玩私家团 · 1V1专车", high1Desc: "一团一导独立出行，不拼团、不购物，随走随停自由随心。", high2Title: "24H管家保障 · 随心畅游", high2Desc: "全程专属管家贴心服务，随时调整行程节奏，独立出行更自由。", high3Title: "深度自然人文 · 精彩打卡", high3Desc: "一站式打卡经典奇观与特色风土人情，定格绝美旅途记忆。",
         brandP1: "🌟 让世界更轻松地探索中国，让每一次旅行都成为独特的体验。",
         brandP2: "🚀 连接全球游客与中国目的地，用KLOOK的方式，让定制旅行更简单、更自由、更有趣。",
@@ -307,8 +334,8 @@
       'zh-TW': { 
         bannerTag: "EXCLUSIVE PRIVATE CUSTOMIZATION", bannerTitle: "【Klook 專屬私人訂製】深度之旅", bannerSub: "Klook 專屬私人管家服務 · 獨立成團 · 純玩無購物",
         departPrefix: "出發", headingHighlights: '行程尊享亮點', headingItinerary: '詳細行程安排', headingHotel: '酒店住宿安排 (鑽級品質)', headingInclusions: '服務包含與說明', headingContact: '聯絡我們 / CONTACT US',
-        lblTickets: '🎫 包含門票明細', lblTraffic: '🚗 車輛交通明細', lblGuide: '🧭 專屬導遊服務', lblActivities: '🎁 體驗與贈送明細', lblExclusions: '費用不含', lblCancellation: '退改政策', qrWechat: "掃碼添加微信管家", qrWhatsapp: "掃碼添加 WhatsApp",
-        high1Title: "純玩私家團 · 1V1專車", high1Desc: "一團一導獨立出行，不拼團、不購物，隨走隨停自由隨心。", high2Title: "24H管家保障 · 隨心暢遊", high2Desc: "全程專屬管家貼心服務，隨時調整行程節奏，獨立出行更自由。", high3Title: "深度自然人文 · 精彩打卡", high3Desc: "一站式打卡經典奇觀與特色風土人情，定格絕美旅途記憶。",
+        lblTickets: '🎫 包含門票明細', lblTraffic: '🚗 車輛交通明細', lblGuide: '🧭 專屬導遊服務', lblActivities: '🎁 特色體驗與贈送明細', lblExclusions: '費用不含', lblCancellation: '退改政策', qrWechat: "掃碼添加微信管家", qrWhatsapp: "掃碼添加 WhatsApp",
+        high1Title: "純玩私家團 · 1V1專車", high1Desc: "一團一導獨立出行，不拼團、不購物，隨走隨停自由隨心。", high2Title: "24H管家保障 · 隨心暢湧", high2Desc: "全程專屬管家貼心服務，隨時調整行程節奏，獨立出行更自由。", high3Title: "深度自然人文 · 精彩打卡", high3Desc: "一站式打卡經典奇觀與特色風土人情，定格絕美旅途記憶。",
         brandP1: "🌟 讓世界更輕鬆地探索中國，讓每一次旅行都成為獨特的體驗。",
         brandP2: "🚀 連接全球遊客與中國目的地，用KLOOK的方式，讓訂製旅行更簡單、更自由、更有趣。",
         footerSub: "Klook 官方品質保障 · 專屬行程規劃師為您服務"
@@ -316,7 +343,7 @@
       'en': { 
         bannerTag: "PRIVATE CUSTOMIZATION IN-DEPTH JOURNEY", bannerTitle: "[Klook Exclusive] In-Depth China Tour", bannerSub: "Private Butler Service · Independent Group · Pure Sightseeing",
         departPrefix: "Departure", headingHighlights: 'Tour Highlights', headingItinerary: 'Detailed Itinerary', headingHotel: 'Hotel Accommodation (Premium)', headingInclusions: 'Inclusions & Details', headingContact: 'Contact Us',
-        lblTickets: '🎫 Tickets Included', lblTraffic: '🚗 Transport & Vehicles', lblGuide: '🧭 Private Tour Guide', lblActivities: '🎁 Activities & Bonus', lblExclusions: 'Exclusions', lblCancellation: 'Cancellation Policy', qrWechat: "Scan WeChat QR", qrWhatsapp: "Scan WhatsApp QR",
+        lblTickets: '🎫 Tickets Included', lblTraffic: '🚗 Transport & Vehicles', lblGuide: '🧭 Private Tour Guide', lblActivities: '🎁 Special Experiences & Bonus', lblExclusions: 'Exclusions', lblCancellation: 'Cancellation Policy', qrWechat: "Scan WeChat QR", qrWhatsapp: "Scan WhatsApp QR",
         high1Title: "100% Private Tour & Vehicle", high1Desc: "Independent travel with dedicated driver/guide. Flexible and hassle-free with zero shopping.", high2Title: "24H Butler Service & Flexible Pace", high2Desc: "Dedicated travel specialist assistance throughout your trip. Travel at your own pace.", high3Title: "In-Depth Local Experiences", high3Desc: "Uncover breathtaking natural wonders and rich local ethnic culture.",
         brandP1: "🌟 Exploring China with ease, making every trip a unique and memorable adventure.",
         brandP2: "🚀 Connecting global travelers with China — customized travel made simpler, freer, and more enjoyable.",
@@ -494,6 +521,21 @@
       const lang = document.getElementById('lang-select').value;
       const dict = I18N[lang] || I18N['zh-CN'];
 
+      // 1. 读取所有服务模块勾选状态
+      const isCarChecked = document.querySelector('input[name="pkg-module"][value="car"]').checked;
+      const isTicketChecked = document.querySelector('input[name="pkg-module"][value="ticket"]').checked;
+      const isGuideChecked = document.querySelector('input[name="pkg-module"][value="guide"]').checked;
+      const isHotelChecked = document.querySelector('input[name="pkg-module"][value="hotel"]').checked;
+      const isExpChecked = document.querySelector('input[name="pkg-module"][value="exp"]').checked;
+
+      // 2. 动态切换左侧面板的输入框显示/隐藏
+      document.getElementById('car-input-block').style.display = isCarChecked ? 'block' : 'none';
+      document.getElementById('ticket-input-block').style.display = isTicketChecked ? 'block' : 'none';
+      document.getElementById('guide-input-block').style.display = isGuideChecked ? 'block' : 'none';
+      document.getElementById('hotel-input-block').style.display = isHotelChecked ? 'block' : 'none';
+      document.getElementById('exp-input-block').style.display = isExpChecked ? 'block' : 'none';
+
+      // 3. UI 文本国际化
       document.getElementById('ui-banner-tag').innerText = dict.bannerTag;
       document.getElementById('ui-banner-title').innerText = dict.bannerTitle;
       document.getElementById('ui-banner-sub1').innerText = dict.bannerSub;
@@ -529,6 +571,7 @@
       document.getElementById('ui-group-info').innerText = groupVal;
       document.getElementById('poster-price-box').innerHTML = priceVal;
 
+      // 4. 每日行程渲染
       const dailyContainer = document.getElementById('poster-daily-list');
       if (GLOBAL_DAYS_DATA.length > 0) {
         dailyContainer.innerHTML = GLOBAL_DAYS_DATA.map((d) => `
@@ -553,11 +596,14 @@
         <div class="flex items-start gap-2.5 bg-white/90 p-2.5 rounded-lg border border-orange-100/70 shadow-2xs"><div class="w-6 h-6 rounded-lg bg-orange-100 text-klook flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold">📸</div><div><div class="font-bold text-gray-800 text-[11px] leading-tight">${dict.high3Title}</div><div class="text-[10px] text-gray-500 mt-0.5 leading-snug">${dict.high3Desc}</div></div></div>
       `;
 
+      // 5. 渲染“服务包含与说明” (严格根据勾选状态与填写内容动态增减)
       let exRaw = document.getElementById('field-exclusions').value || "全程酒店住宿自理\n全程正餐及晚餐自理";
       let canRaw = document.getElementById('field-cancellation').value || "提前6日至4日取消，扣除20%违约金；\n行程开始当日取消，扣除60%违约金。";
       let hRaw = document.getElementById('field-hotel').value || "严选钻级精品客栈/高口碑酒店入住";
       let tickRaw = document.getElementById('field-tickets').value;
       let trafRaw = document.getElementById('field-traffic').value;
+      let guideRaw = document.getElementById('field-guide').value;
+      let expRaw = document.getElementById('field-exp').value;
 
       if (lang !== 'zh-CN') {
         exRaw = await translateText(exRaw, lang);
@@ -565,20 +611,35 @@
         hRaw = await translateText(hRaw, lang);
         if (tickRaw) tickRaw = await translateText(tickRaw, lang);
         if (trafRaw) trafRaw = await translateText(trafRaw, lang);
+        if (guideRaw) guideRaw = await translateText(guideRaw, lang);
+        if (expRaw) expRaw = await translateText(expRaw, lang);
       }
 
       document.getElementById('poster-exclusions').innerHTML = exRaw.split('\n').filter(s=>s.trim()).map(i => `<li>${i}</li>`).join('');
       document.getElementById('poster-cancellation').innerHTML = canRaw.split('\n').filter(s=>s.trim()).map(l => `<p>• ${l}</p>`).join('');
       
       let incHTML = '';
-      if (tickRaw) incHTML += `<div class="bg-orange-50/40 p-2.5 rounded-lg border border-orange-100"><span class="font-bold text-gray-800 block mb-1">${dict.lblTickets}</span><p class="text-gray-600 text-[11px]">${tickRaw}</p></div>`;
-      if (trafRaw) incHTML += `<div class="bg-orange-50/40 p-2.5 rounded-lg border border-orange-100"><span class="font-bold text-gray-800 block mb-1">${dict.lblTraffic}</span><p class="text-gray-600 text-[11px]">${trafRaw}</p></div>`;
-      document.getElementById('poster-inclusions-dynamic-list').innerHTML = incHTML || '<p class="text-xs text-gray-400">None</p>';
+      if (isTicketChecked && tickRaw) {
+        incHTML += `<div class="bg-orange-50/40 p-2.5 rounded-lg border border-orange-100"><span class="font-bold text-gray-800 block mb-1">${dict.lblTickets}</span><p class="text-gray-600 text-[11px]">${tickRaw}</p></div>`;
+      }
+      if (isCarChecked && trafRaw) {
+        incHTML += `<div class="bg-orange-50/40 p-2.5 rounded-lg border border-orange-100"><span class="font-bold text-gray-800 block mb-1">${dict.lblTraffic}</span><p class="text-gray-600 text-[11px]">${trafRaw}</p></div>`;
+      }
+      if (isGuideChecked && guideRaw) {
+        incHTML += `<div class="bg-orange-50/40 p-2.5 rounded-lg border border-orange-100"><span class="font-bold text-gray-800 block mb-1">${dict.lblGuide}</span><p class="text-gray-600 text-[11px]">${guideRaw}</p></div>`;
+      }
+      if (isExpChecked && expRaw) {
+        incHTML += `<div class="bg-orange-50/40 p-2.5 rounded-lg border border-orange-100"><span class="font-bold text-gray-800 block mb-1">${dict.lblActivities}</span><p class="text-gray-600 text-[11px]">${expRaw}</p></div>`;
+      }
 
-      const isHotelSelected = document.querySelector('input[name="pkg-module"][value="hotel"]').checked;
-      document.getElementById('hotel-input-block').style.display = isHotelSelected ? 'block' : 'none';
-      document.getElementById('poster-hotel-wrapper').style.display = isHotelSelected ? 'block' : 'none';
-      if (isHotelSelected) {
+      // 若未勾选任何包含项，整个板块隐藏或提示
+      const hasAnyInclusions = isTicketChecked || isCarChecked || isGuideChecked || isExpChecked;
+      document.getElementById('poster-inclusions-wrapper').style.display = hasAnyInclusions ? 'block' : 'none';
+      document.getElementById('poster-inclusions-dynamic-list').innerHTML = incHTML;
+
+      // 酒店模块根据勾选控制
+      document.getElementById('poster-hotel-wrapper').style.display = isHotelChecked ? 'block' : 'none';
+      if (isHotelChecked) {
         document.getElementById('poster-hotel-list').innerHTML = hRaw.split('\n').filter(s=>s.trim()).map(h => `<div class="flex items-start gap-2 bg-gray-50 p-2 rounded-lg border border-gray-100"><span class="bg-klook/10 text-klook font-bold px-1.5 py-0.5 rounded text-[10px]">🏨</span><span class="text-gray-700 font-medium text-[11px]">${h}</span></div>`).join('');
       }
     }
@@ -586,7 +647,10 @@
     function loadTemplate() {
       document.getElementById('field-itinerary').value = "Day 1: 昆明接机—高铁前往大理—理想邦—文笔村\nDay 2: 磻溪村S湾—喜洲古镇—文笔村—双廊古镇—大理\nDay 3: 大理—沙溪古镇—白沙古镇—丽江古城\nDay 4: 丽江—甘海子—玉龙雪山—冰川公园—蓝月谷\nDay 5: 丽江—拉市海—丽江送机";
       document.getElementById('field-date').value = "10月12日"; document.getElementById('field-group').value = "4大1小"; document.getElementById('field-price').value = "9000元/定制团";
-      document.getElementById('field-tickets').value = "玉龙雪山大索道及环保车、印象丽江实景演出"; document.getElementById('field-traffic').value = "7座别克GL8商务车（含油费过路费司机食宿）";
+      document.getElementById('field-tickets').value = "玉龙雪山大索道及环保车、印象丽江实景演出"; 
+      document.getElementById('field-traffic').value = "7座别克GL8商务车（含油费过路费司机食宿）";
+      document.getElementById('field-guide').value = "全程资深专属私人管家 1对1贴心服务";
+      document.getElementById('field-exp').value = "磻溪村S湾骑行体验、每人赠送大理烤乳扇与雪山防寒服使用";
       syncItineraryToDaysData();
     }
 
@@ -598,10 +662,16 @@
       document.getElementById('btn-load-template').addEventListener('click', loadTemplate);
       document.getElementById('btn-sync-middle').addEventListener('click', () => syncItineraryToDaysData());
       
-      const inputsToWatch = ['field-date', 'field-group', 'field-price', 'field-hotel', 'field-tickets', 'field-traffic', 'field-exclusions', 'field-cancellation'];
-      inputsToWatch.forEach(id => { document.getElementById(id).addEventListener('change', renderPoster); });
+      const inputsToWatch = ['field-date', 'field-group', 'field-price', 'field-hotel', 'field-tickets', 'field-traffic', 'field-guide', 'field-exp', 'field-exclusions', 'field-cancellation'];
+      inputsToWatch.forEach(id => { 
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('change', renderPoster); 
+      });
       
-      document.querySelectorAll('input[name="pkg-module"]').forEach(cb => { cb.addEventListener('change', renderPoster); });
+      document.querySelectorAll('input[name="pkg-module"]').forEach(cb => { 
+        cb.addEventListener('change', renderPoster); 
+      });
+
       document.getElementById('btn-print-pdf').addEventListener('click', () => window.print());
 
       document.getElementById('btn-export').addEventListener('click', async () => {
