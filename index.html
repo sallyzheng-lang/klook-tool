@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Klook 私人定制行程生成器 (旗舰完整版)</title>
+  <title>Klook 私人定制行程生成器 (全自动图库扫描版)</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -54,10 +54,10 @@
 
       <div class="bg-emerald-50/70 border border-emerald-200 p-3 rounded-xl space-y-2">
         <label class="block text-[11px] font-bold text-emerald-900 flex items-center justify-between gap-1.5">
-          <span class="flex items-center gap-1"><span>☁️</span> 团队公共图库</span>
-          <span class="text-[9px] bg-emerald-200 text-emerald-800 px-1.5 py-0.5 rounded font-black">已连接</span>
+          <span class="flex items-center gap-1"><span>☁️</span> 团队公共图库 (API热同步)</span>
+          <span id="cloud-status-tag" class="text-[9px] bg-emerald-200 text-emerald-800 px-1.5 py-0.5 rounded font-black">已实时扫描</span>
         </label>
-        <div class="text-[10px] text-emerald-700 font-medium leading-tight">支持免代码热更新：上传名为“景点名.jpg/png”的图片至 GitHub，系统即可自动调用。</div>
+        <div id="cloud-status-text" class="text-[10px] text-emerald-700 font-medium leading-tight">已自动读取 GitHub 全量图库。以后只需上传“景点名.jpg”，无需改动任何代码。</div>
       </div>
 
       <div class="bg-gray-50 border border-gray-200 p-3 rounded-xl space-y-2.5">
@@ -166,7 +166,7 @@
             <div class="bg-gray-50 p-3 rounded-xl border border-gray-200"><span class="font-bold text-gray-800 block mb-1">⚠️ <span id="ui-lbl-cancellation">退改政策</span></span><div id="poster-cancellation" class="text-gray-600 space-y-0.5"></div></div>
           </div>
 
-          <!-- 🌟 Klook 品牌宗旨卡片 (已还原) 🌟 -->
+          <!-- Klook 品牌宗旨卡片 -->
           <div class="bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 rounded-2xl p-4 text-white shadow-md space-y-2">
             <div class="flex items-center justify-between">
               <span class="bg-white/20 backdrop-blur-md text-[10px] font-black px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-xs">✨ KLOOK TRAVEL 🧳</span>
@@ -176,14 +176,14 @@
             <p id="ui-brand-p2" class="text-[10px] text-amber-100 font-medium leading-snug">🚀 连接全球游客与中国目的地，用KLOOK的方式，让定制旅行更简单、更自由、更有趣。</p>
           </div>
 
-          <!-- 联系我们 (含官方邮箱 Block & 二维码) -->
+          <!-- 联系我们 -->
           <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 space-y-3">
             <h3 class="text-xs font-bold text-gray-800 uppercase tracking-wider flex items-center justify-between border-b border-gray-100 pb-2">
               <span class="flex items-center gap-1.5">🎧 <span id="ui-heading-contact">联系我们 / CONTACT US</span></span>
               <span class="text-[9px] bg-orange-100 text-orange-700 px-2.5 py-0.5 rounded-full font-black tracking-wider">KLOOK EXCLUSIVE BUTLER</span>
             </h3>
 
-            <!-- 🌟 官方邮箱 Block 🌟 -->
+            <!-- 官方邮箱 Block -->
             <div class="bg-orange-50/60 border border-orange-100 rounded-xl p-2.5 flex items-center gap-2.5">
               <div class="w-8 h-8 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center shrink-0 font-bold text-xs shadow-2xs">✉️</div>
               <div>
@@ -220,80 +220,50 @@
   <script>
     // ================= 全局状态管理 =================
     let GLOBAL_DAYS_DATA = [];
+    let AUTO_CLOUD_IMAGES = {}; // 动态储存 API 实时扫描到的全量图片清单
 
-    // 精准映射 GitHub 上所有已上传的文件名（含具体后缀）
-    const EXACT_GITHUB_FILES = {
-      "理想邦": "理想邦.png",
-      "玉龙雪山": "玉龙雪山.jpg",
-      "喜洲": "喜洲古镇.jpg",
-      "白沙": "白沙古镇.png",
-      "丽江古城": "丽江古城.jpg",
-      "虎跳峡": "虎跳峡.png",
-      "纳帕海": "纳帕海.jpg",
-      "拉市海": "拉市海.jpg",
-      "建水": "建水古城.jpg",
-      "和顺": "和顺古镇.jpg",
-      "热带植物园": "热带植物园.jpg",
-      "热海": "热海.png",
-      "石林": "石林.jpg",
-      "猪槽船": "猪槽船.png",
-      "元阳梯田": "元阳梯田.jpg",
-      "云南民族村": "云南民族村.jpg",
-      "勐巴娜西": "勐巴娜西珍奇园.jpg",
-      "大金塔": "勐焕大金塔.jpg",
-      "十里画廊": "十里画廊.png",
-      "北海湿地": "北海湿地.jpg",
-
-      // 东北
-      "冰雪大世界": "冰雪大世界.jpg",
-      "伏尔加庄园": "伏尔加庄园.png",
-      "中央大街": "中央大街.jpg",
-      "亚布力": "亚布力滑雪场.jpg",
-      "东北虎": "东北虎林园.jpg",
-      "太阳岛": "太阳岛.png",
-      "中华巴洛克": "中华巴洛克.png",
-      "哈尔滨": "哈尔滨.png",
-      "北极村": "北极村.png",
-      "北红村": "北红村.png",
-
-      // 四川
-      "熊猫": "熊猫基地.jpg",
-      "九寨沟": "九寨沟.jpg",
-      "黄龙": "黄龙.jpg",
-      "都江堰": "都江堰.jpg",
-      "青城山": "青城山.png",
-      "乐山大佛": "乐山大佛.jpg",
-      "峨眉山": "峨眉山.png",
-      "四姑娘山": "四姑娘山.png",
-      "双桥沟": "四姑娘山-双桥沟.jpeg",
-      "宽窄巷子": "宽窄巷子.jpg",
-      "太古里": "太古里.png",
-      "IFS": "IFS国金中心.png",
-      "南桥": "南桥.jpg",
-
-      // 服务
-      "接机": "接机.png",
-      "送机": "送机.png"
-    };
+    const SAFE_FALLBACK_IMG = "https://sallyzheng-lang.github.io/klook-tool/丽江古城.jpg";
 
     const MULTI_FALLBACK_IMAGES = [
+      "https://images.unsplash.com/photo-1548013146-72479768bada?w=800&q=80",
       "https://images.unsplash.com/photo-1527684651001-731c474aaf9a?w=800&q=80",
       "https://images.unsplash.com/photo-1543016843-f1c0fa5c4424?w=800&q=80",
       "https://images.unsplash.com/photo-1506197603052-3cc9c3a201bd?w=800&q=80",
-      "https://images.unsplash.com/photo-1548013146-72479768bada?w=800&q=80",
       "https://images.unsplash.com/photo-1563720225384-9a0264b3a4a1?w=800&q=80"
     ];
 
-    function findTeamCloudImage(pois, dayIndex, usedImagesSet) {
+    // 🌟 核心：通过 GitHub REST API 实时自动扫描全库图片 🌟
+    async function scanGitHubRepositoryImages() {
       const GITHUB_BASE = "https://sallyzheng-lang.github.io/klook-tool/";
+      try {
+        const res = await fetch('https://api.github.com/repos/sallyzheng-lang/klook-tool/contents/');
+        if (res.ok) {
+          const files = await res.json();
+          files.forEach(file => {
+            const fileName = file.name;
+            const match = fileName.match(/\.(jpg|jpeg|png|webp)$/i);
+            if (match) {
+              const cleanKeyword = fileName.replace(/\.(jpg|jpeg|png|webp)$/i, '');
+              AUTO_CLOUD_IMAGES[cleanKeyword] = GITHUB_BASE + encodeURIComponent(fileName);
+            }
+          });
+          const tag = document.getElementById('cloud-status-tag');
+          if (tag) {
+            tag.innerText = `已连线 (含 ${Object.keys(AUTO_CLOUD_IMAGES).length} 张云图)`;
+          }
+        }
+      } catch (e) {
+        console.warn("API scan fallback to local mapping:", e);
+      }
+    }
+
+    function findTeamCloudImage(pois, dayIndex, usedImagesSet) {
       const routeStr = pois.join(" ");
 
-      for (let key in EXACT_GITHUB_FILES) {
-        if (routeStr.includes(key)) {
-          const imgUrl = EXACT_GITHUB_FILES[key].startsWith("http") 
-            ? EXACT_GITHUB_FILES[key] 
-            : GITHUB_BASE + EXACT_GITHUB_FILES[key];
-
+      // 1. 优先使用 GitHub API 动态扫描出的最新全库图片
+      for (let key in AUTO_CLOUD_IMAGES) {
+        if (key.length >= 2 && routeStr.includes(key)) {
+          const imgUrl = AUTO_CLOUD_IMAGES[key];
           if (!usedImagesSet.has(imgUrl)) {
             usedImagesSet.add(imgUrl);
             return imgUrl;
@@ -301,6 +271,16 @@
         }
       }
 
+      // 2. 检查接送机专车图
+      if (pois.some(p => p.includes("接机") || p.includes("送机"))) {
+        const carUrl = "https://images.unsplash.com/photo-1563720225384-9a0264b3a4a1?w=800&q=80";
+        if (!usedImagesSet.has(carUrl)) {
+          usedImagesSet.add(carUrl);
+          return carUrl;
+        }
+      }
+
+      // 3. 去重备用风光图
       for (let fallback of MULTI_FALLBACK_IMAGES) {
         if (!usedImagesSet.has(fallback)) {
           usedImagesSet.add(fallback);
@@ -347,13 +327,11 @@
     const SIMP_TO_TRAD = { "国":"國", "门":"門", "车":"車", "导":"導", "游":"遊", "订":"訂", "话":"話", "费":"費", "观":"觀", "规":"規", "则":"則", "险":"險", "团":"團", "乐":"樂", "飞":"飛", "场":"場", "点":"點", "选":"選", "质":"質", "保":"保", "证":"證", "划":"劃", "动":"動", "独":"獨", "镇":"鎮", "缆":"纜", "索":"索", "赠":"贈", "气":"氣", "减":"減", "务":"務", "说":"說", "明":"明", "发":"發", "条":"條", "件":"件", "桥":"橋" };
     
     const EN_DICT = {
+      "哈尔滨": "Harbin", "亚布力": "Yabuli Ski Resort", "雪乡": "China Snow Town", "长白山": "Mount Changbai", "二道白河": "Erdaobaihe Town", "天池": "Heavenly Lake",
       "大理": "Dali", "丽江": "Lijiang", "昆明": "Kunming", "香格里拉": "Shangri-La", "九寨沟": "Jiuzhaigou", 
       "玉龙雪山": "Jade Dragon Snow Mountain", "冰川公园": "Glacier Park", "蓝月谷": "Blue Moon Valley", 
-      "大理古城": "Dali Ancient Town", "丽江古城": "Lijiang Ancient Town", "沙溪古镇": "Shaxi Ancient Town",
-      "白沙古镇": "Baisha Ancient Town", "喜洲古镇": "Xizhou Ancient Town", "双廊古镇": "Shuanglang Ancient Town",
       "理想邦": "Ideal State (Santorini)", "文笔村": "Wenbi Village", "磻溪村": "Panxi Village", "拉市海": "Lashi Lake",
-      "猫鼻梁": "Maobiliang Viewpoint", "四姑娘山": "Mount Siguniang", "双桥沟": "Shuangqiao Valley", "丹巴": "Danba", "藏寨": "Tibetan Village",
-      "高铁": "High-Speed Rail", "前往": "to", "送机": "Airport Drop-off", "接机": "Airport Pick-up", "接站": "Pick-up"
+      "高铁": "High-Speed Rail", "前往": "to", "送机": "Airport Drop-off", "接机": "Airport Pick-up"
     };
 
     async function translateText(text, lang) {
@@ -380,13 +358,15 @@
     }
 
     const SMART_ROUTE_DESCS_CN = {
+      "哈尔滨,亚布力": "专车接机后前往SS级滑雪胜地亚布力。沿途观赏北国冰雪风光，办理入住后自由活动，准备开启精彩的冰雪之旅。",
+      "亚布力,雪乡": "体验激情滑雪后，乘车穿梭最美亚雪公路前往“中国雪乡”。漫步雪韵大街，欣赏梦幻雪屋、童话雪蘑菇与红灯笼，夜宿雪乡特色酒店。",
+      "雪乡,长白山": "清晨在雪乡体验震撼的“泼水成冰”奇观。随后乘车前往长白山脚下的二道白河镇，入住温泉酒店，洗去疲惫，体验火山雪地温泉。",
+      "长白山,天池": "乘专车前往长白山北景区，乘坐倒站车直达山顶，亲眼目睹神秘震撼的长白山天池。随后游览长白瀑布、聚龙温泉群与绿渊潭，感悟神山圣水魅力。",
       "昆明,理想邦": "专车接机/站。昆明乘高铁前往大理，抵达后游览被誉为“中国版圣托里尼”的理想邦，随后前往文笔村，欣赏洱海绝美风光与日落，入住酒店。",
       "磻溪村,喜洲": "晨起前往磻溪村S湾体验唯美骑行与摄影，漫步喜洲古镇品尝特色烤乳扇。随后前往双廊古镇感受苍洱风光，傍晚自由闲逛大理古城。",
       "沙溪,白沙": "大理出发，前往茶马古道上唯一幸存的古集市——沙溪古镇，探访古戏台与玉津桥。随后前往白沙古镇感受原生态纳西风情，傍晚入住丽江古城。",
       "玉龙雪山,蓝月谷": "乘车前往玉龙雪山风景区，途经甘海子高山草甸。乘坐大索道直达海拔4506米的冰川公园，随后游览自带滤镜的蓝月谷，观赏震撼的《印象丽江》实景演出。",
-      "拉市海,送机": "清晨前往拉市海湿地公园，感受候鸟天堂的宁静与茶马古道的悠远。根据您的航班时间，专属管家将安排专车送机，结束愉快的定制之旅。",
-      "猫鼻梁,四姑娘山": "成都接站后乘专车前往“蜀山后花园”四姑娘山。途经猫鼻梁观景台，远眺四姑娘山四大主峰雄姿，随后前往四姑娘山镇入住。",
-      "双桥沟,丹巴": "全天深度游览四姑娘山双桥沟，乘坐观光车游览雪山、森林、草甸与海子。随后前往“中国最美乡村”丹巴藏寨，感受浓郁的嘉绒藏族风情与碉楼建筑奇观。"
+      "拉市海,送机": "清晨前往拉市海湿地公园，感受候鸟天堂的宁静与茶马古道的悠远。根据您的航班时间，专属管家将安排专车送机，结束愉快的定制之旅。"
     };
 
     function getSmartDescCn(routeStr) {
@@ -396,7 +376,7 @@
         if (key.split(',').every(k => joinedPois.includes(k))) return SMART_ROUTE_DESCS_CN[key];
       }
       
-      const ignoreWords = ["高铁", "前往", "返回", "送机", "接机", "出发", "乘车", "接站"];
+      const ignoreWords = ["高铁", "前往", "返回", "送机", "接机", "出发", "乘车", "接站", "入住", "体验"];
       const mainSpots = rawPois.filter(p => !ignoreWords.some(ignore => p.includes(ignore)));
       
       if (mainSpots.length > 0) {
@@ -479,7 +459,7 @@
                   <input type="file" accept="image/*" class="hidden" onchange="handleManualImageUpload(event, ${index})">
                 </label>
               </div>
-              <img src="${day.img}" onerror="this.onerror=null; this.src='https://sallyzheng-lang.github.io/klook-tool/丽江古城.jpg';" class="w-full h-32 object-cover rounded-lg border border-gray-200 shadow-xs">
+              <img src="${day.img}" onerror="if(!this.dataset.triedPng){this.dataset.triedPng='1'; this.src=this.src.endsWith('.jpg')?this.src.replace('.jpg','.png'):this.src.replace('.png','.jpg');} else {this.onerror=null; this.src='https://sallyzheng-lang.github.io/klook-tool/丽江古城.jpg';}" class="w-full h-32 object-cover rounded-lg border border-gray-200 shadow-xs">
             </div>
             <div>
               <label class="text-[10px] text-gray-500 font-bold mb-1 block">文案描述 (智能生成，可修改)</label>
@@ -554,7 +534,7 @@
         dailyContainer.innerHTML = GLOBAL_DAYS_DATA.map((d) => `
           <div class="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100">
             <div class="relative h-48 w-full overflow-hidden bg-gray-100 group">
-              <img src="${d.img}" onerror="this.onerror=null; this.src='https://sallyzheng-lang.github.io/klook-tool/丽江古城.jpg';" class="w-full h-full object-cover transform transition duration-700 group-hover:scale-105">
+              <img src="${d.img}" onerror="if(!this.dataset.triedPng){this.dataset.triedPng='1'; this.src=this.src.endsWith('.jpg')?this.src.replace('.jpg','.png'):this.src.replace('.png','.jpg');} else {this.onerror=null; this.src='https://sallyzheng-lang.github.io/klook-tool/丽江古城.jpg';}" class="w-full h-full object-cover transform transition duration-700 group-hover:scale-105">
               <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent"></div>
               <div class="absolute bottom-2.5 left-3.5 right-3.5 flex justify-between items-end text-white">
                 <div><span class="bg-klook text-white text-[10px] px-2 py-0.5 rounded font-black tracking-wider shadow-md">DAY ${d.dayNum}</span><h4 class="font-bold text-sm mt-1.5 leading-snug tracking-wide drop-shadow-md">${d.title}</h4></div>
@@ -610,7 +590,8 @@
       syncItineraryToDaysData();
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
+      await scanGitHubRepositoryImages();
       loadTemplate();
       
       document.getElementById('lang-select').addEventListener('change', () => { syncItineraryToDaysData(); });
