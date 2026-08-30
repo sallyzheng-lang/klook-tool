@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Klook 私人定制行程生成器 (团队云端协作版)</title>
+  <title>Klook 私人定制行程生成器</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -11,7 +11,7 @@
       theme: { extend: { colors: { klook: { DEFAULT: '#FF5722', hover: '#E64A19', light: '#FFF3E0', dark: '#D84315' } } } }
     }
   </script>
-  <!-- html2canvas 用于导出长图 -->
+  <!-- html2canvas -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     .custom-scrollbar::-webkit-scrollbar { width: 4px; }
@@ -37,15 +37,13 @@
     <div id="left-panel" class="lg:col-span-3 bg-white p-5 rounded-2xl shadow-sm space-y-5 h-fit sticky top-4 custom-scrollbar scrollable-panel no-print">
       
       <div class="flex items-center justify-between border-b pb-3">
-        <h1 class="text-base font-bold text-gray-900 flex items-center gap-1.5">
-          <span>🧭</span> 行程基础设置
-        </h1>
+        <h1 class="text-base font-bold text-gray-900 flex items-center gap-1.5"><span>🧭</span> 行程基础设置</h1>
         <div class="flex items-center gap-1 bg-gray-50 border border-gray-200 px-2 py-1 rounded shadow-sm">
           <span class="text-xs">🌐</span>
           <select id="lang-select" class="bg-transparent text-[11px] font-bold text-gray-800 outline-none cursor-pointer w-20">
-            <option value="zh-CN">简中</option>
-            <option value="zh-TW">繁中</option>
-            <option value="en">EN</option>
+            <option value="zh-CN">简体中文</option>
+            <option value="zh-TW">繁體中文</option>
+            <option value="en">English (EN)</option>
           </select>
         </div>
       </div>
@@ -54,22 +52,16 @@
         ⚡ 第一次使用？一键加载演示数据
       </button>
 
-      <!-- 🌟 升级：团队云端图库状态展示 (不再需要手动选文件夹) -->
       <div class="bg-emerald-50/70 border border-emerald-200 p-3 rounded-xl space-y-2">
         <label class="block text-[11px] font-bold text-emerald-900 flex items-center justify-between gap-1.5">
           <span class="flex items-center gap-1"><span>☁️</span> 团队公共图库</span>
           <span class="text-[9px] bg-emerald-200 text-emerald-800 px-1.5 py-0.5 rounded font-black">已连接</span>
         </label>
-        <div class="text-[10px] text-emerald-700 font-medium leading-tight">
-          系统已自动接入团队云端图库，生成路线时将自动为您匹配最美风景图。
-        </div>
+        <div class="text-[10px] text-emerald-700 font-medium leading-tight">系统已自动接入您的 GitHub 云端图库 (覆盖全国核心景点)，将自动匹配美图。</div>
       </div>
 
-      <!-- 模块化多选组件 -->
       <div class="bg-gray-50 border border-gray-200 p-3 rounded-xl space-y-2.5">
-        <label class="block text-xs font-bold text-gray-800 flex items-center justify-between">
-          <span>🧩 服务模块勾选</span>
-        </label>
+        <label class="block text-xs font-bold text-gray-800 flex items-center justify-between"><span>🧩 服务模块勾选</span></label>
         <div class="grid grid-cols-2 gap-2 text-xs">
           <label class="flex items-center gap-1.5 bg-white p-1.5 rounded-lg border border-gray-200 cursor-pointer hover:border-klook transition"><input type="checkbox" name="pkg-module" value="car" checked class="accent-orange-600 w-3 h-3"><span class="font-bold text-gray-700 text-[11px]">🚗 包车/交通</span></label>
           <label class="flex items-center gap-1.5 bg-white p-1.5 rounded-lg border border-gray-200 cursor-pointer hover:border-klook transition"><input type="checkbox" name="pkg-module" value="ticket" checked class="accent-orange-600 w-3 h-3"><span class="font-bold text-gray-700 text-[11px]">🎟️ 景点门票</span></label>
@@ -79,7 +71,6 @@
         </div>
       </div>
 
-      <!-- 出行基本信息 -->
       <div class="space-y-2">
         <label class="block text-xs font-bold text-gray-800">📋 出行基本信息</label>
         <div class="space-y-2 text-xs">
@@ -89,17 +80,15 @@
         </div>
       </div>
 
-      <!-- 快速路线生成器 -->
       <div class="space-y-1.5 bg-blue-50/50 p-3 rounded-xl border border-blue-100">
         <div class="flex items-center justify-between"><label class="block text-xs font-bold text-blue-900">📌 快速排录路线</label></div>
-        <p class="text-[10px] text-blue-600 mb-2">输入Day简要路线，点击生成将自动同步至中间栏并匹配美图。</p>
+        <p class="text-[10px] text-blue-600 mb-2">输入Day简要路线，点击生成将自动同步并触发多语言翻译。</p>
         <textarea id="field-itinerary" rows="5" class="w-full border border-blue-200 rounded-lg p-2 text-[11px] focus:ring-1 focus:ring-blue-400 outline-none custom-scrollbar font-mono bg-white leading-relaxed"></textarea>
         <button id="btn-sync-middle" class="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 rounded-lg transition shadow-sm">
-          🔄 将路线同步至编辑器
+          🔄 智能翻译并同步至编辑器
         </button>
       </div>
 
-      <!-- 服务与退改文本域 -->
       <div class="space-y-3 pt-2">
         <div id="hotel-input-block" style="display:none;"><label class="block text-[11px] font-bold text-gray-800 mb-1">🏨 酒店安排</label><textarea id="field-hotel" rows="2" class="w-full border border-gray-200 rounded-lg p-2 text-[10px] bg-gray-50"></textarea></div>
         <div><label class="block text-[11px] font-bold text-gray-800 mb-1">🎫 门票明细</label><input type="text" id="field-tickets" class="w-full border border-gray-200 rounded-lg p-2 text-[10px] bg-gray-50"></div>
@@ -116,7 +105,7 @@
         <span class="text-[10px] text-gray-400 bg-gray-100 px-2 py-1 rounded">Day Card Editor</span>
       </div>
       <div class="text-[11px] text-orange-600 bg-orange-50 p-2.5 rounded-lg border border-orange-100 leading-snug font-medium">
-        提示：系统已为您匹配公共图库最佳配图。若不满意，可点击 <strong class="font-bold text-orange-700">“上传新图片”</strong> 手动替换，这不会影响公共图库。
+        提示：已根据您选择的语言翻译文案。您可修改文案或 <strong class="font-bold text-orange-700">“上传新图片”</strong> 替换云端图库自动匹配的配图。
       </div>
       <div id="day-editors-container" class="space-y-5 mt-4"></div>
     </div>
@@ -142,7 +131,7 @@
           </div>
           <div class="bg-gray-900/95 text-white px-4 py-3 -mx-6 -mb-6 mt-4 flex justify-between items-center border-t border-white/10">
             <div class="flex items-center gap-2 shrink-0"><span id="poster-date-badge" class="bg-klook text-white text-[11px] px-2.5 py-1 rounded-md font-bold whitespace-nowrap">出发日期</span><span id="ui-group-info" class="text-[11px] text-gray-200 font-bold whitespace-nowrap bg-white/10 px-2.5 py-1 rounded-md border border-white/10">4大1小</span></div>
-            <div class="text-right shrink-0"><div id="poster-price-box" class="flex flex-col items-end gap-0.5">--</div></div>
+            <div class="text-right shrink-0"><div id="poster-price-box" class="flex flex-col items-end gap-0.5 text-amber-300 font-black text-base">--</div></div>
           </div>
         </div>
 
@@ -184,12 +173,12 @@
               <div class="bg-emerald-50/90 border border-emerald-400 rounded-xl p-3 flex flex-col items-center justify-between h-full">
                 <div class="bg-emerald-600 text-white font-black text-[10px] px-2.5 py-0.5 rounded-full inline-flex items-center gap-1 mb-2"><span>💬</span> WeChat</div>
                 <div class="w-20 h-20 bg-white border border-emerald-200 rounded-lg p-1 overflow-hidden"><img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=KlookWechat" class="w-full h-full object-contain"></div>
-                <span class="text-[9px] text-emerald-800 font-extrabold mt-1.5">扫码添加微信管家</span>
+                <span id="ui-qr-wechat" class="text-[9px] text-emerald-800 font-extrabold mt-1.5">扫码添加微信管家</span>
               </div>
               <div class="bg-teal-50/90 border border-teal-400 rounded-xl p-3 flex flex-col items-center justify-between h-full">
                 <div class="bg-teal-700 text-white font-black text-[10px] px-2.5 py-0.5 rounded-full inline-flex items-center gap-1 mb-2"><span>📱</span> WhatsApp</div>
                 <div class="w-20 h-20 bg-white border border-teal-200 rounded-lg p-1 overflow-hidden"><img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://wa.me/8615181778005" class="w-full h-full object-contain"></div>
-                <span class="text-[9px] text-teal-900 font-extrabold mt-1.5">扫码添加 WhatsApp</span>
+                <span id="ui-qr-whatsapp" class="text-[9px] text-teal-900 font-extrabold mt-1.5">扫码添加 WhatsApp</span>
               </div>
             </div>
           </div>
@@ -207,63 +196,175 @@
     // ================= 全局状态管理 =================
     let GLOBAL_DAYS_DATA = [];
 
-    // ================= 🌟 团队公共图库配置区 🌟 =================
-    // 【管理员操作】：以后有新的图片，只需要在这里添加“景点名”和对应的“图片网络链接”，所有人就都能匹配到了！
+    // ================= 🌟 团队云端图库 (覆盖东北/云南/四川/通用) 🌟 =================
     const TEAM_CLOUD_IMAGES = {
+      // ===== 东北/哈尔滨方向 =====
+      "东北虎林园": "https://sallyzheng-lang.github.io/klook-tool/东北虎林园.jpg",
+      "中华巴洛克": "https://sallyzheng-lang.github.io/klook-tool/中华巴洛克.png",
+      "中央大街": "https://sallyzheng-lang.github.io/klook-tool/中央大街.jpg",
+      "亚布力": "https://sallyzheng-lang.github.io/klook-tool/亚布力滑雪场.jpg",
+      "滑雪场": "https://sallyzheng-lang.github.io/klook-tool/亚布力滑雪场.jpg",
+      "伏尔加庄园": "https://sallyzheng-lang.github.io/klook-tool/伏尔加庄园.png",
+      "冰雪大世界": "https://sallyzheng-lang.github.io/klook-tool/冰雪大世界.jpg",
+      "北极村": "https://sallyzheng-lang.github.io/klook-tool/北极村.png",
+      "北红村": "https://sallyzheng-lang.github.io/klook-tool/北红村.png",
+      "哈尔滨": "https://sallyzheng-lang.github.io/klook-tool/哈尔滨.png",
+      "大秃顶子山": "https://sallyzheng-lang.github.io/klook-tool/大秃顶子山.png",
+      "太阳岛": "https://sallyzheng-lang.github.io/klook-tool/太阳岛.png",
+
+      // ===== 云南方向 =====
+      "丽江古城": "https://sallyzheng-lang.github.io/klook-tool/丽江古城.jpg",
+      "云南民族村": "https://sallyzheng-lang.github.io/klook-tool/云南民族村.jpg",
+      "元阳梯田": "https://sallyzheng-lang.github.io/klook-tool/元阳梯田.jpg",
+      "勐巴娜西": "https://sallyzheng-lang.github.io/klook-tool/勐巴娜西珍奇园.jpg",
+      "珍奇园": "https://sallyzheng-lang.github.io/klook-tool/勐巴娜西珍奇园.jpg",
+      "勐焕大金塔": "https://sallyzheng-lang.github.io/klook-tool/勐焕大金塔.jpg",
+      "大金塔": "https://sallyzheng-lang.github.io/klook-tool/勐焕大金塔.jpg",
+      "北海湿地": "https://sallyzheng-lang.github.io/klook-tool/北海湿地.jpg",
+      "和顺古镇": "https://sallyzheng-lang.github.io/klook-tool/和顺古镇.jpg",
+      "和顺": "https://sallyzheng-lang.github.io/klook-tool/和顺古镇.jpg",
+      "喜洲古镇": "https://sallyzheng-lang.github.io/klook-tool/喜洲古镇.jpg",
+      "喜洲": "https://sallyzheng-lang.github.io/klook-tool/喜洲古镇.jpg",
+      "建水古城": "https://sallyzheng-lang.github.io/klook-tool/建水古城.jpg",
+      "十里画廊": "https://sallyzheng-lang.github.io/klook-tool/十里画廊.png",
+
+      // ===== 四川/成都方向 =====
+      "IFS": "https://sallyzheng-lang.github.io/klook-tool/IFS国金中心.png",
+      "国金中心": "https://sallyzheng-lang.github.io/klook-tool/IFS国金中心.png",
+      "乐山大佛": "https://sallyzheng-lang.github.io/klook-tool/乐山大佛.jpg",
+      "九寨沟": "https://sallyzheng-lang.github.io/klook-tool/九寨沟.jpg",
+      "南桥": "https://sallyzheng-lang.github.io/klook-tool/南桥.jpg",
+      "双桥沟": "https://sallyzheng-lang.github.io/klook-tool/四姑娘山-双桥沟.jpeg",
+      "四姑娘山": "https://sallyzheng-lang.github.io/klook-tool/四姑娘山.png",
+      "太古里": "https://sallyzheng-lang.github.io/klook-tool/太古里.png",
+      "宽窄巷子": "https://sallyzheng-lang.github.io/klook-tool/宽窄巷子.jpg",
+      "峨眉山": "https://sallyzheng-lang.github.io/klook-tool/峨眉山.png",
+      "熊猫基地": "https://sallyzheng-lang.github.io/klook-tool/熊猫基地.jpg",
+      "大熊猫": "https://sallyzheng-lang.github.io/klook-tool/熊猫基地.jpg",
+      "熊猫谷": "https://sallyzheng-lang.github.io/klook-tool/熊猫谷.jpg",
+      "都江堰": "https://sallyzheng-lang.github.io/klook-tool/都江堰.jpg",
+      "青城山": "https://sallyzheng-lang.github.io/klook-tool/青城山.png",
+      "黄龙": "https://sallyzheng-lang.github.io/klook-tool/黄龙.jpg",
+      
+      // ===== 其他及通用 =====
+      "接机": "https://sallyzheng-lang.github.io/klook-tool/接机.png",
+      "送机": "https://sallyzheng-lang.github.io/klook-tool/接机.png",
+
+      // 备用图库
       "玉龙雪山": "https://images.unsplash.com/photo-1455243911674-8d960fba6333?w=800&q=80",
-      "冰川公园": "https://images.unsplash.com/photo-1455243911674-8d960fba6333?w=800&q=80",
       "大理古城": "https://images.unsplash.com/photo-1527684651001-731c474aaf9a?w=800&q=80",
-      "理想邦": "https://images.unsplash.com/photo-1527684651001-731c474aaf9a?w=800&q=80",
-      "丽江古城": "https://images.unsplash.com/photo-1543016843-f1c0fa5c4424?w=800&q=80",
-      "虎跳峡": "https://images.unsplash.com/photo-1518098268026-4e89f1a2cd8e?w=800&q=80",
-      "香格里拉": "https://images.unsplash.com/photo-1506197603052-3cc9c3a201bd?w=800&q=80",
-      "普达措": "https://images.unsplash.com/photo-1506197603052-3cc9c3a201bd?w=800&q=80",
-      "洱海": "https://images.unsplash.com/photo-1528164344705-47542687990d?w=800&q=80",
-      "喜洲": "https://images.unsplash.com/photo-1548013146-72479768bada?w=800&q=80",
-      // 你可以无限往下加，比如：
-      // "九寨沟": "https://xxxxx.jpg",
-      // "三亚": "https://xxxxx.jpg"
+      "香格里拉": "https://images.unsplash.com/photo-1506197603052-3cc9c3a201bd?w=800&q=80"
     };
 
     const DEFAULT_BACKUP_IMAGES = [
       "https://images.unsplash.com/photo-1548013146-72479768bada?w=800&q=80",
       "https://images.unsplash.com/photo-1527684651001-731c474aaf9a?w=800&q=80",
-      "https://images.unsplash.com/photo-1543016843-f1c0fa5c4424?w=800&q=80",
-      "https://images.unsplash.com/photo-1455243911674-8d960fba6333?w=800&q=80"
+      "https://images.unsplash.com/photo-1543016843-f1c0fa5c4424?w=800&q=80"
     ];
 
     const CITY_BLACKLIST = ["丽江", "大理", "昆明", "哈尔滨", "香格里拉", "成都", "乌鲁木齐", "西宁", "敦煌", "三亚", "拉萨"];
 
     function findTeamCloudImage(pois) {
       if (!pois || !Array.isArray(pois)) return null;
-      const cleanPois = pois.filter(p => !p.includes("高铁") && !p.includes("前往") && !p.includes("送机") && !p.includes("接机"));
+      // 注意这里放宽了对“接机/送机”的拦截，确保您的接机图能展示
+      const cleanPois = pois.filter(p => !p.includes("高铁") && !p.includes("前往"));
       const scenicSpotPois = cleanPois.filter(p => !CITY_BLACKLIST.includes(p.trim()));
 
-      // 优先级1：具体景点精确匹配
+      // 第一优先级匹配具体景点
       for (let poi of scenicSpotPois) {
-        let cleanPoi = poi.trim();
-        for (let key in TEAM_CLOUD_IMAGES) { if (key.includes(cleanPoi) || cleanPoi.includes(key)) return TEAM_CLOUD_IMAGES[key]; }
+        for (let key in TEAM_CLOUD_IMAGES) { if (poi.includes(key) || key.includes(poi)) return TEAM_CLOUD_IMAGES[key]; }
       }
-      // 优先级2：大城市兜底匹配
+      // 第二优先级兜底
       for (let poi of cleanPois) {
-        let cleanPoi = poi.trim();
-        for (let key in TEAM_CLOUD_IMAGES) { if (key.includes(cleanPoi) || cleanPoi.includes(key)) return TEAM_CLOUD_IMAGES[key]; }
+        for (let key in TEAM_CLOUD_IMAGES) { if (poi.includes(key) || key.includes(poi)) return TEAM_CLOUD_IMAGES[key]; }
       }
+      // 第三优先级接送机
+      if (pois.some(p => p.includes("接机") || p.includes("送机"))) return TEAM_CLOUD_IMAGES["接机"];
+      
       return null;
+    }
+
+    // ================= 🌍 核心多语言翻译引擎 🌍 =================
+    const I18N = {
+      'zh-CN': { 
+        bannerTag: "EXCLUSIVE PRIVATE CUSTOMIZATION", bannerTitle: "【Klook 专属私人定制】深度之旅", bannerSub: "Klook 专属私人管家服务 · 独立成团 · 纯玩无购物",
+        departPrefix: "出发", headingHighlights: '行程尊享亮点', headingItinerary: '详细行程安排', headingHotel: '酒店住宿安排 (钻级品质)', headingInclusions: '服务包含与说明', headingContact: '联系我们 / Contact Us',
+        lblTickets: '🎫 包含门票明细', lblTraffic: '🚗 车辆交通明细', lblGuide: '🧭 专属导游服务', lblActivities: '🎁 体验与赠送明细', lblExclusions: '费用不含', lblCancellation: '退改政策', qrWechat: "扫码添加微信管家", qrWhatsapp: "扫码添加 WhatsApp",
+        high1Title: "纯玩私家团 · 1V1专车", high1Desc: "一团一导独立出行，不拼团、不购物，随走随停自由随心。", high2Title: "24H管家保障 · 随心畅游", high2Desc: "全程专属管家贴心服务，随时调整行程节奏，独立出行更自由。", high3Title: "深度自然人文 · 精彩打卡", high3Desc: "一站式打卡经典奇观与特色风土人情，定格绝美旅途记忆。"
+      },
+      'zh-TW': { 
+        bannerTag: "EXCLUSIVE PRIVATE CUSTOMIZATION", bannerTitle: "【Klook 專屬私人訂製】深度之旅", bannerSub: "Klook 專屬私人管家服務 · 獨立成團 · 純玩無購物",
+        departPrefix: "出發", headingHighlights: '行程尊享亮點', headingItinerary: '詳細行程安排', headingHotel: '酒店住宿安排 (鑽級品質)', headingInclusions: '服務包含與說明', headingContact: '聯絡我們 / Contact Us',
+        lblTickets: '🎫 包含門票明細', lblTraffic: '🚗 車輛交通明細', lblGuide: '🧭 專屬導遊服務', lblActivities: '🎁 體驗與贈送明細', lblExclusions: '費用不含', lblCancellation: '退改政策', qrWechat: "掃碼添加微信管家", qrWhatsapp: "掃碼添加 WhatsApp",
+        high1Title: "純玩私家團 · 1V1專車", high1Desc: "一團一導獨立出行，不拼團、不購物，隨走隨停自由隨心。", high2Title: "24H管家保障 · 隨心暢遊", high2Desc: "全程專屬管家貼心服務，隨時調整行程節奏，獨立出行更自由。", high3Title: "深度自然人文 · 精彩打卡", high3Desc: "一站式打卡經典奇觀與特色風土人情，定格絕美旅途記憶。"
+      },
+      'en': { 
+        bannerTag: "PRIVATE CUSTOMIZATION IN-DEPTH JOURNEY", bannerTitle: "[Klook Exclusive] In-Depth China Tour", bannerSub: "Private Butler Service · Independent Group · Pure Sightseeing",
+        departPrefix: "Departure", headingHighlights: 'Tour Highlights', headingItinerary: 'Detailed Itinerary', headingHotel: 'Hotel Accommodation (Premium)', headingInclusions: 'Inclusions & Details', headingContact: 'Contact Us',
+        lblTickets: '🎫 Tickets Included', lblTraffic: '🚗 Transport & Vehicles', lblGuide: '🧭 Private Tour Guide', lblActivities: '🎁 Activities & Bonus', lblExclusions: 'Exclusions', lblCancellation: 'Cancellation Policy', qrWechat: "Scan WeChat QR", qrWhatsapp: "Scan WhatsApp QR",
+        high1Title: "100% Private Tour & Vehicle", high1Desc: "Independent travel with dedicated driver/guide. Flexible and hassle-free with zero shopping.", high2Title: "24H Butler Service & Flexible Pace", high2Desc: "Dedicated travel specialist assistance throughout your trip. Travel at your own pace.", high3Title: "In-Depth Local Experiences", high3Desc: "Uncover breathtaking natural wonders and rich local ethnic culture."
+      }
+    };
+
+    const SIMP_TO_TRAD = { "国":"國", "门":"門", "车":"車", "导":"導", "游":"遊", "订":"訂", "话":"話", "费":"費", "观":"觀", "规":"規", "则":"則", "险":"險", "团":"團", "乐":"樂", "飞":"飛", "场":"場", "点":"點", "选":"選", "质":"質", "保":"保", "证":"證", "划":"劃", "动":"動", "独":"獨", "镇":"鎮", "缆":"纜", "索":"索", "赠":"贈", "气":"氣", "减":"減", "务":"務", "说":"說", "明":"明", "发":"發", "条":"條", "件":"件", "桥":"橋" };
+    
+    // 针对常见地名的英文核心字典 (包含了您所有的新上传图片)
+    const EN_DICT = {
+      "东北虎林园": "Siberian Tiger Park", "中华巴洛克": "Chinese Baroque", "中央大街": "Central Street", 
+      "亚布力滑雪场": "Yabuli Ski Resort", "伏尔加庄园": "Volga Manor", "冰雪大世界": "Ice and Snow World", 
+      "太阳岛": "Sun Island", "大秃顶子山": "Mount Datudingzi", "北极村": "Beiji Village", "北红村": "Beihong Village", "哈尔滨": "Harbin",
+      "云南民族村": "Yunnan Nationalities Village", "元阳梯田": "Yuanyang Rice Terraces", "勐巴娜西珍奇园": "Menghanaxi Exotic Garden",
+      "勐焕大金塔": "Menghuan Silver Pagoda", "北海湿地": "Beihai Wetland", "和顺古镇": "Heshun Ancient Town",
+      "建水古城": "Jianshui Ancient City", "喜洲古镇": "Xizhou Ancient Town", "十里画廊": "Ten-mile Gallery",
+      "峨眉山": "Mount Emei", "大理": "Dali", "丽江": "Lijiang", "昆明": "Kunming", "香格里拉": "Shangri-La", 
+      "成都": "Chengdu", "九寨沟": "Jiuzhaigou", "黄龙": "Huanglong", "乐山大佛": "Leshan Giant Buddha", 
+      "都江堰": "Dujiangyan", "青城山": "Mount Qingcheng", "熊猫基地": "Panda Base", "四姑娘山": "Mount Siguniang", 
+      "双桥沟": "Shuangqiao Valley", "宽窄巷子": "Kuanzhai Alley", "太古里": "Taikoo Li", "大理古城": "Dali Ancient Town", 
+      "丽江古城": "Lijiang Ancient Town", "玉龙雪山": "Jade Dragon Snow Mountain", "冰川公园": "Glacier Park", 
+      "蓝月谷": "Blue Moon Valley", "印象丽江": "Impression Lijiang", "虎跳峡": "Tiger Leaping Gorge", 
+      "普达措国家公园": "Pudacuo National Park", "普达措公园": "Pudacuo National Park", "高铁": "High-Speed Rail", 
+      "前往": "to", "返回": "back to", "送机": "Airport Drop-off", "接机": "Airport Pick-up", "自理": "Self-arranged", 
+      "客人在订酒店": "Hotel booked by guest", "包车": "Private Car", "门票": "Tickets", "导游": "Guide", "酒店": "Hotel"
+    };
+
+    async function translateText(text, lang) {
+      if (!text || !text.trim() || lang === 'zh-CN') return text;
+      let result = text;
+
+      if (lang === 'zh-TW') {
+        let tradStr = "";
+        for (let char of result) { tradStr += SIMP_TO_TRAD[char] || char; }
+        return tradStr;
+      }
+
+      if (lang === 'en') {
+        let keys = Object.keys(EN_DICT).sort((a, b) => b.length - a.length);
+        for (let key of keys) { result = result.replaceAll(key, EN_DICT[key]); }
+        result = result.replaceAll('—', ' - ').replaceAll('、', ', ').replaceAll('；', '; ');
+        if (/[\u4e00-\u9fa5]/.test(result)) {
+          try {
+            const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q=${encodeURIComponent(result)}`);
+            const data = await res.json();
+            if (data && data[0]) return data[0].map(item => item[0]).join('');
+          } catch(e) { console.warn("API limit, fallback to dict."); }
+        }
+      }
+      return result;
     }
 
     // ================= 智能文案引擎 =================
     const SMART_ROUTE_DESCS_CN = {
+      "九寨沟,黄龙": "乘专车前往“童话世界”九寨沟，漫步五花海与诺日朗瀑布；随后游览“人间瑶池”黄龙风景区，观赏绝美钙化彩池，感受川西高原的自然奇观。",
+      "成都,熊猫": "前往大熊猫繁育研究基地，近距离观看国宝大熊猫的憨态可掬；随后漫步宽窄巷子或打卡IFS太古里，品味地道成都慢生活与特色美食。",
+      "乐山,峨眉": "乘车前往乐山，乘船观赏震撼的乐山大佛全景；随后前往峨眉山，体验佛教名山的清幽与秀美，感受巴蜀文化底蕴。",
+      "都江堰,青城山": "探访千年水利工程都江堰，感叹古人治水智慧；随后前往道教发源地青城山，漫步清幽山林，体验“青城天下幽”的绝美意境。",
       "昆明,大理": "昆明乘高铁前往大理，抵达后游览理想邦、文笔村，欣赏洱海风光，随后前往大理古城漫步游览，入住酒店。",
-      "磻溪村,喜洲": "清晨前往磻溪村S湾体验骑行与摄影，漫步喜洲古镇体验白族民俗与特色美食，随后前往双廊古镇观赏洱海日落。",
-      "沙溪,白沙": "大理出发前往茶马古道要冲沙溪古镇，探访古戏台与玉津桥，随后前往白沙古镇感受原生态纳西风情，傍晚入住丽江古城。",
       "玉龙雪山,冰川": "乘车前往玉龙雪山风景区，乘坐大索道直达冰川公园，游览蓝月谷，观赏《印象丽江》实景演出。",
-      "虎跳峡,香格里拉": "丽江出发前往虎跳峡，近距离感受金沙江奔腾磅礴，随后前往香格里拉，傍晚游览独克宗古城。",
-      "纳帕海,普达措": "前往纳帕海感受高原湖泊风貌，随后深入游览普达措国家公园，漫步原始森林与高原草甸。",
-      "送机": "根据您的航班或车次，我们将安排专车为您提供送机/送站服务。期待与您的下次相遇，结束愉快的定制之旅。"
+      "送机": "根据您的航班或车次，我们将安排专车为您提供送机/送站服务。期待与您的下次相遇，结束愉快的定制之旅。",
+      "接机": "专车司机将在机场或高铁站等候您，接您前往下榻酒店，开启愉快的深度定制之旅。"
     };
 
-    function getSmartDesc(routeStr) {
+    function getSmartDescCn(routeStr) {
       const rawPois = routeStr.split(/[—\-–>,\s]+/).filter(s => s.trim().length > 0);
       const joinedPois = rawPois.join(',');
       for (let key in SMART_ROUTE_DESCS_CN) {
@@ -276,10 +377,13 @@
     }
 
     // ================= 核心业务逻辑 =================
-    function syncItineraryToDaysData() {
+    async function syncItineraryToDaysData() {
+      const lang = document.getElementById('lang-select').value;
+      const btn = document.getElementById('btn-sync-middle');
+      btn.innerText = "🔄 正在智能翻译同步中..."; btn.disabled = true;
+
       const itineraryRaw = document.getElementById('field-itinerary').value || "";
       const dayBlocks = itineraryRaw.split(/(?=Day\s*\d+|\d{1,2}月\d{1,2}日|\d{1,2}\.\d{1,2})/gi);
-      
       let newDaysData = [];
       let dayCounter = 1;
 
@@ -289,29 +393,26 @@
 
         const headerMatch = block.match(/^(?:Day\s*\d+|\d{1,2}月\d{1,2}日|\d{1,2}\.\d{1,2})[：:]\s*([^\n]+)/i);
         if (headerMatch) {
-          const routeStr = headerMatch[1].trim();
-          const rawPois = routeStr.split(/[—\-–>,\s]+/).filter(s => s.trim().length > 0);
+          const routeStrCn = headerMatch[1].trim();
+          const rawPois = routeStrCn.split(/[—\-–>,\s]+/).filter(s => s.trim().length > 0);
           
-          let smartDesc = getSmartDesc(routeStr);
+          let smartDescCn = getSmartDescCn(routeStrCn);
           
-          // 💡 优先去公共图库找图
+          let titleTrans = await translateText(routeStrCn, lang);
+          let descTrans = await translateText(smartDescCn, lang);
+          
           let matchedCloudImg = findTeamCloudImage(rawPois);
           let defaultImg = DEFAULT_BACKUP_IMAGES[(dayCounter - 1) % DEFAULT_BACKUP_IMAGES.length];
           let existingData = GLOBAL_DAYS_DATA.find(d => d.dayNum === dayCounter);
           
           let finalImg = matchedCloudImg || defaultImg;
           let finalIsManual = false;
-
-          // 如果同事手动传过图片，保护那张图
-          if (existingData && existingData.isManualImg) {
-            finalImg = existingData.img;
-            finalIsManual = true;
-          }
+          if (existingData && existingData.isManualImg) { finalImg = existingData.img; finalIsManual = true; }
 
           newDaysData.push({
             dayNum: dayCounter,
-            title: routeStr,
-            desc: existingData && existingData.desc !== getSmartDesc(existingData.title) ? existingData.desc : smartDesc,
+            title: titleTrans,
+            desc: descTrans,
             img: finalImg,
             isManualImg: finalIsManual
           });
@@ -321,7 +422,9 @@
       
       GLOBAL_DAYS_DATA = newDaysData;
       renderMiddlePanel();
-      renderPoster();
+      await renderPoster();
+      
+      btn.innerText = "🔄 智能翻译并同步至编辑器"; btn.disabled = false;
     }
 
     function renderMiddlePanel() {
@@ -330,7 +433,6 @@
         container.innerHTML = `<div class="text-center text-xs text-gray-400 py-6 border border-dashed border-gray-200 rounded-xl">请在左侧填写路线并点击“同步”</div>`;
         return;
       }
-
       container.innerHTML = GLOBAL_DAYS_DATA.map((day, index) => {
         const lockBadge = day.isManualImg ? `<span class="bg-emerald-100 text-emerald-700 text-[9px] px-1.5 py-0.5 rounded font-bold ml-2 shadow-xs">🔒 已手动锁定</span>` : `<span class="bg-blue-100 text-blue-700 text-[9px] px-1.5 py-0.5 rounded font-bold ml-2 shadow-xs">☁️ 云端图库匹配</span>`;
         return `
@@ -349,7 +451,7 @@
                   <input type="file" accept="image/*" class="hidden" onchange="handleManualImageUpload(event, ${index})">
                 </label>
               </div>
-              <img src="${day.img}" class="w-full h-32 object-cover rounded-lg border border-gray-200 shadow-xs">
+              <img src="${day.img}" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1548013146-72479768bada?w=800&q=80';" class="w-full h-32 object-cover rounded-lg border border-gray-200 shadow-xs">
             </div>
             <div>
               <label class="text-[10px] text-gray-500 font-bold mb-1 block">文案描述 (智能生成，可修改)</label>
@@ -380,73 +482,113 @@
       }
     };
 
-    function renderPoster() {
-      document.getElementById('poster-date-badge').innerText = (document.getElementById('field-date').value || "10月12日") + " 出发";
-      document.getElementById('ui-group-info').innerText = document.getElementById('field-group').value || "4大1小";
-      const priceText = document.getElementById('field-price').value || "9000元/定制团";
-      document.getElementById('poster-price-box').innerHTML = `<div class="flex items-baseline gap-0.5 leading-none"><span class="text-base font-black text-amber-300 tracking-tight">${priceText}</span></div>`;
+    async function renderPoster() {
+      const lang = document.getElementById('lang-select').value;
+      const dict = I18N[lang] || I18N['zh-CN'];
+
+      document.getElementById('ui-banner-tag').innerText = dict.bannerTag;
+      document.getElementById('ui-banner-title').innerText = dict.bannerTitle;
+      document.getElementById('ui-banner-sub1').innerText = dict.bannerSub;
+      document.getElementById('ui-heading-highlights').innerText = dict.headingHighlights;
+      document.getElementById('ui-heading-itinerary').innerText = dict.headingItinerary;
+      document.getElementById('ui-heading-hotel').innerText = dict.headingHotel;
+      document.getElementById('ui-heading-inclusions').innerText = dict.headingInclusions;
+      document.getElementById('ui-heading-contact').innerText = dict.headingContact;
+      document.getElementById('ui-lbl-exclusions').innerText = dict.lblExclusions;
+      document.getElementById('ui-lbl-cancellation').innerText = dict.lblCancellation;
+      document.getElementById('ui-qr-wechat').innerText = dict.qrWechat;
+      document.getElementById('ui-qr-whatsapp').innerText = dict.qrWhatsapp;
+
+      let dateVal = document.getElementById('field-date').value || "10月12日";
+      let groupVal = document.getElementById('field-group').value || "4大1小";
+      let priceVal = document.getElementById('field-price').value || "9000元/定制团";
+      
+      if (lang === 'en') {
+        dateVal = dateVal.replace('月', '/').replace('日', '');
+        groupVal = groupVal.replace('大', ' Adults ').replace('小', ' Child');
+        priceVal = priceVal.replace('元/定制团', ' CNY / Group').replace('元/人', ' CNY / Person');
+      } else if (lang === 'zh-TW') {
+        dateVal = await translateText(dateVal, 'zh-TW');
+        groupVal = await translateText(groupVal, 'zh-TW');
+        priceVal = await translateText(priceVal, 'zh-TW');
+      }
+
+      document.getElementById('poster-date-badge').innerText = `${dateVal} ${dict.departPrefix}`;
+      document.getElementById('ui-group-info').innerText = groupVal;
+      document.getElementById('poster-price-box').innerHTML = priceVal;
 
       const dailyContainer = document.getElementById('poster-daily-list');
       if (GLOBAL_DAYS_DATA.length > 0) {
         dailyContainer.innerHTML = GLOBAL_DAYS_DATA.map((d) => `
           <div class="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100">
             <div class="relative h-48 w-full overflow-hidden bg-gray-100 group">
-              <img src="${d.img}" class="w-full h-full object-cover transform transition duration-700 group-hover:scale-105">
+              <!-- 防碎图保护：一旦云端图库连接异常，自动退回高清风光备用图 -->
+              <img src="${d.img}" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1548013146-72479768bada?w=800&q=80';" class="w-full h-full object-cover transform transition duration-700 group-hover:scale-105">
               <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent"></div>
               <div class="absolute bottom-2.5 left-3.5 right-3.5 flex justify-between items-end text-white">
-                <div>
-                  <span class="bg-klook text-white text-[10px] px-2 py-0.5 rounded font-black tracking-wider shadow-md">DAY ${d.dayNum}</span>
-                  <h4 class="font-bold text-sm mt-1.5 leading-snug tracking-wide drop-shadow-md">${d.title}</h4>
-                </div>
+                <div><span class="bg-klook text-white text-[10px] px-2 py-0.5 rounded font-black tracking-wider shadow-md">DAY ${d.dayNum}</span><h4 class="font-bold text-sm mt-1.5 leading-snug tracking-wide drop-shadow-md">${d.title}</h4></div>
               </div>
             </div>
             <div class="p-3.5 bg-white"><p class="text-[11px] text-gray-600 leading-relaxed font-normal">${d.desc}</p></div>
           </div>
         `).join('');
       } else {
-        dailyContainer.innerHTML = `<div class="text-center text-xs text-gray-400 py-6 border border-dashed border-gray-200 rounded-xl">暂无行程，请在左侧排录并生成</div>`;
+        dailyContainer.innerHTML = `<div class="text-center text-xs text-gray-400 py-6 border border-dashed border-gray-200 rounded-xl">Empty Itinerary / 暂无行程</div>`;
       }
 
       document.getElementById('poster-highlights-list').innerHTML = `
-        <div class="flex items-start gap-2.5 bg-white/90 p-2.5 rounded-lg border border-orange-100/70 shadow-2xs"><div class="w-6 h-6 rounded-lg bg-orange-100 text-klook flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold">🚘</div><div><div class="font-bold text-gray-800 text-[11px] leading-tight">纯玩私家团 · 1V1专车</div><div class="text-[10px] text-gray-500 mt-0.5 leading-snug">一团一导独立出行，不拼团、不购物，随走随停自由随心。</div></div></div>
-        <div class="flex items-start gap-2.5 bg-white/90 p-2.5 rounded-lg border border-orange-100/70 shadow-2xs"><div class="w-6 h-6 rounded-lg bg-orange-100 text-klook flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold">🌟</div><div><div class="font-bold text-gray-800 text-[11px] leading-tight">24H管家保障 · 随心畅游</div><div class="text-[10px] text-gray-500 mt-0.5 leading-snug">全程专属管家贴心服务，随时调整行程节奏，独立出行更自由。</div></div></div>
-        <div class="flex items-start gap-2.5 bg-white/90 p-2.5 rounded-lg border border-orange-100/70 shadow-2xs"><div class="w-6 h-6 rounded-lg bg-orange-100 text-klook flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold">📸</div><div><div class="font-bold text-gray-800 text-[11px] leading-tight">深度自然人文 · 精彩打卡</div><div class="text-[10px] text-gray-500 mt-0.5 leading-snug">一站式打卡经典自然奇观与特色风土人情，定格绝美旅途记忆。</div></div></div>
+        <div class="flex items-start gap-2.5 bg-white/90 p-2.5 rounded-lg border border-orange-100/70 shadow-2xs"><div class="w-6 h-6 rounded-lg bg-orange-100 text-klook flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold">🚘</div><div><div class="font-bold text-gray-800 text-[11px] leading-tight">${dict.high1Title}</div><div class="text-[10px] text-gray-500 mt-0.5 leading-snug">${dict.high1Desc}</div></div></div>
+        <div class="flex items-start gap-2.5 bg-white/90 p-2.5 rounded-lg border border-orange-100/70 shadow-2xs"><div class="w-6 h-6 rounded-lg bg-orange-100 text-klook flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold">🌟</div><div><div class="font-bold text-gray-800 text-[11px] leading-tight">${dict.high2Title}</div><div class="text-[10px] text-gray-500 mt-0.5 leading-snug">${dict.high2Desc}</div></div></div>
+        <div class="flex items-start gap-2.5 bg-white/90 p-2.5 rounded-lg border border-orange-100/70 shadow-2xs"><div class="w-6 h-6 rounded-lg bg-orange-100 text-klook flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold">📸</div><div><div class="font-bold text-gray-800 text-[11px] leading-tight">${dict.high3Title}</div><div class="text-[10px] text-gray-500 mt-0.5 leading-snug">${dict.high3Desc}</div></div></div>
       `;
 
-      const exLines = (document.getElementById('field-exclusions').value || "全程酒店住宿自理\n全程正餐及晚餐自理").split('\n').filter(s=>s.trim());
-      document.getElementById('poster-exclusions').innerHTML = exLines.map(i => `<li>${i}</li>`).join('');
-      const canLines = (document.getElementById('field-cancellation').value || "提前6日至4日取消，扣除20%违约金；\n行程开始当日取消，扣除60%违约金。").split('\n').filter(s=>s.trim());
-      document.getElementById('poster-cancellation').innerHTML = canLines.map(l => `<p>• ${l}</p>`).join('');
+      let exRaw = document.getElementById('field-exclusions').value || "全程酒店住宿自理\n全程正餐及晚餐自理";
+      let canRaw = document.getElementById('field-cancellation').value || "提前6日至4日取消，扣除20%违约金；\n行程开始当日取消，扣除60%违约金。";
+      let hRaw = document.getElementById('field-hotel').value || "严选钻级精品客栈/高口碑酒店入住";
+      let tickRaw = document.getElementById('field-tickets').value;
+      let trafRaw = document.getElementById('field-traffic').value;
+
+      if (lang !== 'zh-CN') {
+        exRaw = await translateText(exRaw, lang);
+        canRaw = await translateText(canRaw, lang);
+        hRaw = await translateText(hRaw, lang);
+        if (tickRaw) tickRaw = await translateText(tickRaw, lang);
+        if (trafRaw) trafRaw = await translateText(trafRaw, lang);
+      }
+
+      document.getElementById('poster-exclusions').innerHTML = exRaw.split('\n').filter(s=>s.trim()).map(i => `<li>${i}</li>`).join('');
+      document.getElementById('poster-cancellation').innerHTML = canRaw.split('\n').filter(s=>s.trim()).map(l => `<p>• ${l}</p>`).join('');
       
       let incHTML = '';
-      const tickets = document.getElementById('field-tickets').value;
-      if (tickets) incHTML += `<div class="bg-orange-50/40 p-2.5 rounded-lg border border-orange-100"><span class="font-bold text-gray-800 block mb-1">🎫 包含门票明细</span><p class="text-gray-600 text-[11px]">${tickets}</p></div>`;
-      const traffic = document.getElementById('field-traffic').value;
-      if (traffic) incHTML += `<div class="bg-orange-50/40 p-2.5 rounded-lg border border-orange-100"><span class="font-bold text-gray-800 block mb-1">🚗 车辆交通明细</span><p class="text-gray-600 text-[11px]">${traffic}</p></div>`;
-      document.getElementById('poster-inclusions-dynamic-list').innerHTML = incHTML || '<p class="text-xs text-gray-400">无</p>';
+      if (tickRaw) incHTML += `<div class="bg-orange-50/40 p-2.5 rounded-lg border border-orange-100"><span class="font-bold text-gray-800 block mb-1">${dict.lblTickets}</span><p class="text-gray-600 text-[11px]">${tickRaw}</p></div>`;
+      if (trafRaw) incHTML += `<div class="bg-orange-50/40 p-2.5 rounded-lg border border-orange-100"><span class="font-bold text-gray-800 block mb-1">${dict.lblTraffic}</span><p class="text-gray-600 text-[11px]">${trafRaw}</p></div>`;
+      document.getElementById('poster-inclusions-dynamic-list').innerHTML = incHTML || '<p class="text-xs text-gray-400">None</p>';
 
       const isHotelSelected = document.querySelector('input[name="pkg-module"][value="hotel"]').checked;
       document.getElementById('hotel-input-block').style.display = isHotelSelected ? 'block' : 'none';
       document.getElementById('poster-hotel-wrapper').style.display = isHotelSelected ? 'block' : 'none';
       if (isHotelSelected) {
-        const hLines = (document.getElementById('field-hotel').value || "严选钻级精品客栈/高口碑酒店入住").split('\n').filter(s=>s.trim());
-        document.getElementById('poster-hotel-list').innerHTML = hLines.map(h => `<div class="flex items-start gap-2 bg-gray-50 p-2 rounded-lg border border-gray-100"><span class="bg-klook/10 text-klook font-bold px-1.5 py-0.5 rounded text-[10px]">🏨</span><span class="text-gray-700 font-medium text-[11px]">${h}</span></div>`).join('');
+        document.getElementById('poster-hotel-list').innerHTML = hRaw.split('\n').filter(s=>s.trim()).map(h => `<div class="flex items-start gap-2 bg-gray-50 p-2 rounded-lg border border-gray-100"><span class="bg-klook/10 text-klook font-bold px-1.5 py-0.5 rounded text-[10px]">🏨</span><span class="text-gray-700 font-medium text-[11px]">${h}</span></div>`).join('');
       }
     }
     
     function loadTemplate() {
-      document.getElementById('field-itinerary').value = `Day 1: 昆明—高铁前往大理—理想邦—文笔村—大理古城\nDay 2: 磻溪村S湾—喜洲古镇—文笔村—双廊古镇—大理\nDay 3: 大理—沙溪古镇—白沙古镇—丽江古城\nDay 4: 丽江—甘海子—玉龙雪山—冰川公园—蓝月谷—印象丽江\nDay 5: 丽江—虎跳峡—香格里拉—独克宗古城\nDay 6: 香格里拉—纳帕海—普达措公园—香格里拉\nDay 7: 香格里拉—高铁返回昆明—昆明送机`;
+      document.getElementById('field-itinerary').value = `Day 1: 昆明接机—高铁前往大理—理想邦—文笔村\nDay 2: 磻溪村S湾—喜洲古镇—文笔村—双廊古镇—大理\nDay 3: 大理—沙溪古镇—白沙古镇—丽江古城\nDay 4: 丽江—甘海子—玉龙雪山—冰川公园—蓝月谷\nDay 5: 哈尔滨接机—中央大街—冰雪大世界\nDay 6: 哈尔滨—伏尔加庄园—亚布力滑雪场\nDay 7: 成都—大熊猫—宽窄巷子—九寨沟\nDay 8: 九寨沟—黄龙—成都送机`;
       document.getElementById('field-date').value = "10月12日"; document.getElementById('field-group').value = "4大1小"; document.getElementById('field-price').value = "9000元/定制团";
-      document.getElementById('field-tickets').value = "玉龙雪山进山费、大索道、印象丽江、虎跳峡、普达措国家公园"; document.getElementById('field-traffic').value = "7座别克GL8商务车（含油费过路费司机食宿）";
+      document.getElementById('field-tickets').value = "玉龙雪山、冰雪大世界、九寨沟门票及观光车"; document.getElementById('field-traffic').value = "7座别克GL8商务车（含油费过路费司机食宿）";
       syncItineraryToDaysData();
     }
 
     document.addEventListener('DOMContentLoaded', () => {
       loadTemplate();
+      
+      document.getElementById('lang-select').addEventListener('change', () => { syncItineraryToDaysData(); });
       document.getElementById('btn-load-template').addEventListener('click', loadTemplate);
       document.getElementById('btn-sync-middle').addEventListener('click', () => syncItineraryToDaysData());
+      
       const inputsToWatch = ['field-date', 'field-group', 'field-price', 'field-hotel', 'field-tickets', 'field-traffic', 'field-exclusions', 'field-cancellation'];
-      inputsToWatch.forEach(id => { document.getElementById(id).addEventListener('input', renderPoster); });
+      inputsToWatch.forEach(id => { document.getElementById(id).addEventListener('change', renderPoster); });
+      
       document.querySelectorAll('input[name="pkg-module"]').forEach(cb => { cb.addEventListener('change', renderPoster); });
       document.getElementById('btn-print-pdf').addEventListener('click', () => window.print());
 
