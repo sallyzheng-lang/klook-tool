@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Klook 私人定制行程生成器 (团队云端协作版)</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: { extend: { colors: { klook: { DEFAULT: '#FF5722', hover: '#E64A19', light: '#FFF3E0', dark: '#D84315' } } } }
+    }
+  </script>
+  <!-- html2canvas 用于导出长图 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #FFCCBC; border-radius: 4px; }
+    .scrollable-panel { height: calc(100vh - 2rem); overflow-y: auto; }
+    #export-poster { width: 480px; margin: 0 auto; background: #FAFAFA; }
+
+    @media print {
+      @page { margin: 0; size: A4 portrait; }
+      html, body { background: white !important; padding: 0 !important; margin: 0 !important; width: 100% !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+      .no-print, #left-panel, #middle-panel, .preview-tip { display: none !important; }
+      .main-grid { display: block !important; margin: 0 !important; padding: 0 !important; width: 100% !important; max-width: 100% !important; }
+      #poster-wrapper { width: 100% !important; margin: 0 !important; padding: 0 !important; }
+      #export-poster { width: 100% !important; max-width: 100% !important; margin: 0 !important; box-shadow: none !important; border: none !important; border-radius: 0 !important; }
+    }
+  </style>
+</head>
+<body class="bg-gray-100 min-h-screen p-4 font-sans text-gray-800">
+
+  <div class="max-w-[1500px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-5 main-grid items-start">
+    
+    <!-- ==================== 左侧：全局基础配置 ==================== -->
+    <div id="left-panel" class="lg:col-span-3 bg-white p-5 rounded-2xl shadow-sm space-y-5 h-fit sticky top-4 custom-scrollbar scrollable-panel no-print">
+      
+      <div class="flex items-center justify-between border-b pb-3">
+        <h1 class="text-base font-bold text-gray-900 flex items-center gap-1.5">
+          <span>🧭</span> 行程基础设置
+        </h1>
+        <div class="flex items-center gap-1 bg-gray-50 border border-gray-200 px-2 py-1 rounded shadow-sm">
+          <span class="text-xs">🌐</span>
+          <select id="lang-select" class="bg-transparent text-[11px] font-bold text-gray-800 outline-none cursor-pointer w-20">
+            <option value="zh-CN">简中</option>
+            <option value="zh-TW">繁中</option>
+            <option value="en">EN</option>
+          </select>
+        </div>
+      </div>
+
+      <button id="btn-load-template" class="w-full text-xs bg-amber-500 hover:bg-amber-600 text-white px-3 py-2.5 rounded-xl font-bold transition shadow-xs flex justify-center items-center gap-1.5">
+        ⚡ 第一次使用？一键加载演示数据
+      </button>
+
+      <!-- 🌟 升级：团队云端图库状态展示 (不再需要手动选文件夹) -->
+      <div class="bg-emerald-50/70 border border-emerald-200 p-3 rounded-xl space-y-2">
+        <label class="block text-[11px] font-bold text-emerald-900 flex items-center justify-between gap-1.5">
+          <span class="flex items-center gap-1"><span>☁️</span> 团队公共图库</span>
+          <span class="text-[9px] bg-emerald-200 text-emerald-800 px-1.5 py-0.5 rounded font-black">已连接</span>
+        </label>
+        <div class="text-[10px] text-emerald-700 font-medium leading-tight">
+          系统已自动接入团队云端图库，生成路线时将自动为您匹配最美风景图。
+        </div>
+      </div>
+
+      <!-- 模块化多选组件 -->
+      <div class="bg-gray-50 border border-gray-200 p-3 rounded-xl space-y-2.5">
+        <label class="block text-xs font-bold text-gray-800 flex items-center justify-between">
+          <span>🧩 服务模块勾选</span>
+        </label>
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <label class="flex items-center gap-1.5 bg-white p-1.5 rounded-lg border border-gray-200 cursor-pointer hover:border-klook transition"><input type="checkbox" name="pkg-module" value="car" checked class="accent-orange-600 w-3 h-3"><span class="font-bold text-gray-700 text-[11px]">🚗 包车/交通</span></label>
+          <label class="flex items-center gap-1.5 bg-white p-1.5 rounded-lg border border-gray-200 cursor-pointer hover:border-klook transition"><input type="checkbox" name="pkg-module" value="ticket" checked class="accent-orange-600 w-3 h-3"><span class="font-bold text-gray-700 text-[11px]">🎟️ 景点门票</span></label>
+          <label class="flex items-center gap-1.5 bg-white p-1.5 rounded-lg border border-gray-200 cursor-pointer hover:border-klook transition"><input type="checkbox" name="pkg-module" value="guide" checked class="accent-orange-600 w-3 h-3"><span class="font-bold text-gray-700 text-[11px]">🧭 专属导游</span></label>
+          <label class="flex items-center gap-1.5 bg-white p-1.5 rounded-lg border border-gray-200 cursor-pointer hover:border-klook transition"><input type="checkbox" name="pkg-module" value="hotel" class="accent-orange-600 w-3 h-3"><span class="font-bold text-gray-700 text-[11px]">🏨 住宿酒店</span></label>
+          <label class="flex items-center gap-1.5 bg-white p-1.5 rounded-lg border border-gray-200 cursor-pointer hover:border-klook transition col-span-2"><input type="checkbox" name="pkg-module" value="exp" checked class="accent-orange-600 w-3 h-3"><span class="font-bold text-gray-700 text-[11px]">🎁 特色体验 (含骑行/赠品)</span></label>
+        </div>
+      </div>
+
+      <!-- 出行基本信息 -->
+      <div class="space-y-2">
+        <label class="block text-xs font-bold text-gray-800">📋 出行基本信息</label>
+        <div class="space-y-2 text-xs">
+          <div class="flex items-center gap-2"><span class="w-16 text-[10px] text-gray-500 font-bold text-right shrink-0">出发日期</span><input type="text" id="field-date" class="flex-1 border border-gray-200 rounded-lg p-1.5 text-xs outline-none bg-gray-50" placeholder="例: 10月12日"></div>
+          <div class="flex items-center gap-2"><span class="w-16 text-[10px] text-gray-500 font-bold text-right shrink-0">出行人数</span><input type="text" id="field-group" class="flex-1 border border-gray-200 rounded-lg p-1.5 text-xs outline-none bg-gray-50" placeholder="例: 4大1小"></div>
+          <div class="flex items-center gap-2"><span class="w-16 text-[10px] text-gray-500 font-bold text-right shrink-0">费用报价</span><input type="text" id="field-price" class="flex-1 border border-gray-200 rounded-lg p-1.5 text-xs outline-none bg-gray-50" placeholder="例: 9000元/定制团"></div>
+        </div>
+      </div>
+
+      <!-- 快速路线生成器 -->
+      <div class="space-y-1.5 bg-blue-50/50 p-3 rounded-xl border border-blue-100">
+        <div class="flex items-center justify-between"><label class="block text-xs font-bold text-blue-900">📌 快速排录路线</label></div>
+        <p class="text-[10px] text-blue-600 mb-2">输入Day简要路线，点击生成将自动同步至中间栏并匹配美图。</p>
+        <textarea id="field-itinerary" rows="5" class="w-full border border-blue-200 rounded-lg p-2 text-[11px] focus:ring-1 focus:ring-blue-400 outline-none custom-scrollbar font-mono bg-white leading-relaxed"></textarea>
+        <button id="btn-sync-middle" class="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 rounded-lg transition shadow-sm">
+          🔄 将路线同步至编辑器
+        </button>
+      </div>
+
+      <!-- 服务与退改文本域 -->
+      <div class="space-y-3 pt-2">
+        <div id="hotel-input-block" style="display:none;"><label class="block text-[11px] font-bold text-gray-800 mb-1">🏨 酒店安排</label><textarea id="field-hotel" rows="2" class="w-full border border-gray-200 rounded-lg p-2 text-[10px] bg-gray-50"></textarea></div>
+        <div><label class="block text-[11px] font-bold text-gray-800 mb-1">🎫 门票明细</label><input type="text" id="field-tickets" class="w-full border border-gray-200 rounded-lg p-2 text-[10px] bg-gray-50"></div>
+        <div><label class="block text-[11px] font-bold text-gray-800 mb-1">🚗 车辆交通</label><input type="text" id="field-traffic" class="w-full border border-gray-200 rounded-lg p-2 text-[10px] bg-gray-50"></div>
+        <div><label class="block text-[11px] font-bold text-gray-800 mb-1">➖ 费用不含</label><textarea id="field-exclusions" rows="2" class="w-full border border-gray-200 rounded-lg p-2 text-[10px] bg-gray-50"></textarea></div>
+        <div><label class="block text-[11px] font-bold text-gray-800 mb-1">⚠️ 退改政策</label><textarea id="field-cancellation" rows="2" class="w-full border border-gray-200 rounded-lg p-2 text-[10px] bg-gray-50"></textarea></div>
+      </div>
+    </div>
+
+    <!-- ==================== 中间栏：图文卡片编辑器 ==================== -->
+    <div id="middle-panel" class="lg:col-span-4 bg-white p-5 rounded-2xl shadow-sm h-fit sticky top-4 custom-scrollbar scrollable-panel space-y-4 no-print border border-gray-200">
+      <div class="flex items-center justify-between border-b pb-3 sticky top-0 bg-white z-10">
+        <h2 class="text-base font-bold text-gray-900 flex items-center gap-1.5"><span>🖼️</span> 行程卡片编辑器</h2>
+        <span class="text-[10px] text-gray-400 bg-gray-100 px-2 py-1 rounded">Day Card Editor</span>
+      </div>
+      <div class="text-[11px] text-orange-600 bg-orange-50 p-2.5 rounded-lg border border-orange-100 leading-snug font-medium">
+        提示：系统已为您匹配公共图库最佳配图。若不满意，可点击 <strong class="font-bold text-orange-700">“上传新图片”</strong> 手动替换，这不会影响公共图库。
+      </div>
+      <div id="day-editors-container" class="space-y-5 mt-4"></div>
+    </div>
+
+    <!-- ==================== 右侧：海报渲染与预览区 ==================== -->
+    <div id="poster-wrapper" class="lg:col-span-5 flex flex-col items-center">
+      <div class="w-[480px] grid grid-cols-2 gap-3 mb-4 no-print">
+        <button id="btn-export" class="bg-gray-900 hover:bg-black text-white font-medium py-3 rounded-xl shadow-md transition text-[13px] flex items-center justify-center gap-1.5"><span>📥</span> 导出高清长图</button>
+        <button id="btn-print-pdf" class="bg-amber-600 hover:bg-amber-700 text-white font-medium py-3 rounded-xl shadow-md transition text-[13px] flex items-center justify-center gap-1.5"><span>📄</span> 保存为 PDF (自动去白边)</button>
+      </div>
+      <div class="text-[11px] text-gray-400 mb-2 preview-tip font-medium">海报实时预览区</div>
+      
+      <div id="export-poster" class="shadow-2xl rounded-2xl overflow-hidden border border-gray-100 text-gray-800 bg-white">
+        <!-- Banner -->
+        <div class="w-full relative overflow-hidden bg-gradient-to-br from-orange-600 via-amber-600 to-red-700 p-6 flex flex-col justify-between text-white shadow-inner" style="min-height: 220px;">
+          <div class="flex justify-between items-center z-10">
+            <div class="flex items-center gap-2"><span class="bg-klook text-white font-black text-xs px-3 py-1 rounded-md tracking-wider shadow-md">klook</span><span id="poster-package-tag" class="bg-amber-500/90 backdrop-blur-md text-white text-[11px] px-3 py-1 rounded-md font-bold flex items-center gap-1 shadow-md">👑 Klook 专属私人订制</span></div>
+          </div>
+          <div class="z-10 my-auto pt-4 pb-2">
+            <div id="ui-banner-tag" class="text-[11px] font-semibold text-amber-200 tracking-wider uppercase mb-0.5">PRIVATE CUSTOMIZATION IN-DEPTH JOURNEY</div>
+            <h2 id="ui-banner-title" class="text-2xl font-black leading-tight tracking-wide drop-shadow-md">【Klook 专属私人定制】深度之旅</h2>
+            <p id="ui-banner-sub1" class="text-xs text-amber-100 mt-2 font-medium tracking-wide">Klook 专属私人管家服务 · 独立成团 · 纯玩无购物</p>
+          </div>
+          <div class="bg-gray-900/95 text-white px-4 py-3 -mx-6 -mb-6 mt-4 flex justify-between items-center border-t border-white/10">
+            <div class="flex items-center gap-2 shrink-0"><span id="poster-date-badge" class="bg-klook text-white text-[11px] px-2.5 py-1 rounded-md font-bold whitespace-nowrap">出发日期</span><span id="ui-group-info" class="text-[11px] text-gray-200 font-bold whitespace-nowrap bg-white/10 px-2.5 py-1 rounded-md border border-white/10">4大1小</span></div>
+            <div class="text-right shrink-0"><div id="poster-price-box" class="flex flex-col items-end gap-0.5">--</div></div>
+          </div>
+        </div>
+
+        <div class="p-5 space-y-5">
+          <!-- 行程尊享亮点 -->
+          <div id="poster-highlights-box" class="bg-gradient-to-br from-orange-50/80 via-amber-50/40 to-white p-4 rounded-xl border border-orange-100 shadow-sm space-y-2.5">
+            <h3 class="text-xs font-bold text-gray-800 uppercase tracking-wider flex items-center justify-between"><span class="flex items-center gap-1.5">✨ <span id="ui-heading-highlights">行程尊享亮点</span></span><span class="text-[10px] bg-klook/10 text-klook font-bold px-2 py-0.5 rounded-full">Klook Exclusive</span></h3>
+            <div id="poster-highlights-list" class="grid grid-cols-1 gap-2 pt-0.5 text-xs"></div>
+          </div>
+
+          <!-- 详细行程安排 -->
+          <div>
+            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1"><span>📅</span> <span id="ui-heading-itinerary">详细行程安排</span></h3>
+            <div id="poster-daily-list" class="space-y-4"></div>
+          </div>
+
+          <!-- 酒店住宿安排 -->
+          <div id="poster-hotel-wrapper" class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 space-y-2">
+            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-1"><span>🏨</span> <span id="ui-heading-hotel">酒店住宿安排 (钻级品质)</span></h3>
+            <div id="poster-hotel-list" class="space-y-2 text-xs"></div>
+          </div>
+
+          <!-- 服务包含与说明 -->
+          <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 space-y-3">
+            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1"><span>🛡️</span> <span id="ui-heading-inclusions">服务包含与说明</span></h3>
+            <div id="poster-inclusions-dynamic-list" class="space-y-2.5 text-xs"></div>
+          </div>
+
+          <!-- 费用不含 & 退改政策 -->
+          <div class="grid grid-cols-2 gap-3 text-[11px]">
+            <div class="bg-gray-50 p-3 rounded-xl border border-gray-200"><span class="font-bold text-gray-800 block mb-1">➖ <span id="ui-lbl-exclusions">费用不含</span></span><ul id="poster-exclusions" class="list-disc list-inside text-gray-600 space-y-0.5"></ul></div>
+            <div class="bg-gray-50 p-3 rounded-xl border border-gray-200"><span class="font-bold text-gray-800 block mb-1">⚠️ <span id="ui-lbl-cancellation">退改政策</span></span><div id="poster-cancellation" class="text-gray-600 space-y-0.5"></div></div>
+          </div>
+
+          <!-- 联系我们 -->
+          <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 space-y-3">
+            <h3 class="text-xs font-bold text-gray-800 uppercase tracking-wider flex items-center justify-between border-b border-gray-100 pb-2"><span class="flex items-center gap-1.5">🎧 <span id="ui-heading-contact">联系我们 / Contact Us</span></span></h3>
+            <div class="grid grid-cols-2 gap-3 pt-1">
+              <div class="bg-emerald-50/90 border border-emerald-400 rounded-xl p-3 flex flex-col items-center justify-between h-full">
+                <div class="bg-emerald-600 text-white font-black text-[10px] px-2.5 py-0.5 rounded-full inline-flex items-center gap-1 mb-2"><span>💬</span> WeChat</div>
+                <div class="w-20 h-20 bg-white border border-emerald-200 rounded-lg p-1 overflow-hidden"><img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=KlookWechat" class="w-full h-full object-contain"></div>
+                <span class="text-[9px] text-emerald-800 font-extrabold mt-1.5">扫码添加微信管家</span>
+              </div>
+              <div class="bg-teal-50/90 border border-teal-400 rounded-xl p-3 flex flex-col items-center justify-between h-full">
+                <div class="bg-teal-700 text-white font-black text-[10px] px-2.5 py-0.5 rounded-full inline-flex items-center gap-1 mb-2"><span>📱</span> WhatsApp</div>
+                <div class="w-20 h-20 bg-white border border-teal-200 rounded-lg p-1 overflow-hidden"><img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://wa.me/8615181778005" class="w-full h-full object-contain"></div>
+                <span class="text-[9px] text-teal-900 font-extrabold mt-1.5">扫码添加 WhatsApp</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 页脚 -->
+          <div class="text-center pt-2 border-t border-dashed border-gray-200 pb-2">
+            <div class="text-xs font-extrabold text-klook tracking-wider">klook <span class="font-normal text-gray-400">| Private Customized Trip</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ================= 全局状态管理 =================
+    let GLOBAL_DAYS_DATA = [];
+
+    // ================= 🌟 团队公共图库配置区 🌟 =================
+    // 【管理员操作】：以后有新的图片，只需要在这里添加“景点名”和对应的“图片网络链接”，所有人就都能匹配到了！
+    const TEAM_CLOUD_IMAGES = {
+      "玉龙雪山": "https://images.unsplash.com/photo-1455243911674-8d960fba6333?w=800&q=80",
+      "冰川公园": "https://images.unsplash.com/photo-1455243911674-8d960fba6333?w=800&q=80",
+      "大理古城": "https://images.unsplash.com/photo-1527684651001-731c474aaf9a?w=800&q=80",
+      "理想邦": "https://images.unsplash.com/photo-1527684651001-731c474aaf9a?w=800&q=80",
+      "丽江古城": "https://images.unsplash.com/photo-1543016843-f1c0fa5c4424?w=800&q=80",
+      "虎跳峡": "https://images.unsplash.com/photo-1518098268026-4e89f1a2cd8e?w=800&q=80",
+      "香格里拉": "https://images.unsplash.com/photo-1506197603052-3cc9c3a201bd?w=800&q=80",
+      "普达措": "https://images.unsplash.com/photo-1506197603052-3cc9c3a201bd?w=800&q=80",
+      "洱海": "https://images.unsplash.com/photo-1528164344705-47542687990d?w=800&q=80",
+      "喜洲": "https://images.unsplash.com/photo-1548013146-72479768bada?w=800&q=80",
+      // 你可以无限往下加，比如：
+      // "九寨沟": "https://xxxxx.jpg",
+      // "三亚": "https://xxxxx.jpg"
+    };
+
+    const DEFAULT_BACKUP_IMAGES = [
+      "https://images.unsplash.com/photo-1548013146-72479768bada?w=800&q=80",
+      "https://images.unsplash.com/photo-1527684651001-731c474aaf9a?w=800&q=80",
+      "https://images.unsplash.com/photo-1543016843-f1c0fa5c4424?w=800&q=80",
+      "https://images.unsplash.com/photo-1455243911674-8d960fba6333?w=800&q=80"
+    ];
+
+    const CITY_BLACKLIST = ["丽江", "大理", "昆明", "哈尔滨", "香格里拉", "成都", "乌鲁木齐", "西宁", "敦煌", "三亚", "拉萨"];
+
+    function findTeamCloudImage(pois) {
+      if (!pois || !Array.isArray(pois)) return null;
+      const cleanPois = pois.filter(p => !p.includes("高铁") && !p.includes("前往") && !p.includes("送机") && !p.includes("接机"));
+      const scenicSpotPois = cleanPois.filter(p => !CITY_BLACKLIST.includes(p.trim()));
+
+      // 优先级1：具体景点精确匹配
+      for (let poi of scenicSpotPois) {
+        let cleanPoi = poi.trim();
+        for (let key in TEAM_CLOUD_IMAGES) { if (key.includes(cleanPoi) || cleanPoi.includes(key)) return TEAM_CLOUD_IMAGES[key]; }
+      }
+      // 优先级2：大城市兜底匹配
+      for (let poi of cleanPois) {
+        let cleanPoi = poi.trim();
+        for (let key in TEAM_CLOUD_IMAGES) { if (key.includes(cleanPoi) || cleanPoi.includes(key)) return TEAM_CLOUD_IMAGES[key]; }
+      }
+      return null;
+    }
+
+    // ================= 智能文案引擎 =================
+    const SMART_ROUTE_DESCS_CN = {
+      "昆明,大理": "昆明乘高铁前往大理，抵达后游览理想邦、文笔村，欣赏洱海风光，随后前往大理古城漫步游览，入住酒店。",
+      "磻溪村,喜洲": "清晨前往磻溪村S湾体验骑行与摄影，漫步喜洲古镇体验白族民俗与特色美食，随后前往双廊古镇观赏洱海日落。",
+      "沙溪,白沙": "大理出发前往茶马古道要冲沙溪古镇，探访古戏台与玉津桥，随后前往白沙古镇感受原生态纳西风情，傍晚入住丽江古城。",
+      "玉龙雪山,冰川": "乘车前往玉龙雪山风景区，乘坐大索道直达冰川公园，游览蓝月谷，观赏《印象丽江》实景演出。",
+      "虎跳峡,香格里拉": "丽江出发前往虎跳峡，近距离感受金沙江奔腾磅礴，随后前往香格里拉，傍晚游览独克宗古城。",
+      "纳帕海,普达措": "前往纳帕海感受高原湖泊风貌，随后深入游览普达措国家公园，漫步原始森林与高原草甸。",
+      "送机": "根据您的航班或车次，我们将安排专车为您提供送机/送站服务。期待与您的下次相遇，结束愉快的定制之旅。"
+    };
+
+    function getSmartDesc(routeStr) {
+      const rawPois = routeStr.split(/[—\-–>,\s]+/).filter(s => s.trim().length > 0);
+      const joinedPois = rawPois.join(',');
+      for (let key in SMART_ROUTE_DESCS_CN) {
+        if (key.split(',').every(k => joinedPois.includes(k))) return SMART_ROUTE_DESCS_CN[key];
+      }
+      const ignoreWords = ["高铁", "前往", "返回", "送机", "接机", "出发", "乘车"];
+      const mainSpots = rawPois.filter(p => !ignoreWords.some(ignore => p.includes(ignore)));
+      if (mainSpots.length > 0) return `乘专车打卡 ${mainSpots.slice(0, 3).join('、')} 等精选景点，体验地道风土人情与绝美自然风物。`;
+      return "专车舒适出行，带您深度体验地道风土人情与绝美自然风物，享受惬意的定制假期之旅。";
+    }
+
+    // ================= 核心业务逻辑 =================
+    function syncItineraryToDaysData() {
+      const itineraryRaw = document.getElementById('field-itinerary').value || "";
+      const dayBlocks = itineraryRaw.split(/(?=Day\s*\d+|\d{1,2}月\d{1,2}日|\d{1,2}\.\d{1,2})/gi);
+      
+      let newDaysData = [];
+      let dayCounter = 1;
+
+      for (let block of dayBlocks) {
+        block = block.trim();
+        if (!block) continue;
+
+        const headerMatch = block.match(/^(?:Day\s*\d+|\d{1,2}月\d{1,2}日|\d{1,2}\.\d{1,2})[：:]\s*([^\n]+)/i);
+        if (headerMatch) {
+          const routeStr = headerMatch[1].trim();
+          const rawPois = routeStr.split(/[—\-–>,\s]+/).filter(s => s.trim().length > 0);
+          
+          let smartDesc = getSmartDesc(routeStr);
+          
+          // 💡 优先去公共图库找图
+          let matchedCloudImg = findTeamCloudImage(rawPois);
+          let defaultImg = DEFAULT_BACKUP_IMAGES[(dayCounter - 1) % DEFAULT_BACKUP_IMAGES.length];
+          let existingData = GLOBAL_DAYS_DATA.find(d => d.dayNum === dayCounter);
+          
+          let finalImg = matchedCloudImg || defaultImg;
+          let finalIsManual = false;
+
+          // 如果同事手动传过图片，保护那张图
+          if (existingData && existingData.isManualImg) {
+            finalImg = existingData.img;
+            finalIsManual = true;
+          }
+
+          newDaysData.push({
+            dayNum: dayCounter,
+            title: routeStr,
+            desc: existingData && existingData.desc !== getSmartDesc(existingData.title) ? existingData.desc : smartDesc,
+            img: finalImg,
+            isManualImg: finalIsManual
+          });
+          dayCounter++;
+        }
+      }
+      
+      GLOBAL_DAYS_DATA = newDaysData;
+      renderMiddlePanel();
+      renderPoster();
+    }
+
+    function renderMiddlePanel() {
+      const container = document.getElementById('day-editors-container');
+      if (GLOBAL_DAYS_DATA.length === 0) {
+        container.innerHTML = `<div class="text-center text-xs text-gray-400 py-6 border border-dashed border-gray-200 rounded-xl">请在左侧填写路线并点击“同步”</div>`;
+        return;
+      }
+
+      container.innerHTML = GLOBAL_DAYS_DATA.map((day, index) => {
+        const lockBadge = day.isManualImg ? `<span class="bg-emerald-100 text-emerald-700 text-[9px] px-1.5 py-0.5 rounded font-bold ml-2 shadow-xs">🔒 已手动锁定</span>` : `<span class="bg-blue-100 text-blue-700 text-[9px] px-1.5 py-0.5 rounded font-bold ml-2 shadow-xs">☁️ 云端图库匹配</span>`;
+        return `
+        <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 shadow-sm relative transition hover:border-orange-300">
+          <div class="absolute top-0 left-0 bg-orange-500 text-white text-[10px] font-black px-2.5 py-1 rounded-br-xl rounded-tl-xl shadow-sm">DAY ${day.dayNum}</div>
+          <div class="mt-4 space-y-3">
+            <div>
+              <label class="text-[10px] text-gray-500 font-bold mb-1 block">当日核心路线 (海报标题)</label>
+              <input type="text" class="w-full border border-gray-200 rounded-lg p-2 text-xs outline-none focus:ring-1 focus:ring-orange-400 bg-white" value="${day.title}" oninput="updateDayData(${index}, 'title', this.value)">
+            </div>
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <label class="text-[10px] text-gray-500 font-bold flex items-center">精美配图替换 ${lockBadge}</label>
+                <label class="cursor-pointer text-[10px] text-orange-600 bg-orange-100 hover:bg-orange-200 px-2 py-0.5 rounded font-bold transition">
+                  手动传图 (优先)
+                  <input type="file" accept="image/*" class="hidden" onchange="handleManualImageUpload(event, ${index})">
+                </label>
+              </div>
+              <img src="${day.img}" class="w-full h-32 object-cover rounded-lg border border-gray-200 shadow-xs">
+            </div>
+            <div>
+              <label class="text-[10px] text-gray-500 font-bold mb-1 block">文案描述 (智能生成，可修改)</label>
+              <textarea rows="3" class="w-full border border-gray-200 rounded-lg p-2 text-[11px] outline-none focus:ring-1 focus:ring-orange-400 custom-scrollbar bg-white" oninput="updateDayData(${index}, 'desc', this.value)">${day.desc}</textarea>
+            </div>
+          </div>
+        </div>
+      `}).join('');
+    }
+
+    window.updateDayData = function(index, key, value) {
+      if (GLOBAL_DAYS_DATA[index]) { GLOBAL_DAYS_DATA[index][key] = value; renderPoster(); }
+    };
+
+    window.handleManualImageUpload = function(event, index) {
+      const file = event.target.files[0];
+      if (file && file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          if (GLOBAL_DAYS_DATA[index]) {
+            GLOBAL_DAYS_DATA[index].img = e.target.result;
+            GLOBAL_DAYS_DATA[index].isManualImg = true;
+            renderMiddlePanel();
+            renderPoster();
+          }
+        }
+        reader.readAsDataURL(file);
+      }
+    };
+
+    function renderPoster() {
+      document.getElementById('poster-date-badge').innerText = (document.getElementById('field-date').value || "10月12日") + " 出发";
+      document.getElementById('ui-group-info').innerText = document.getElementById('field-group').value || "4大1小";
+      const priceText = document.getElementById('field-price').value || "9000元/定制团";
+      document.getElementById('poster-price-box').innerHTML = `<div class="flex items-baseline gap-0.5 leading-none"><span class="text-base font-black text-amber-300 tracking-tight">${priceText}</span></div>`;
+
+      const dailyContainer = document.getElementById('poster-daily-list');
+      if (GLOBAL_DAYS_DATA.length > 0) {
+        dailyContainer.innerHTML = GLOBAL_DAYS_DATA.map((d) => `
+          <div class="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100">
+            <div class="relative h-48 w-full overflow-hidden bg-gray-100 group">
+              <img src="${d.img}" class="w-full h-full object-cover transform transition duration-700 group-hover:scale-105">
+              <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent"></div>
+              <div class="absolute bottom-2.5 left-3.5 right-3.5 flex justify-between items-end text-white">
+                <div>
+                  <span class="bg-klook text-white text-[10px] px-2 py-0.5 rounded font-black tracking-wider shadow-md">DAY ${d.dayNum}</span>
+                  <h4 class="font-bold text-sm mt-1.5 leading-snug tracking-wide drop-shadow-md">${d.title}</h4>
+                </div>
+              </div>
+            </div>
+            <div class="p-3.5 bg-white"><p class="text-[11px] text-gray-600 leading-relaxed font-normal">${d.desc}</p></div>
+          </div>
+        `).join('');
+      } else {
+        dailyContainer.innerHTML = `<div class="text-center text-xs text-gray-400 py-6 border border-dashed border-gray-200 rounded-xl">暂无行程，请在左侧排录并生成</div>`;
+      }
+
+      document.getElementById('poster-highlights-list').innerHTML = `
+        <div class="flex items-start gap-2.5 bg-white/90 p-2.5 rounded-lg border border-orange-100/70 shadow-2xs"><div class="w-6 h-6 rounded-lg bg-orange-100 text-klook flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold">🚘</div><div><div class="font-bold text-gray-800 text-[11px] leading-tight">纯玩私家团 · 1V1专车</div><div class="text-[10px] text-gray-500 mt-0.5 leading-snug">一团一导独立出行，不拼团、不购物，随走随停自由随心。</div></div></div>
+        <div class="flex items-start gap-2.5 bg-white/90 p-2.5 rounded-lg border border-orange-100/70 shadow-2xs"><div class="w-6 h-6 rounded-lg bg-orange-100 text-klook flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold">🌟</div><div><div class="font-bold text-gray-800 text-[11px] leading-tight">24H管家保障 · 随心畅游</div><div class="text-[10px] text-gray-500 mt-0.5 leading-snug">全程专属管家贴心服务，随时调整行程节奏，独立出行更自由。</div></div></div>
+        <div class="flex items-start gap-2.5 bg-white/90 p-2.5 rounded-lg border border-orange-100/70 shadow-2xs"><div class="w-6 h-6 rounded-lg bg-orange-100 text-klook flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold">📸</div><div><div class="font-bold text-gray-800 text-[11px] leading-tight">深度自然人文 · 精彩打卡</div><div class="text-[10px] text-gray-500 mt-0.5 leading-snug">一站式打卡经典自然奇观与特色风土人情，定格绝美旅途记忆。</div></div></div>
+      `;
+
+      const exLines = (document.getElementById('field-exclusions').value || "全程酒店住宿自理\n全程正餐及晚餐自理").split('\n').filter(s=>s.trim());
+      document.getElementById('poster-exclusions').innerHTML = exLines.map(i => `<li>${i}</li>`).join('');
+      const canLines = (document.getElementById('field-cancellation').value || "提前6日至4日取消，扣除20%违约金；\n行程开始当日取消，扣除60%违约金。").split('\n').filter(s=>s.trim());
+      document.getElementById('poster-cancellation').innerHTML = canLines.map(l => `<p>• ${l}</p>`).join('');
+      
+      let incHTML = '';
+      const tickets = document.getElementById('field-tickets').value;
+      if (tickets) incHTML += `<div class="bg-orange-50/40 p-2.5 rounded-lg border border-orange-100"><span class="font-bold text-gray-800 block mb-1">🎫 包含门票明细</span><p class="text-gray-600 text-[11px]">${tickets}</p></div>`;
+      const traffic = document.getElementById('field-traffic').value;
+      if (traffic) incHTML += `<div class="bg-orange-50/40 p-2.5 rounded-lg border border-orange-100"><span class="font-bold text-gray-800 block mb-1">🚗 车辆交通明细</span><p class="text-gray-600 text-[11px]">${traffic}</p></div>`;
+      document.getElementById('poster-inclusions-dynamic-list').innerHTML = incHTML || '<p class="text-xs text-gray-400">无</p>';
+
+      const isHotelSelected = document.querySelector('input[name="pkg-module"][value="hotel"]').checked;
+      document.getElementById('hotel-input-block').style.display = isHotelSelected ? 'block' : 'none';
+      document.getElementById('poster-hotel-wrapper').style.display = isHotelSelected ? 'block' : 'none';
+      if (isHotelSelected) {
+        const hLines = (document.getElementById('field-hotel').value || "严选钻级精品客栈/高口碑酒店入住").split('\n').filter(s=>s.trim());
+        document.getElementById('poster-hotel-list').innerHTML = hLines.map(h => `<div class="flex items-start gap-2 bg-gray-50 p-2 rounded-lg border border-gray-100"><span class="bg-klook/10 text-klook font-bold px-1.5 py-0.5 rounded text-[10px]">🏨</span><span class="text-gray-700 font-medium text-[11px]">${h}</span></div>`).join('');
+      }
+    }
+    
+    function loadTemplate() {
+      document.getElementById('field-itinerary').value = `Day 1: 昆明—高铁前往大理—理想邦—文笔村—大理古城\nDay 2: 磻溪村S湾—喜洲古镇—文笔村—双廊古镇—大理\nDay 3: 大理—沙溪古镇—白沙古镇—丽江古城\nDay 4: 丽江—甘海子—玉龙雪山—冰川公园—蓝月谷—印象丽江\nDay 5: 丽江—虎跳峡—香格里拉—独克宗古城\nDay 6: 香格里拉—纳帕海—普达措公园—香格里拉\nDay 7: 香格里拉—高铁返回昆明—昆明送机`;
+      document.getElementById('field-date').value = "10月12日"; document.getElementById('field-group').value = "4大1小"; document.getElementById('field-price').value = "9000元/定制团";
+      document.getElementById('field-tickets').value = "玉龙雪山进山费、大索道、印象丽江、虎跳峡、普达措国家公园"; document.getElementById('field-traffic').value = "7座别克GL8商务车（含油费过路费司机食宿）";
+      syncItineraryToDaysData();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadTemplate();
+      document.getElementById('btn-load-template').addEventListener('click', loadTemplate);
+      document.getElementById('btn-sync-middle').addEventListener('click', () => syncItineraryToDaysData());
+      const inputsToWatch = ['field-date', 'field-group', 'field-price', 'field-hotel', 'field-tickets', 'field-traffic', 'field-exclusions', 'field-cancellation'];
+      inputsToWatch.forEach(id => { document.getElementById(id).addEventListener('input', renderPoster); });
+      document.querySelectorAll('input[name="pkg-module"]').forEach(cb => { cb.addEventListener('change', renderPoster); });
+      document.getElementById('btn-print-pdf').addEventListener('click', () => window.print());
+
+      document.getElementById('btn-export').addEventListener('click', async () => {
+        const posterContainer = document.getElementById('export-poster');
+        const btn = document.getElementById('btn-export');
+        const origText = btn.innerHTML;
+        btn.innerHTML = `生成海报中...`; btn.disabled = true;
+        try {
+          const canvas = await html2canvas(posterContainer, { scale: 2, useCORS: true, backgroundColor: "#FAFAFA" });
+          const link = document.createElement('a');
+          link.download = `Klook_Premium_Tour.png`;
+          link.href = canvas.toDataURL('image/png');
+          link.click();
+        } catch (err) { alert("图片加载可能存在跨域问题，请稍后重试！"); } finally {
+          btn.innerHTML = origText; btn.disabled = false;
+        }
+      });
+    });
+  </script>
+</body>
+</html>
