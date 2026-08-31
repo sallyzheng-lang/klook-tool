@@ -133,11 +133,25 @@
     <div id="middle-panel" class="lg:col-span-4 bg-white p-5 rounded-2xl shadow-sm h-fit sticky top-4 custom-scrollbar scrollable-panel space-y-4 no-print border border-gray-200">
       <div class="flex items-center justify-between border-b pb-3 sticky top-0 bg-white z-10">
         <h2 class="text-base font-bold text-gray-900 flex items-center gap-1.5"><span>🖼️</span> 行程卡片编辑器</h2>
-        <span class="text-[10px] text-gray-400 bg-gray-100 px-2 py-1 rounded">Day Card Editor</span>
+        <span class="text-[10px] text-gray-400 bg-gray-100 px-2 py-1 rounded">Card Editor</span>
       </div>
+      
       <div class="text-[11px] text-orange-600 bg-orange-50 p-2.5 rounded-lg border border-orange-100 leading-snug font-medium">
-        提示：系统已为您自动生成走心文案与去重匹配图。若图片不满意，可点击 <strong class="font-bold text-orange-700">“上传新图片”</strong> 手动替换。
+        提示：系统已为您自动生成走心文案、亮点与去重匹配图。右侧所有文案与图片均支持手动自定义修改，手动修改优先级最高。
       </div>
+
+      <!-- 新增：行程亮点在线编辑器 -->
+      <div id="highlights-editor-container" class="bg-amber-50/60 border border-amber-200 rounded-xl p-3.5 space-y-3">
+        <div class="flex items-center justify-between border-b border-amber-200/60 pb-2">
+          <span class="text-xs font-bold text-amber-900 flex items-center gap-1">✨ 行程亮点配置 (智能计算/手动修改)</span>
+          <button id="btn-reset-highlights" class="text-[10px] bg-amber-200/80 hover:bg-amber-300/80 text-amber-900 px-2 py-0.5 rounded font-bold transition">
+            🔄 恢复智能生成
+          </button>
+        </div>
+        <div id="highlights-inputs-list" class="space-y-2.5"></div>
+      </div>
+
+      <!-- 每日行程卡片编辑器 -->
       <div id="day-editors-container" class="space-y-5 mt-4"></div>
     </div>
 
@@ -253,6 +267,13 @@
     let GLOBAL_DAYS_DATA = [];
     let AUTO_CLOUD_IMAGES = {};
 
+    // 新增：行程亮点全局状态，默认支持智能生成与手动改写
+    let GLOBAL_HIGHLIGHTS_DATA = [
+      { icon: "🚘", title: "", desc: "", isManual: false },
+      { icon: "🌟", title: "", desc: "", isManual: false },
+      { icon: "📸", title: "", desc: "", isManual: false }
+    ];
+
     const SAFE_FALLBACK_IMG = "https://sallyzheng-lang.github.io/klook-tool/丽江古城.jpg";
 
     const MULTI_FALLBACK_IMAGES = [
@@ -326,7 +347,6 @@
         bannerTag: "EXCLUSIVE PRIVATE CUSTOMIZATION", bannerTitle: "【Klook 专属私人定制】深度之旅", bannerSub: "Klook 专属私人管家服务 · 独立成团 · 纯玩无购物",
         departPrefix: "出发", headingHighlights: '行程尊享亮点', headingItinerary: '详细行程安排', headingHotel: '酒店住宿安排 (钻级品质)', headingInclusions: '服务包含与说明', headingContact: '联系我们 / CONTACT US',
         lblTickets: '🎫 包含门票明细', lblTraffic: '🚗 车辆交通明细', lblGuide: '🧭 专属导游服务', lblActivities: '🎁 特色体验与赠送明细', lblExclusions: '费用不含', lblCancellation: '退改政策', qrWechat: "扫码添加微信管家", qrWhatsapp: "扫码添加 WhatsApp",
-        high1Title: "纯玩私家团 · 1V1专车", high1Desc: "一团一导独立出行，不拼团、不购物，随走随停自由随心。", high2Title: "24H管家保障 · 随心畅游", high2Desc: "全程专属管家贴心服务，随时调整行程节奏，独立出行更自由。", high3Title: "深度自然人文 · 精彩打卡", high3Desc: "一站式打卡经典奇观与特色风土人情，定格绝美旅途记忆。",
         brandP1: "🌟 让世界更轻松地探索中国，让每一次旅行都成为独特的体验。",
         brandP2: "🚀 连接全球游客与中国目的地，用KLOOK的方式，让定制旅行更简单、更自由、更有趣。",
         footerSub: "Klook 官方品质保障 · 专属行程规划师为您服务"
@@ -335,7 +355,6 @@
         bannerTag: "EXCLUSIVE PRIVATE CUSTOMIZATION", bannerTitle: "【Klook 專屬私人訂製】深度之旅", bannerSub: "Klook 專屬私人管家服務 · 獨立成團 · 純玩無購物",
         departPrefix: "出發", headingHighlights: '行程尊享亮點', headingItinerary: '詳細行程安排', headingHotel: '酒店住宿安排 (鑽級品質)', headingInclusions: '服務包含與說明', headingContact: '聯絡我們 / CONTACT US',
         lblTickets: '🎫 包含門票明細', lblTraffic: '🚗 車輛交通明細', lblGuide: '🧭 專屬導遊服務', lblActivities: '🎁 特色體驗與贈送明細', lblExclusions: '費用不含', lblCancellation: '退改政策', qrWechat: "掃碼添加微信管家", qrWhatsapp: "掃碼添加 WhatsApp",
-        high1Title: "純玩私家團 · 1V1專車", high1Desc: "一團一導獨立出行，不拼團、不購物，隨走隨停自由隨心。", high2Title: "24H管家保障 · 隨心暢湧", high2Desc: "全程專屬管家貼心服務，隨時調整行程節奏，獨立出行更自由。", high3Title: "深度自然人文 · 精彩打卡", high3Desc: "一站式打卡經典奇觀與特色風土人情，定格絕美旅途記憶。",
         brandP1: "🌟 讓世界更輕鬆地探索中國，讓每一次旅行都成為獨特的體驗。",
         brandP2: "🚀 連接全球遊客與中國目的地，用KLOOK的方式，讓訂製旅行更簡單、更自由、更有趣。",
         footerSub: "Klook 官方品質保障 · 專屬行程規劃師為您服務"
@@ -344,7 +363,6 @@
         bannerTag: "PRIVATE CUSTOMIZATION IN-DEPTH JOURNEY", bannerTitle: "[Klook Exclusive] In-Depth China Tour", bannerSub: "Private Butler Service · Independent Group · Pure Sightseeing",
         departPrefix: "Departure", headingHighlights: 'Tour Highlights', headingItinerary: 'Detailed Itinerary', headingHotel: 'Hotel Accommodation (Premium)', headingInclusions: 'Inclusions & Details', headingContact: 'Contact Us',
         lblTickets: '🎫 Tickets Included', lblTraffic: '🚗 Transport & Vehicles', lblGuide: '🧭 Private Tour Guide', lblActivities: '🎁 Special Experiences & Bonus', lblExclusions: 'Exclusions', lblCancellation: 'Cancellation Policy', qrWechat: "Scan WeChat QR", qrWhatsapp: "Scan WhatsApp QR",
-        high1Title: "100% Private Tour & Vehicle", high1Desc: "Independent travel with dedicated driver/guide. Flexible and hassle-free with zero shopping.", high2Title: "24H Butler Service & Flexible Pace", high2Desc: "Dedicated travel specialist assistance throughout your trip. Travel at your own pace.", high3Title: "In-Depth Local Experiences", high3Desc: "Uncover breathtaking natural wonders and rich local ethnic culture.",
         brandP1: "🌟 Exploring China with ease, making every trip a unique and memorable adventure.",
         brandP2: "🚀 Connecting global travelers with China — customized travel made simpler, freer, and more enjoyable.",
         footerSub: "Klook Official Guarantee · Dedicated Travel Specialist at Your Service"
@@ -382,6 +400,56 @@
         }
       }
       return result;
+    }
+
+    // ================= 💡 智能生成行程亮点 💡 =================
+    async function generateSmartHighlights(forceReset = false) {
+      const lang = document.getElementById('lang-select').value;
+      const groupVal = document.getElementById('field-group').value || "私家团";
+      const trafVal = document.getElementById('field-traffic').value || "";
+      const tickVal = document.getElementById('field-tickets').value || "";
+      const expVal = document.getElementById('field-exp').value || "";
+      const guideVal = document.getElementById('field-guide').value || "";
+
+      // 1. 根据车辆与人数生成亮点一
+      let h1Title = "纯玩私家团 · 专属出行";
+      let h1Desc = trafVal ? `针对${groupVal}独立定制，精选${trafVal}，专车专导服务更舒适。` : `针对${groupVal}独立成团，专车专导随走随停，不拼团不购物。`;
+
+      // 2. 根据门票与体验生成亮点二
+      let h2Title = "精选景点 · 特色体验";
+      let comboExp = [tickVal, expVal].filter(Boolean).join("；");
+      let h2Desc = comboExp ? `行程已含：${comboExp}` : "一站式打卡经典奇观与特色风土人情，定格绝美旅途记忆。";
+
+      // 3. 根据导游/管家服务生成亮点三
+      let h3Title = "24H管家保障 · 灵活随心";
+      let h3Desc = guideVal ? `${guideVal}，行程节奏可根据需求随时调整。` : "全程专属管家贴心服务，随心调整行程节奏，出行更自由。";
+
+      // 多语言翻译转换
+      if (lang !== 'zh-CN') {
+        h1Title = await translateText(h1Title, lang);
+        h1Desc = await translateText(h1Desc, lang);
+        h2Title = await translateText(h2Title, lang);
+        h2Desc = await translateText(h2Desc, lang);
+        h3Title = await translateText(h3Title, lang);
+        h3Desc = await translateText(h3Desc, lang);
+      }
+
+      const calculated = [
+        { icon: "🚘", title: h1Title, desc: h1Desc },
+        { icon: "🌟", title: h2Title, desc: h2Desc },
+        { icon: "📸", title: h3Title, desc: h3Desc }
+      ];
+
+      GLOBAL_HIGHLIGHTS_DATA.forEach((item, index) => {
+        if (forceReset || !item.isManual) {
+          item.icon = calculated[index].icon;
+          item.title = calculated[index].title;
+          item.desc = calculated[index].desc;
+          item.isManual = false;
+        }
+      });
+
+      renderHighlightsEditor();
     }
 
     const SMART_ROUTE_DESCS_CN = {
@@ -456,13 +524,47 @@
       }
       
       GLOBAL_DAYS_DATA = newDaysData;
+      
+      // 智能重新计算亮点（未被手动锁定的亮点会自动更新）
+      await generateSmartHighlights(false);
+
       renderMiddlePanel();
       await renderPoster();
       
       btn.innerText = "🔄 智能生成文案并同步"; btn.disabled = false;
     }
 
+    // 渲染亮点编辑器板块
+    function renderHighlightsEditor() {
+      const listContainer = document.getElementById('highlights-inputs-list');
+      if (!listContainer) return;
+
+      listContainer.innerHTML = GLOBAL_HIGHLIGHTS_DATA.map((h, index) => {
+        const manualBadge = h.isManual ? `<span class="bg-amber-200 text-amber-900 text-[9px] px-1.5 py-0.2 rounded font-bold">已手动修改</span>` : `<span class="bg-gray-200 text-gray-600 text-[9px] px-1.5 py-0.2 rounded font-bold">智能推算</span>`;
+        return `
+          <div class="bg-white p-2.5 rounded-lg border border-amber-200/80 space-y-1.5 shadow-2xs">
+            <div class="flex items-center justify-between text-[10px] text-amber-800 font-bold">
+              <span>亮点 ${index + 1} ${h.icon}</span>
+              ${manualBadge}
+            </div>
+            <input type="text" class="w-full border border-gray-200 rounded p-1 text-xs font-bold outline-none focus:ring-1 focus:ring-amber-400 bg-gray-50" value="${h.title}" placeholder="亮点标题" oninput="updateHighlightData(${index}, 'title', this.value)">
+            <textarea rows="2" class="w-full border border-gray-200 rounded p-1 text-[10px] outline-none focus:ring-1 focus:ring-amber-400 bg-gray-50 custom-scrollbar" placeholder="亮点详细描述" oninput="updateHighlightData(${index}, 'desc', this.value)">${h.desc}</textarea>
+          </div>
+        `;
+      }).join('');
+    }
+
+    window.updateHighlightData = function(index, field, value) {
+      if (GLOBAL_HIGHLIGHTS_DATA[index]) {
+        GLOBAL_HIGHLIGHTS_DATA[index][field] = value;
+        GLOBAL_HIGHLIGHTS_DATA[index].isManual = true; // 标记为手动修改，防止被覆盖
+        renderHighlightsEditor();
+        renderPoster();
+      }
+    };
+
     function renderMiddlePanel() {
+      renderHighlightsEditor();
       const container = document.getElementById('day-editors-container');
       if (GLOBAL_DAYS_DATA.length === 0) {
         container.innerHTML = `<div class="text-center text-xs text-gray-400 py-6 border border-dashed border-gray-200 rounded-xl">请在左侧填写路线并点击“同步”</div>`;
@@ -590,11 +692,16 @@
         dailyContainer.innerHTML = `<div class="text-center text-xs text-gray-400 py-6 border border-dashed border-gray-200 rounded-xl">Empty Itinerary / 暂无行程</div>`;
       }
 
-      document.getElementById('poster-highlights-list').innerHTML = `
-        <div class="flex items-start gap-2.5 bg-white/90 p-2.5 rounded-lg border border-orange-100/70 shadow-2xs"><div class="w-6 h-6 rounded-lg bg-orange-100 text-klook flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold">🚘</div><div><div class="font-bold text-gray-800 text-[11px] leading-tight">${dict.high1Title}</div><div class="text-[10px] text-gray-500 mt-0.5 leading-snug">${dict.high1Desc}</div></div></div>
-        <div class="flex items-start gap-2.5 bg-white/90 p-2.5 rounded-lg border border-orange-100/70 shadow-2xs"><div class="w-6 h-6 rounded-lg bg-orange-100 text-klook flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold">🌟</div><div><div class="font-bold text-gray-800 text-[11px] leading-tight">${dict.high2Title}</div><div class="text-[10px] text-gray-500 mt-0.5 leading-snug">${dict.high2Desc}</div></div></div>
-        <div class="flex items-start gap-2.5 bg-white/90 p-2.5 rounded-lg border border-orange-100/70 shadow-2xs"><div class="w-6 h-6 rounded-lg bg-orange-100 text-klook flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold">📸</div><div><div class="font-bold text-gray-800 text-[11px] leading-tight">${dict.high3Title}</div><div class="text-[10px] text-gray-500 mt-0.5 leading-snug">${dict.high3Desc}</div></div></div>
-      `;
+      // 动态渲染行程亮点列表（读取编辑器中的数据，实现高优先级呈现）
+      document.getElementById('poster-highlights-list').innerHTML = GLOBAL_HIGHLIGHTS_DATA.map(h => `
+        <div class="flex items-start gap-2.5 bg-white/90 p-2.5 rounded-lg border border-orange-100/70 shadow-2xs">
+          <div class="w-6 h-6 rounded-lg bg-orange-100 text-klook flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold">${h.icon}</div>
+          <div>
+            <div class="font-bold text-gray-800 text-[11px] leading-tight">${h.title}</div>
+            <div class="text-[10px] text-gray-500 mt-0.5 leading-snug">${h.desc}</div>
+          </div>
+        </div>
+      `).join('');
 
       // 5. 渲染“服务包含与说明” (严格根据勾选状态与填写内容动态增减)
       let exRaw = document.getElementById('field-exclusions').value || "全程酒店住宿自理\n全程正餐及晚餐自理";
@@ -662,14 +769,26 @@
       document.getElementById('btn-load-template').addEventListener('click', loadTemplate);
       document.getElementById('btn-sync-middle').addEventListener('click', () => syncItineraryToDaysData());
       
+      // 亮点编辑重置按钮
+      document.getElementById('btn-reset-highlights').addEventListener('click', async () => {
+        await generateSmartHighlights(true);
+        renderPoster();
+      });
+
       const inputsToWatch = ['field-date', 'field-group', 'field-price', 'field-hotel', 'field-tickets', 'field-traffic', 'field-guide', 'field-exp', 'field-exclusions', 'field-cancellation'];
       inputsToWatch.forEach(id => { 
         const el = document.getElementById(id);
-        if (el) el.addEventListener('change', renderPoster); 
+        if (el) el.addEventListener('change', async () => {
+          await generateSmartHighlights(false);
+          renderPoster();
+        }); 
       });
       
       document.querySelectorAll('input[name="pkg-module"]').forEach(cb => { 
-        cb.addEventListener('change', renderPoster); 
+        cb.addEventListener('change', async () => {
+          await generateSmartHighlights(false);
+          renderPoster();
+        }); 
       });
 
       document.getElementById('btn-print-pdf').addEventListener('click', () => window.print());
