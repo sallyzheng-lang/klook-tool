@@ -436,17 +436,39 @@
       const lang = document.getElementById('lang-select').value;
       const groupVal = document.getElementById('field-group').value || "私家团";
       const trafVal = document.getElementById('field-traffic').value || "";
-      const tickVal = document.getElementById('field-tickets').value || "";
-      const expVal = document.getElementById('field-exp').value || "";
       const guideVal = document.getElementById('field-guide').value || "";
 
+      // 1. 亮点一：包车与团队出行
       let h1Title = "纯玩私家团 · 专属出行";
       let h1Desc = trafVal ? `针对${groupVal}独立定制，精选${trafVal}，专车专导服务更舒适。` : `针对${groupVal}独立成团，专车专导随走随停，不拼团不购物。`;
 
-      let h2Title = "精选景点 · 特色体验";
-      let comboExp = [tickVal, expVal].filter(Boolean).join("；");
-      let h2Desc = comboExp ? `行程已含：${comboExp}` : "一站式打卡经典奇观与特色风土人情，定格绝美旅途记忆。";
+      // 2. 亮点二：纯粹聚焦景色与目的地深度游览（不再包含“费用包含/赠送”）
+      let h2Title = "精选美景 · 深度人文";
+      
+      let spotList = [];
+      if (GLOBAL_DAYS_DATA && GLOBAL_DAYS_DATA.length > 0) {
+        const ignoreWords = ["接机", "送机", "前往", "高铁", "乘车", "入住", "出发", "返回", "定制"];
+        GLOBAL_DAYS_DATA.forEach(day => {
+          let title = day.title || "";
+          let parts = title.split(/[—\-–>,\s]+/);
+          parts.forEach(p => {
+            let clean = p.trim();
+            if (clean.length >= 2 && !ignoreWords.some(w => clean.includes(w))) {
+              if (!spotList.includes(clean)) spotList.push(clean);
+            }
+          });
+        });
+      }
 
+      let h2Desc = "";
+      if (spotList.length > 0) {
+        let topSpots = spotList.slice(0, 5).join("、");
+        h2Desc = `深度打卡${topSpots}等地标美景与风土人情，定格绝美旅途记忆。`;
+      } else {
+        h2Desc = "深入游览当地经典自然风光与人文胜景，随走随停，定格绝美旅途记忆。";
+      }
+
+      // 3. 亮点三：导游/管家服务
       let h3Title = "24H管家保障 · 灵活随心";
       let h3Desc = guideVal ? `${guideVal}，行程节奏可根据需求随时调整。` : "全程专属管家贴心服务，随心调整行程节奏，出行更自由。";
 
@@ -856,7 +878,7 @@
         const el = document.getElementById(id);
         if (el) {
           el.addEventListener('input', async () => {
-            if (id === 'field-group' || id === 'field-traffic' || id === 'field-tickets' || id === 'field-exp' || id === 'field-guide') {
+            if (id === 'field-group' || id === 'field-traffic' || id === 'field-guide') {
               await generateSmartHighlights(false);
             }
             renderPoster();
