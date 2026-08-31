@@ -13,6 +13,8 @@
   </script>
   <!-- html2canvas -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <!-- jsPDF for compact PDF export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     .custom-scrollbar::-webkit-scrollbar { width: 4px; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #FFCCBC; border-radius: 4px; }
@@ -165,7 +167,7 @@
     <div id="poster-wrapper" class="lg:col-span-5 flex flex-col items-center">
       <div class="w-[480px] grid grid-cols-2 gap-3 mb-4 no-print">
         <button id="btn-export" class="bg-gray-900 hover:bg-black text-white font-medium py-3 rounded-xl shadow-md transition text-[13px] flex items-center justify-center gap-1.5"><span>📥</span> 导出高清长图</button>
-        <button id="btn-print-pdf" class="bg-amber-600 hover:bg-amber-700 text-white font-medium py-3 rounded-xl shadow-md transition text-[13px] flex items-center justify-center gap-1.5"><span>📄</span> 保存为 PDF (自动去白边)</button>
+        <button id="btn-print-pdf" class="bg-amber-600 hover:bg-amber-700 text-white font-medium py-3 rounded-xl shadow-md transition text-[13px] flex items-center justify-center gap-1.5"><span>📄</span> 保存为 PDF (极速压缩)</button>
       </div>
       <div class="text-[11px] text-gray-400 mb-2 preview-tip font-medium">海报实时预览区</div>
       
@@ -173,101 +175,101 @@
         <!-- Banner -->
         <div class="w-full relative overflow-hidden bg-gradient-to-br from-orange-600 via-amber-600 to-red-700 p-6 flex flex-col justify-between text-white shadow-inner" style="min-height: 220px;">
           <div class="flex justify-between items-center z-10">
-            <div class="flex items-center gap-2"><span class="bg-klook text-white font-black text-xs px-3 py-1 rounded-md tracking-wider shadow-md">klook</span><span id="poster-package-tag" class="bg-amber-500/90 backdrop-blur-md text-white text-[11px] px-3 py-1 rounded-md font-bold flex items-center gap-1 shadow-md">👑 Klook 专属私人订制</span></div>
+            <div class="flex items-center gap-2"><span class="bg-klook text-white font-black text-xs px-3 py-1 rounded-md tracking-wider shadow-md">klook</span><span id="poster-package-tag" class="bg-amber-500/90 backdrop-blur-md text-white text-xs px-3 py-1 rounded-md font-bold flex items-center gap-1 shadow-md">👑 Klook 专属私人订制</span></div>
           </div>
           <div class="z-10 my-auto pt-4 pb-2">
-            <div id="ui-banner-tag" class="text-[11px] font-semibold text-amber-200 tracking-wider uppercase mb-0.5">PRIVATE CUSTOMIZATION IN-DEPTH JOURNEY</div>
+            <div id="ui-banner-tag" class="text-xs font-semibold text-amber-200 tracking-wider uppercase mb-1">PRIVATE CUSTOMIZATION IN-DEPTH JOURNEY</div>
             <h2 id="ui-banner-title" class="text-2xl font-black leading-tight tracking-wide drop-shadow-md">【Klook 专属私人定制】深度之旅</h2>
-            <p id="ui-banner-sub1" class="text-xs text-amber-100 mt-2 font-medium tracking-wide">Klook 专属私人管家服务 · 独立成团 · 纯玩无购物</p>
+            <p id="ui-banner-sub1" class="text-sm text-amber-100 mt-2 font-medium tracking-wide">Klook 专属私人管家服务 · 独立成团 · 纯玩无购物</p>
           </div>
           <div class="bg-gray-900/95 text-white px-4 py-3 -mx-6 -mb-6 mt-4 flex justify-between items-center border-t border-white/10">
-            <div class="flex items-center gap-2 shrink-0"><span id="poster-date-badge" class="bg-klook text-white text-[11px] px-2.5 py-1 rounded-md font-bold whitespace-nowrap">出发日期</span><span id="ui-group-info" class="text-[11px] text-gray-200 font-bold whitespace-nowrap bg-white/10 px-2.5 py-1 rounded-md border border-white/10">4大1小</span></div>
-            <div class="text-right shrink-0"><div id="poster-price-box" class="flex flex-col items-end gap-0.5 text-amber-300 font-black text-base">--</div></div>
+            <div class="flex items-center gap-2 shrink-0"><span id="poster-date-badge" class="bg-klook text-white text-xs px-2.5 py-1 rounded-md font-bold whitespace-nowrap">出发日期</span><span id="ui-group-info" class="text-xs text-gray-200 font-bold whitespace-nowrap bg-white/10 px-2.5 py-1 rounded-md border border-white/10">4大1小</span></div>
+            <div class="text-right shrink-0"><div id="poster-price-box" class="flex flex-col items-end gap-0.5 text-amber-300 font-black text-lg">--</div></div>
           </div>
         </div>
 
         <div class="p-5 space-y-5">
           <!-- 行程尊享亮点 -->
           <div id="poster-highlights-box" class="bg-gradient-to-br from-orange-50/80 via-amber-50/40 to-white p-4 rounded-xl border border-orange-100 shadow-sm space-y-2.5">
-            <h3 class="text-xs font-bold text-gray-800 uppercase tracking-wider flex items-center justify-between"><span class="flex items-center gap-1.5">✨ <span id="ui-heading-highlights">行程尊享亮点</span></span><span class="text-[10px] bg-klook/10 text-klook font-bold px-2 py-0.5 rounded-full">Klook Exclusive</span></h3>
+            <h3 class="text-sm font-bold text-gray-900 uppercase tracking-wider flex items-center justify-between"><span class="flex items-center gap-1.5">✨ <span id="ui-heading-highlights">行程尊享亮点</span></span><span class="text-xs bg-klook/10 text-klook font-bold px-2.5 py-0.5 rounded-full">Klook Exclusive</span></h3>
             <div id="poster-highlights-list" class="grid grid-cols-1 gap-2 pt-0.5 text-xs"></div>
           </div>
 
           <!-- 详细行程安排 -->
           <div>
-            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1"><span>📅</span> <span id="ui-heading-itinerary">详细行程安排</span></h3>
+            <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-1"><span>📅</span> <span id="ui-heading-itinerary">详细行程安排</span></h3>
             <div id="poster-daily-list" class="space-y-4"></div>
           </div>
 
           <!-- 酒店住宿安排 -->
           <div id="poster-hotel-wrapper" class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 space-y-2">
-            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-1"><span>🏨</span> <span id="ui-heading-hotel">酒店住宿安排 (钻级品质)</span></h3>
+            <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-1"><span>🏨</span> <span id="ui-heading-hotel">酒店住宿安排 (钻级品质)</span></h3>
             <div id="poster-hotel-list" class="space-y-2 text-xs"></div>
           </div>
 
           <!-- 服务包含与说明 -->
           <div id="poster-inclusions-wrapper" class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 space-y-3">
-            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1"><span>🛡️</span> <span id="ui-heading-inclusions">服务包含与说明</span></h3>
+            <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1"><span>🛡️</span> <span id="ui-heading-inclusions">服务包含与说明</span></h3>
             <div id="poster-inclusions-dynamic-list" class="space-y-2.5 text-xs"></div>
           </div>
 
           <!-- 费用不含 & 退改政策 (支持选填，动态排版) -->
-          <div id="poster-policy-wrapper" class="grid gap-3 text-[11px]">
-            <div id="poster-exclusions-box" class="bg-gray-50 p-3 rounded-xl border border-gray-200">
-              <span class="font-bold text-gray-800 block mb-1">➖ <span id="ui-lbl-exclusions">费用不含</span></span>
-              <ul id="poster-exclusions" class="list-disc list-inside text-gray-600 space-y-0.5"></ul>
+          <div id="poster-policy-wrapper" class="grid gap-3 text-xs">
+            <div id="poster-exclusions-box" class="bg-gray-50 p-3.5 rounded-xl border border-gray-200">
+              <span class="font-bold text-gray-800 block mb-1 text-xs">➖ <span id="ui-lbl-exclusions">费用不含</span></span>
+              <ul id="poster-exclusions" class="list-disc list-inside text-gray-600 space-y-1 text-xs"></ul>
             </div>
-            <div id="poster-cancellation-box" class="bg-gray-50 p-3 rounded-xl border border-gray-200">
-              <span class="font-bold text-gray-800 block mb-1">⚠️ <span id="ui-lbl-cancellation">退改政策</span></span>
-              <div id="poster-cancellation" class="text-gray-600 space-y-0.5"></div>
+            <div id="poster-cancellation-box" class="bg-gray-50 p-3.5 rounded-xl border border-gray-200">
+              <span class="font-bold text-gray-800 block mb-1 text-xs">⚠️ <span id="ui-lbl-cancellation">退改政策</span></span>
+              <div id="poster-cancellation" class="text-gray-600 space-y-1 text-xs"></div>
             </div>
           </div>
 
           <!-- Klook 品牌宗旨卡片 -->
           <div class="bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 rounded-2xl p-4 text-white shadow-md space-y-2">
             <div class="flex items-center justify-between">
-              <span class="bg-white/20 backdrop-blur-md text-[10px] font-black px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-xs">✨ KLOOK TRAVEL 🧳</span>
+              <span class="bg-white/20 backdrop-blur-md text-xs font-black px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-xs">✨ KLOOK TRAVEL 🧳</span>
               <div class="flex gap-1 text-xs">✈️ 🌍 📸 📍</div>
             </div>
-            <p id="ui-brand-p1" class="text-[11px] font-bold leading-snug drop-shadow-xs">🌟 让世界更轻松地探索中国，让每一次旅行都成为独特的体验。</p>
-            <p id="ui-brand-p2" class="text-[10px] text-amber-100 font-medium leading-snug">🚀 连接全球游客与中国目的地，用KLOOK的方式，让定制旅行更简单、更自由、更有趣。</p>
+            <p id="ui-brand-p1" class="text-xs font-bold leading-relaxed drop-shadow-xs">🌟 让世界更轻松地探索中国，让每一次旅行都成为独特的体验。</p>
+            <p id="ui-brand-p2" class="text-xs text-amber-100 font-medium leading-relaxed">🚀 连接全球游客与中国目的地，用KLOOK的方式，让定制旅行更简单、更自由、更有趣。</p>
           </div>
 
           <!-- 联系我们 -->
           <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 space-y-3">
-            <h3 class="text-xs font-bold text-gray-800 uppercase tracking-wider flex items-center justify-between border-b border-gray-100 pb-2">
+            <h3 class="text-sm font-bold text-gray-800 uppercase tracking-wider flex items-center justify-between border-b border-gray-100 pb-2">
               <span class="flex items-center gap-1.5">🎧 <span id="ui-heading-contact">联系我们 / CONTACT US</span></span>
-              <span class="text-[9px] bg-orange-100 text-orange-700 px-2.5 py-0.5 rounded-full font-black tracking-wider">KLOOK EXCLUSIVE BUTLER</span>
+              <span class="text-[10px] bg-orange-100 text-orange-700 px-2.5 py-0.5 rounded-full font-black tracking-wider">KLOOK EXCLUSIVE BUTLER</span>
             </h3>
 
             <!-- 官方邮箱 Block -->
-            <div class="bg-orange-50/60 border border-orange-100 rounded-xl p-2.5 flex items-center gap-2.5">
-              <div class="w-8 h-8 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center shrink-0 font-bold text-xs shadow-2xs">✉️</div>
+            <div class="bg-orange-50/60 border border-orange-100 rounded-xl p-3 flex items-center gap-3">
+              <div class="w-9 h-9 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center shrink-0 font-bold text-sm shadow-2xs">✉️</div>
               <div>
-                <div class="text-[9px] text-orange-600 font-bold uppercase tracking-wider">Official Email</div>
-                <div class="text-[11px] text-gray-800 font-extrabold tracking-tight">china_customized_travel@klook.com</div>
+                <div class="text-[10px] text-orange-600 font-bold uppercase tracking-wider">Official Email</div>
+                <div class="text-xs text-gray-900 font-extrabold tracking-tight">china_customized_travel@klook.com</div>
               </div>
             </div>
 
             <!-- 二维码 -->
             <div class="grid grid-cols-2 gap-3 pt-1">
               <div class="bg-emerald-50/90 border border-emerald-400 rounded-xl p-3 flex flex-col items-center justify-between h-full">
-                <div class="bg-emerald-600 text-white font-black text-[10px] px-2.5 py-0.5 rounded-full inline-flex items-center gap-1 mb-2"><span>💬</span> 微信管家 / WeChat</div>
-                <div class="w-20 h-20 bg-white border border-emerald-200 rounded-lg p-1 overflow-hidden"><img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=KlookWechat" class="w-full h-full object-contain"></div>
-                <span id="ui-qr-wechat" class="text-[9px] text-emerald-800 font-extrabold mt-1.5">扫码添加微信管家</span>
+                <div class="bg-emerald-600 text-white font-black text-xs px-2.5 py-0.5 rounded-full inline-flex items-center gap-1 mb-2"><span>💬</span> 微信管家 / WeChat</div>
+                <div class="w-22 h-22 bg-white border border-emerald-200 rounded-lg p-1 overflow-hidden"><img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=KlookWechat" class="w-full h-full object-contain"></div>
+                <span id="ui-qr-wechat" class="text-xs text-emerald-800 font-extrabold mt-2">扫码添加微信管家</span>
               </div>
               <div class="bg-teal-50/90 border border-teal-400 rounded-xl p-3 flex flex-col items-center justify-between h-full">
-                <div class="bg-teal-700 text-white font-black text-[10px] px-2.5 py-0.5 rounded-full inline-flex items-center gap-1 mb-2"><span>📱</span> WhatsApp / WA</div>
-                <div class="w-20 h-20 bg-white border border-teal-200 rounded-lg p-1 overflow-hidden"><img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://wa.me/8615181778005" class="w-full h-full object-contain"></div>
-                <span id="ui-qr-whatsapp" class="text-[9px] text-teal-900 font-extrabold mt-1.5">扫码添加 WhatsApp</span>
+                <div class="bg-teal-700 text-white font-black text-xs px-2.5 py-0.5 rounded-full inline-flex items-center gap-1 mb-2"><span>📱</span> WhatsApp / WA</div>
+                <div class="w-22 h-22 bg-white border border-teal-200 rounded-lg p-1 overflow-hidden"><img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://wa.me/8615181778005" class="w-full h-full object-contain"></div>
+                <span id="ui-qr-whatsapp" class="text-xs text-teal-900 font-extrabold mt-2">扫码添加 WhatsApp</span>
               </div>
             </div>
           </div>
 
           <!-- 页脚 -->
           <div class="text-center pt-2 border-t border-dashed border-gray-200 pb-2">
-            <div class="text-xs font-extrabold text-klook tracking-wider">klook <span class="font-normal text-gray-400">| Private Customized Trip</span></div>
-            <div class="text-[9px] text-gray-400 font-medium mt-0.5" id="ui-footer-sub">Klook 官方品质保障 · 专属行程规划师为您服务</div>
+            <div class="text-sm font-extrabold text-klook tracking-wider">klook <span class="font-normal text-gray-400">| Private Customized Trip</span></div>
+            <div class="text-xs text-gray-400 font-medium mt-1" id="ui-footer-sub">Klook 官方品质保障 · 专属行程规划师为您服务</div>
           </div>
         </div>
       </div>
@@ -607,18 +609,37 @@
       if (GLOBAL_DAYS_DATA[index]) { GLOBAL_DAYS_DATA[index][key] = value; renderPoster(); }
     };
 
+    // 上传图片自动智能压缩优化（防止手机端上传高清照片导致内存爆表及PDF巨大）
     window.handleManualImageUpload = function(event, index) {
       const file = event.target.files[0];
       if (file && file.type.startsWith('image/')) {
         const reader = new FileReader();
         reader.onload = function(e) {
-          if (GLOBAL_DAYS_DATA[index]) {
-            GLOBAL_DAYS_DATA[index].img = e.target.result;
-            GLOBAL_DAYS_DATA[index].isManualImg = true;
-            renderMiddlePanel();
-            renderPoster();
-          }
-        }
+          const img = new Image();
+          img.onload = function() {
+            const canvas = document.createElement('canvas');
+            const MAX_WIDTH = 1000;
+            let width = img.width;
+            let height = img.height;
+            if (width > MAX_WIDTH) {
+              height = Math.round((height * MAX_WIDTH) / width);
+              width = MAX_WIDTH;
+            }
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.82);
+            
+            if (GLOBAL_DAYS_DATA[index]) {
+              GLOBAL_DAYS_DATA[index].img = compressedDataUrl;
+              GLOBAL_DAYS_DATA[index].isManualImg = true;
+              renderMiddlePanel();
+              renderPoster();
+            }
+          };
+          img.src = e.target.result;
+        };
         reader.readAsDataURL(file);
       }
     };
@@ -677,7 +698,7 @@
       document.getElementById('ui-group-info').innerText = groupVal;
       document.getElementById('poster-price-box').innerHTML = priceVal;
 
-      // 4. 每日行程渲染
+      // 4. 每日行程渲染 (放大手机端显示字号)
       const dailyContainer = document.getElementById('poster-daily-list');
       if (GLOBAL_DAYS_DATA.length > 0) {
         dailyContainer.innerHTML = GLOBAL_DAYS_DATA.map((d) => `
@@ -686,10 +707,10 @@
               <img src="${d.img}" onerror="if(!this.dataset.triedPng){this.dataset.triedPng='1'; this.src=this.src.endsWith('.jpg')?this.src.replace('.jpg','.png'):this.src.replace('.png','.jpg');} else {this.onerror=null; this.src='https://sallyzheng-lang.github.io/klook-tool/丽江古城.jpg';}" class="w-full h-full object-cover transform transition duration-700 group-hover:scale-105">
               <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent"></div>
               <div class="absolute bottom-2.5 left-3.5 right-3.5 flex justify-between items-end text-white">
-                <div><span class="bg-klook text-white text-[10px] px-2 py-0.5 rounded font-black tracking-wider shadow-md">DAY ${d.dayNum}</span><h4 class="font-bold text-sm mt-1.5 leading-snug tracking-wide drop-shadow-md">${d.title}</h4></div>
+                <div><span class="bg-klook text-white text-xs px-2 py-0.5 rounded font-black tracking-wider shadow-md">DAY ${d.dayNum}</span><h4 class="font-bold text-base mt-1.5 leading-snug tracking-wide drop-shadow-md">${d.title}</h4></div>
               </div>
             </div>
-            <div class="p-3.5 bg-white"><p class="text-[11px] text-gray-600 leading-relaxed font-normal">${d.desc}</p></div>
+            <div class="p-4 bg-white"><p class="text-xs text-gray-700 leading-relaxed font-normal">${d.desc}</p></div>
           </div>
         `).join('');
       } else {
@@ -701,8 +722,8 @@
         <div class="flex items-start gap-2.5 bg-white/90 p-2.5 rounded-lg border border-orange-100/70 shadow-2xs">
           <div class="w-6 h-6 rounded-lg bg-orange-100 text-klook flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold">${h.icon}</div>
           <div>
-            <div class="font-bold text-gray-800 text-[11px] leading-tight">${h.title}</div>
-            <div class="text-[10px] text-gray-500 mt-0.5 leading-snug">${h.desc}</div>
+            <div class="font-bold text-gray-900 text-xs leading-tight">${h.title}</div>
+            <div class="text-xs text-gray-600 mt-1 leading-snug">${h.desc}</div>
           </div>
         </div>
       `).join('');
@@ -724,16 +745,16 @@
 
       let incHTML = '';
       if (isTicketChecked && tickRaw) {
-        incHTML += `<div class="bg-orange-50/40 p-2.5 rounded-lg border border-orange-100"><span class="font-bold text-gray-800 block mb-1">${dict.lblTickets}</span><p class="text-gray-600 text-[11px]">${tickRaw}</p></div>`;
+        incHTML += `<div class="bg-orange-50/40 p-2.5 rounded-lg border border-orange-100"><span class="font-bold text-gray-900 text-xs block mb-1">${dict.lblTickets}</span><p class="text-gray-700 text-xs leading-relaxed">${tickRaw}</p></div>`;
       }
       if (isCarChecked && trafRaw) {
-        incHTML += `<div class="bg-orange-50/40 p-2.5 rounded-lg border border-orange-100"><span class="font-bold text-gray-800 block mb-1">${dict.lblTraffic}</span><p class="text-gray-600 text-[11px]">${trafRaw}</p></div>`;
+        incHTML += `<div class="bg-orange-50/40 p-2.5 rounded-lg border border-orange-100"><span class="font-bold text-gray-900 text-xs block mb-1">${dict.lblTraffic}</span><p class="text-gray-700 text-xs leading-relaxed">${trafRaw}</p></div>`;
       }
       if (isGuideChecked && guideRaw) {
-        incHTML += `<div class="bg-orange-50/40 p-2.5 rounded-lg border border-orange-100"><span class="font-bold text-gray-800 block mb-1">${dict.lblGuide}</span><p class="text-gray-600 text-[11px]">${guideRaw}</p></div>`;
+        incHTML += `<div class="bg-orange-50/40 p-2.5 rounded-lg border border-orange-100"><span class="font-bold text-gray-900 text-xs block mb-1">${dict.lblGuide}</span><p class="text-gray-700 text-xs leading-relaxed">${guideRaw}</p></div>`;
       }
       if (isExpChecked && expRaw) {
-        incHTML += `<div class="bg-orange-50/40 p-2.5 rounded-lg border border-orange-100"><span class="font-bold text-gray-800 block mb-1">${dict.lblActivities}</span><p class="text-gray-600 text-[11px]">${expRaw}</p></div>`;
+        incHTML += `<div class="bg-orange-50/40 p-2.5 rounded-lg border border-orange-100"><span class="font-bold text-gray-900 text-xs block mb-1">${dict.lblActivities}</span><p class="text-gray-700 text-xs leading-relaxed">${expRaw}</p></div>`;
       }
 
       const hasAnyInclusions = isTicketChecked || isCarChecked || isGuideChecked || isExpChecked;
@@ -743,7 +764,7 @@
       // 酒店模块根据勾选控制
       document.getElementById('poster-hotel-wrapper').style.display = isHotelChecked ? 'block' : 'none';
       if (isHotelChecked) {
-        document.getElementById('poster-hotel-list').innerHTML = hRaw.split('\n').filter(s=>s.trim()).map(h => `<div class="flex items-start gap-2 bg-gray-50 p-2 rounded-lg border border-gray-100"><span class="bg-klook/10 text-klook font-bold px-1.5 py-0.5 rounded text-[10px]">🏨</span><span class="text-gray-700 font-medium text-[11px]">${h}</span></div>`).join('');
+        document.getElementById('poster-hotel-list').innerHTML = hRaw.split('\n').filter(s=>s.trim()).map(h => `<div class="flex items-start gap-2 bg-gray-50 p-2 rounded-lg border border-gray-100"><span class="bg-klook/10 text-klook font-bold px-1.5 py-0.5 rounded text-xs">🏨</span><span class="text-gray-800 font-medium text-xs leading-snug">${h}</span></div>`).join('');
       }
 
       // 6. 费用不含 & 退改政策 (支持选填与单/双栏自适应渲染)
@@ -767,9 +788,9 @@
       } else {
         policyWrapper.style.display = 'grid';
         if (hasExclusions && hasCancellation) {
-          policyWrapper.className = "grid grid-cols-2 gap-3 text-[11px]";
+          policyWrapper.className = "grid grid-cols-2 gap-3 text-xs";
         } else {
-          policyWrapper.className = "grid grid-cols-1 gap-3 text-[11px]";
+          policyWrapper.className = "grid grid-cols-1 gap-3 text-xs";
         }
 
         if (hasExclusions) {
@@ -835,15 +856,39 @@
         }); 
       });
 
-      document.getElementById('btn-print-pdf').addEventListener('click', () => window.print());
+      // 优化后的极速压缩 PDF 导出引擎（解决体积过大问题）
+      document.getElementById('btn-print-pdf').addEventListener('click', async () => {
+        const posterContainer = document.getElementById('export-poster');
+        const btn = document.getElementById('btn-print-pdf');
+        const origText = btn.innerHTML;
+        btn.innerHTML = `⌛ 极速生成 PDF 中...`; btn.disabled = true;
+        try {
+          const canvas = await html2canvas(posterContainer, { scale: 1.6, useCORS: true, backgroundColor: "#FAFAFA" });
+          const imgData = canvas.toDataURL('image/jpeg', 0.78); // 高清 JPEG 压缩算法
+          
+          const { jsPDF } = window.jspdf;
+          const pdfWidth = 210; // A4 毫米宽度
+          const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+          
+          const pdf = new jsPDF('p', 'mm', [pdfWidth, pdfHeight]);
+          pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
+          pdf.save(`Klook_Customized_Tour.pdf`);
+        } catch (err) {
+          console.warn("jsPDF error, falling back to browser print:", err);
+          window.print();
+        } finally {
+          btn.innerHTML = origText; btn.disabled = false;
+        }
+      });
 
+      // 长图导出引擎
       document.getElementById('btn-export').addEventListener('click', async () => {
         const posterContainer = document.getElementById('export-poster');
         const btn = document.getElementById('btn-export');
         const origText = btn.innerHTML;
         btn.innerHTML = `生成海报中...`; btn.disabled = true;
         try {
-          const canvas = await html2canvas(posterContainer, { scale: 2, useCORS: true, backgroundColor: "#FAFAFA" });
+          const canvas = await html2canvas(posterContainer, { scale: 1.8, useCORS: true, backgroundColor: "#FAFAFA" });
           const link = document.createElement('a');
           link.download = `Klook_Premium_Tour.png`;
           link.href = canvas.toDataURL('image/png');
