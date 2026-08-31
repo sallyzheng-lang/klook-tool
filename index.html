@@ -117,13 +117,19 @@
         </div>
 
         <div>
-          <label class="block text-[11px] font-bold text-gray-800 mb-1">➖ 费用不含</label>
-          <textarea id="field-exclusions" rows="2" class="w-full border border-gray-200 rounded-lg p-2 text-[10px] bg-gray-50"></textarea>
+          <label class="block text-[11px] font-bold text-gray-800 mb-1 flex items-center justify-between">
+            <span>➖ 费用不含</span>
+            <span class="text-[9px] font-normal text-gray-400">(选填，留空则海报不显示)</span>
+          </label>
+          <textarea id="field-exclusions" rows="2" class="w-full border border-gray-200 rounded-lg p-2 text-[10px] bg-gray-50" placeholder="若无需说明请留空"></textarea>
         </div>
 
         <div>
-          <label class="block text-[11px] font-bold text-gray-800 mb-1">⚠️ 退改政策</label>
-          <textarea id="field-cancellation" rows="2" class="w-full border border-gray-200 rounded-lg p-2 text-[10px] bg-gray-50"></textarea>
+          <label class="block text-[11px] font-bold text-gray-800 mb-1 flex items-center justify-between">
+            <span>⚠️ 退改政策</span>
+            <span class="text-[9px] font-normal text-gray-400">(选填，留空则海报不显示)</span>
+          </label>
+          <textarea id="field-cancellation" rows="2" class="w-full border border-gray-200 rounded-lg p-2 text-[10px] bg-gray-50" placeholder="若无需说明请留空"></textarea>
         </div>
       </div>
 
@@ -140,7 +146,7 @@
         提示：系统已为您自动生成走心文案、亮点与去重匹配图。右侧所有文案与图片均支持手动自定义修改，手动修改优先级最高。
       </div>
 
-      <!-- 新增：行程亮点在线编辑器 -->
+      <!-- 行程亮点在线编辑器 -->
       <div id="highlights-editor-container" class="bg-amber-50/60 border border-amber-200 rounded-xl p-3.5 space-y-3">
         <div class="flex items-center justify-between border-b border-amber-200/60 pb-2">
           <span class="text-xs font-bold text-amber-900 flex items-center gap-1">✨ 行程亮点配置 (智能计算/手动修改)</span>
@@ -205,10 +211,16 @@
             <div id="poster-inclusions-dynamic-list" class="space-y-2.5 text-xs"></div>
           </div>
 
-          <!-- 费用不含 & 退改政策 -->
-          <div class="grid grid-cols-2 gap-3 text-[11px]">
-            <div class="bg-gray-50 p-3 rounded-xl border border-gray-200"><span class="font-bold text-gray-800 block mb-1">➖ <span id="ui-lbl-exclusions">费用不含</span></span><ul id="poster-exclusions" class="list-disc list-inside text-gray-600 space-y-0.5"></ul></div>
-            <div class="bg-gray-50 p-3 rounded-xl border border-gray-200"><span class="font-bold text-gray-800 block mb-1">⚠️ <span id="ui-lbl-cancellation">退改政策</span></span><div id="poster-cancellation" class="text-gray-600 space-y-0.5"></div></div>
+          <!-- 费用不含 & 退改政策 (支持选填，动态排版) -->
+          <div id="poster-policy-wrapper" class="grid gap-3 text-[11px]">
+            <div id="poster-exclusions-box" class="bg-gray-50 p-3 rounded-xl border border-gray-200">
+              <span class="font-bold text-gray-800 block mb-1">➖ <span id="ui-lbl-exclusions">费用不含</span></span>
+              <ul id="poster-exclusions" class="list-disc list-inside text-gray-600 space-y-0.5"></ul>
+            </div>
+            <div id="poster-cancellation-box" class="bg-gray-50 p-3 rounded-xl border border-gray-200">
+              <span class="font-bold text-gray-800 block mb-1">⚠️ <span id="ui-lbl-cancellation">退改政策</span></span>
+              <div id="poster-cancellation" class="text-gray-600 space-y-0.5"></div>
+            </div>
           </div>
 
           <!-- Klook 品牌宗旨卡片 -->
@@ -267,7 +279,6 @@
     let GLOBAL_DAYS_DATA = [];
     let AUTO_CLOUD_IMAGES = {};
 
-    // 新增：行程亮点全局状态，默认支持智能生成与手动改写
     let GLOBAL_HIGHLIGHTS_DATA = [
       { icon: "🚘", title: "", desc: "", isManual: false },
       { icon: "🌟", title: "", desc: "", isManual: false },
@@ -411,20 +422,16 @@
       const expVal = document.getElementById('field-exp').value || "";
       const guideVal = document.getElementById('field-guide').value || "";
 
-      // 1. 根据车辆与人数生成亮点一
       let h1Title = "纯玩私家团 · 专属出行";
       let h1Desc = trafVal ? `针对${groupVal}独立定制，精选${trafVal}，专车专导服务更舒适。` : `针对${groupVal}独立成团，专车专导随走随停，不拼团不购物。`;
 
-      // 2. 根据门票与体验生成亮点二
       let h2Title = "精选景点 · 特色体验";
       let comboExp = [tickVal, expVal].filter(Boolean).join("；");
       let h2Desc = comboExp ? `行程已含：${comboExp}` : "一站式打卡经典奇观与特色风土人情，定格绝美旅途记忆。";
 
-      // 3. 根据导游/管家服务生成亮点三
       let h3Title = "24H管家保障 · 灵活随心";
       let h3Desc = guideVal ? `${guideVal}，行程节奏可根据需求随时调整。` : "全程专属管家贴心服务，随心调整行程节奏，出行更自由。";
 
-      // 多语言翻译转换
       if (lang !== 'zh-CN') {
         h1Title = await translateText(h1Title, lang);
         h1Desc = await translateText(h1Desc, lang);
@@ -524,8 +531,6 @@
       }
       
       GLOBAL_DAYS_DATA = newDaysData;
-      
-      // 智能重新计算亮点（未被手动锁定的亮点会自动更新）
       await generateSmartHighlights(false);
 
       renderMiddlePanel();
@@ -534,7 +539,6 @@
       btn.innerText = "🔄 智能生成文案并同步"; btn.disabled = false;
     }
 
-    // 渲染亮点编辑器板块
     function renderHighlightsEditor() {
       const listContainer = document.getElementById('highlights-inputs-list');
       if (!listContainer) return;
@@ -557,7 +561,7 @@
     window.updateHighlightData = function(index, field, value) {
       if (GLOBAL_HIGHLIGHTS_DATA[index]) {
         GLOBAL_HIGHLIGHTS_DATA[index][field] = value;
-        GLOBAL_HIGHLIGHTS_DATA[index].isManual = true; // 标记为手动修改，防止被覆盖
+        GLOBAL_HIGHLIGHTS_DATA[index].isManual = true;
         renderHighlightsEditor();
         renderPoster();
       }
@@ -692,7 +696,7 @@
         dailyContainer.innerHTML = `<div class="text-center text-xs text-gray-400 py-6 border border-dashed border-gray-200 rounded-xl">Empty Itinerary / 暂无行程</div>`;
       }
 
-      // 动态渲染行程亮点列表（读取编辑器中的数据，实现高优先级呈现）
+      // 动态渲染行程亮点列表
       document.getElementById('poster-highlights-list').innerHTML = GLOBAL_HIGHLIGHTS_DATA.map(h => `
         <div class="flex items-start gap-2.5 bg-white/90 p-2.5 rounded-lg border border-orange-100/70 shadow-2xs">
           <div class="w-6 h-6 rounded-lg bg-orange-100 text-klook flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold">${h.icon}</div>
@@ -703,9 +707,7 @@
         </div>
       `).join('');
 
-      // 5. 渲染“服务包含与说明” (严格根据勾选状态与填写内容动态增减)
-      let exRaw = document.getElementById('field-exclusions').value || "全程酒店住宿自理\n全程正餐及晚餐自理";
-      let canRaw = document.getElementById('field-cancellation').value || "提前6日至4日取消，扣除20%违约金；\n行程开始当日取消，扣除60%违约金。";
+      // 5. 渲染“服务包含与说明”
       let hRaw = document.getElementById('field-hotel').value || "严选钻级精品客栈/高口碑酒店入住";
       let tickRaw = document.getElementById('field-tickets').value;
       let trafRaw = document.getElementById('field-traffic').value;
@@ -713,8 +715,6 @@
       let expRaw = document.getElementById('field-exp').value;
 
       if (lang !== 'zh-CN') {
-        exRaw = await translateText(exRaw, lang);
-        canRaw = await translateText(canRaw, lang);
         hRaw = await translateText(hRaw, lang);
         if (tickRaw) tickRaw = await translateText(tickRaw, lang);
         if (trafRaw) trafRaw = await translateText(trafRaw, lang);
@@ -722,9 +722,6 @@
         if (expRaw) expRaw = await translateText(expRaw, lang);
       }
 
-      document.getElementById('poster-exclusions').innerHTML = exRaw.split('\n').filter(s=>s.trim()).map(i => `<li>${i}</li>`).join('');
-      document.getElementById('poster-cancellation').innerHTML = canRaw.split('\n').filter(s=>s.trim()).map(l => `<p>• ${l}</p>`).join('');
-      
       let incHTML = '';
       if (isTicketChecked && tickRaw) {
         incHTML += `<div class="bg-orange-50/40 p-2.5 rounded-lg border border-orange-100"><span class="font-bold text-gray-800 block mb-1">${dict.lblTickets}</span><p class="text-gray-600 text-[11px]">${tickRaw}</p></div>`;
@@ -739,7 +736,6 @@
         incHTML += `<div class="bg-orange-50/40 p-2.5 rounded-lg border border-orange-100"><span class="font-bold text-gray-800 block mb-1">${dict.lblActivities}</span><p class="text-gray-600 text-[11px]">${expRaw}</p></div>`;
       }
 
-      // 若未勾选任何包含项，整个板块隐藏或提示
       const hasAnyInclusions = isTicketChecked || isCarChecked || isGuideChecked || isExpChecked;
       document.getElementById('poster-inclusions-wrapper').style.display = hasAnyInclusions ? 'block' : 'none';
       document.getElementById('poster-inclusions-dynamic-list').innerHTML = incHTML;
@@ -749,15 +745,60 @@
       if (isHotelChecked) {
         document.getElementById('poster-hotel-list').innerHTML = hRaw.split('\n').filter(s=>s.trim()).map(h => `<div class="flex items-start gap-2 bg-gray-50 p-2 rounded-lg border border-gray-100"><span class="bg-klook/10 text-klook font-bold px-1.5 py-0.5 rounded text-[10px]">🏨</span><span class="text-gray-700 font-medium text-[11px]">${h}</span></div>`).join('');
       }
+
+      // 6. 费用不含 & 退改政策 (支持选填与单/双栏自适应渲染)
+      let exRaw = document.getElementById('field-exclusions').value.trim();
+      let canRaw = document.getElementById('field-cancellation').value.trim();
+
+      if (lang !== 'zh-CN') {
+        if (exRaw) exRaw = await translateText(exRaw, lang);
+        if (canRaw) canRaw = await translateText(canRaw, lang);
+      }
+
+      const hasExclusions = !!exRaw;
+      const hasCancellation = !!canRaw;
+
+      const policyWrapper = document.getElementById('poster-policy-wrapper');
+      const exclusionsBox = document.getElementById('poster-exclusions-box');
+      const cancellationBox = document.getElementById('poster-cancellation-box');
+
+      if (!hasExclusions && !hasCancellation) {
+        policyWrapper.style.display = 'none';
+      } else {
+        policyWrapper.style.display = 'grid';
+        if (hasExclusions && hasCancellation) {
+          policyWrapper.className = "grid grid-cols-2 gap-3 text-[11px]";
+        } else {
+          policyWrapper.className = "grid grid-cols-1 gap-3 text-[11px]";
+        }
+
+        if (hasExclusions) {
+          exclusionsBox.style.display = 'block';
+          document.getElementById('poster-exclusions').innerHTML = exRaw.split('\n').filter(s=>s.trim()).map(i => `<li>${i}</li>`).join('');
+        } else {
+          exclusionsBox.style.display = 'none';
+        }
+
+        if (hasCancellation) {
+          cancellationBox.style.display = 'block';
+          document.getElementById('poster-cancellation').innerHTML = canRaw.split('\n').filter(s=>s.trim()).map(l => `<p>• ${l}</p>`).join('');
+        } else {
+          cancellationBox.style.display = 'none';
+        }
+      }
     }
     
     function loadTemplate() {
       document.getElementById('field-itinerary').value = "Day 1: 昆明接机—高铁前往大理—理想邦—文笔村\nDay 2: 磻溪村S湾—喜洲古镇—文笔村—双廊古镇—大理\nDay 3: 大理—沙溪古镇—白沙古镇—丽江古城\nDay 4: 丽江—甘海子—玉龙雪山—冰川公园—蓝月谷\nDay 5: 丽江—拉市海—丽江送机";
-      document.getElementById('field-date').value = "10月12日"; document.getElementById('field-group').value = "4大1小"; document.getElementById('field-price').value = "9000元/定制团";
+      document.getElementById('field-date').value = "10月12日"; 
+      document.getElementById('field-group').value = "4大1小"; 
+      document.getElementById('field-price').value = "9000元/定制团";
       document.getElementById('field-tickets').value = "玉龙雪山大索道及环保车、印象丽江实景演出"; 
       document.getElementById('field-traffic').value = "7座别克GL8商务车（含油费过路费司机食宿）";
       document.getElementById('field-guide').value = "全程资深专属私人管家 1对1贴心服务";
       document.getElementById('field-exp').value = "磻溪村S湾骑行体验、每人赠送大理烤乳扇与雪山防寒服使用";
+      document.getElementById('field-exclusions').value = "全程酒店住宿自理\n全程正餐及晚餐自理";
+      document.getElementById('field-cancellation').value = "提前6日至4日取消，扣除20%违约金；\n行程开始当日取消，扣除60%违约金。";
       syncItineraryToDaysData();
     }
 
@@ -769,7 +810,6 @@
       document.getElementById('btn-load-template').addEventListener('click', loadTemplate);
       document.getElementById('btn-sync-middle').addEventListener('click', () => syncItineraryToDaysData());
       
-      // 亮点编辑重置按钮
       document.getElementById('btn-reset-highlights').addEventListener('click', async () => {
         await generateSmartHighlights(true);
         renderPoster();
@@ -778,10 +818,14 @@
       const inputsToWatch = ['field-date', 'field-group', 'field-price', 'field-hotel', 'field-tickets', 'field-traffic', 'field-guide', 'field-exp', 'field-exclusions', 'field-cancellation'];
       inputsToWatch.forEach(id => { 
         const el = document.getElementById(id);
-        if (el) el.addEventListener('change', async () => {
-          await generateSmartHighlights(false);
-          renderPoster();
-        }); 
+        if (el) {
+          el.addEventListener('input', async () => {
+            if (id === 'field-group' || id === 'field-traffic' || id === 'field-tickets' || id === 'field-exp' || id === 'field-guide') {
+              await generateSmartHighlights(false);
+            }
+            renderPoster();
+          }); 
+        }
       });
       
       document.querySelectorAll('input[name="pkg-module"]').forEach(cb => { 
