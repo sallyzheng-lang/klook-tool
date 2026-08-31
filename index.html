@@ -21,18 +21,30 @@
     .scrollable-panel { height: calc(100vh - 2rem); overflow-y: auto; }
     #export-poster { width: 480px; margin: 0 auto; background: #FAFAFA; }
 
-    /* html2canvas 100% 垂直居中终极解决方案：容器 Flex + 文本 -2px 向上基线补偿 */
+    /* html2canvas 导出文字垂直居中修复：仅作用于海报导出区域 */
     #export-poster .tag-badge {
       display: inline-flex !important;
       align-items: center !important;
       justify-content: center !important;
       box-sizing: border-box !important;
       vertical-align: middle !important;
+      line-height: 0 !important;
+      position: relative !important;
     }
-    #export-poster .tag-text {
-      display: inline-block !important;
+
+    #export-poster .tag-badge .tag-text {
+      display: block !important;
       line-height: 1 !important;
-      margin-top: -2px !important; /* 抵消 html2canvas 中文字体 Canvas 下沉偏差 */
+      margin: 0 !important;
+      padding: 0 !important;
+      position: relative !important;
+      top: -2px !important;
+      transform: translateY(-1px) !important;
+    }
+
+    /* 小尺寸图标 Badge：保持图标几何中心，不受字体 baseline 影响 */
+    #export-poster .tag-badge .tag-text:only-child {
+      line-height: 1 !important;
     }
 
     @media print {
@@ -745,7 +757,7 @@
               <img src="${d.img}" onerror="if(!this.dataset.triedPng){this.dataset.triedPng='1'; this.src=this.src.endsWith('.jpg')?this.src.replace('.jpg','.png'):this.src.replace('.png','.jpg');} else {this.onerror=null; this.src='https://sallyzheng-lang.github.io/klook-tool/丽江古城.jpg';}" class="w-full h-full object-cover transform transition duration-700 group-hover:scale-105">
               <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent"></div>
               <div class="absolute bottom-2.5 left-3.5 right-3.5 flex justify-between items-end text-white">
-                <div><span class="tag-badge bg-klook text-white text-xs px-2.5 rounded font-black tracking-wider shadow-md"><span class="tag-text">DAY ${d.dayNum}</span></span><h4 class="font-bold text-base mt-1.5 leading-snug tracking-wide drop-shadow-md">${d.title}</h4></div>
+                <div><span class="tag-badge bg-klook text-white text-xs px-2.5 py-1 rounded font-black tracking-wider shadow-md"><span class="tag-text">DAY ${d.dayNum}</span></span><h4 class="font-bold text-base mt-1.5 leading-snug tracking-wide drop-shadow-md">${d.title}</h4></div>
               </div>
             </div>
             <div class="p-4 bg-white"><p class="text-xs text-gray-700 leading-relaxed font-normal">${d.desc}</p></div>
