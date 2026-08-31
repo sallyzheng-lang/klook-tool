@@ -21,24 +21,6 @@
     .scrollable-panel { height: calc(100vh - 2rem); overflow-y: auto; }
     #export-poster { width: 480px; margin: 0 auto; background: #FAFAFA; }
 
-    /* html2canvas 100% 垂直居中终极解决方案：inline-table + table-cell */
-    #export-poster .k-badge {
-      display: inline-table !important;
-      vertical-align: middle !important;
-      border-collapse: separate !important;
-      box-sizing: border-box !important;
-    }
-    #export-poster .k-badge-inner {
-      display: table-cell !important;
-      vertical-align: middle !important;
-      text-align: center !important;
-      line-height: 1.15 !important;
-      white-space: nowrap !important;
-    }
-    #export-poster .k-badge.w-7 { height: 1.75rem !important; }
-    #export-poster .k-badge.w-9 { height: 2.25rem !important; }
-    #export-poster .k-badge.w-5 { height: 1.25rem !important; }
-
     @media print {
       @page { margin: 0; size: A4 portrait; }
       html, body { background: white !important; padding: 0 !important; margin: 0 !important; width: 100% !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
@@ -194,8 +176,8 @@
         <div class="w-full relative overflow-hidden bg-gradient-to-br from-orange-600 via-amber-600 to-red-700 p-6 flex flex-col justify-between text-white shadow-inner" style="min-height: 220px;">
           <div class="flex justify-between items-center z-10">
             <div class="flex items-center gap-2">
-              <div class="k-badge bg-klook text-white rounded-md shadow-md"><span class="k-badge-inner font-black text-xs px-3 py-1">klook</span></div>
-              <div class="k-badge bg-amber-500/90 backdrop-blur-md text-white rounded-md shadow-md"><span id="poster-package-tag" class="k-badge-inner font-bold text-xs px-3 py-1">👑 Klook 专属私人订制</span></div>
+              <span class="inline-block bg-klook text-white font-black text-xs px-3 py-1 rounded-md tracking-wider shadow-md leading-snug">klook</span>
+              <span id="poster-package-tag" class="inline-block bg-amber-500/90 backdrop-blur-md text-white text-xs px-3 py-1 rounded-md font-bold shadow-md leading-snug">👑 Klook 专属私人订制</span>
             </div>
           </div>
           <div class="z-10 my-auto pt-4 pb-2">
@@ -205,8 +187,8 @@
           </div>
           <div class="bg-gray-900/95 text-white px-4 py-3 -mx-6 -mb-6 mt-4 flex justify-between items-center border-t border-white/10">
             <div class="flex items-center gap-2 shrink-0">
-              <div class="k-badge bg-klook text-white rounded-md shadow-sm"><span id="poster-date-badge" class="k-badge-inner font-bold text-xs px-2.5 py-1 whitespace-nowrap">出发日期</span></div>
-              <div class="k-badge bg-white/10 text-gray-200 rounded-md border border-white/10"><span id="ui-group-info" class="k-badge-inner font-bold text-xs px-2.5 py-1 whitespace-nowrap">4大1小</span></div>
+              <span id="poster-date-badge" class="inline-block bg-klook text-white text-xs px-2.5 py-1 rounded-md font-bold whitespace-nowrap leading-snug">出发日期</span>
+              <span id="ui-group-info" class="inline-block text-xs text-gray-200 font-bold whitespace-nowrap bg-white/10 px-2.5 py-1 rounded-md border border-white/10 leading-snug">4大1小</span>
             </div>
             <div class="text-right shrink-0"><div id="poster-price-box" class="flex flex-col items-end gap-0.5 text-amber-300 font-black text-lg">--</div></div>
           </div>
@@ -215,7 +197,7 @@
         <div class="p-5 space-y-5">
           <!-- 行程尊享亮点 -->
           <div id="poster-highlights-box" class="bg-gradient-to-br from-orange-50/80 via-amber-50/40 to-white p-4 rounded-xl border border-orange-100 shadow-sm space-y-2.5">
-            <h3 class="text-sm font-bold text-gray-900 uppercase tracking-wider flex items-center justify-between"><span class="flex items-center gap-1.5">✨ <span id="ui-heading-highlights">行程尊享亮点</span></span><div class="k-badge bg-klook/10 text-klook rounded-full"><span class="k-badge-inner font-bold text-xs px-2.5 py-0.5">Klook Exclusive</span></div></h3>
+            <h3 class="text-sm font-bold text-gray-900 uppercase tracking-wider flex items-center justify-between"><span class="flex items-center gap-1.5">✨ <span id="ui-heading-highlights">行程尊享亮点</span></span><span class="inline-block text-xs bg-klook/10 text-klook font-bold px-2.5 py-1 rounded-full leading-snug">Klook Exclusive</span></h3>
             <div id="poster-highlights-list" class="grid grid-cols-1 gap-2 pt-0.5 text-xs"></div>
           </div>
 
@@ -252,7 +234,7 @@
           <!-- Klook 品牌宗旨卡片 -->
           <div class="bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 rounded-2xl p-4 text-white shadow-md space-y-2">
             <div class="flex items-center justify-between">
-              <div class="k-badge bg-white/20 backdrop-blur-md text-white rounded-full shadow-xs"><span class="k-badge-inner font-black text-xs px-2.5 py-1">✨ KLOOK TRAVEL 🧳</span></div>
+              <span class="inline-block bg-white/20 backdrop-blur-md text-xs font-black px-2.5 py-1 rounded-full shadow-xs leading-snug">✨ KLOOK TRAVEL 🧳</span>
               <div class="flex gap-1 text-xs">✈️ 🌍 📸 📍</div>
             </div>
             <p id="ui-brand-p1" class="text-xs font-bold leading-relaxed drop-shadow-xs">🌟 让世界更轻松地探索中国，让每一次旅行都成为独特的体验。</p>
@@ -263,12 +245,12 @@
           <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 space-y-3">
             <h3 class="text-sm font-bold text-gray-800 uppercase tracking-wider flex items-center justify-between border-b border-gray-100 pb-2">
               <span class="flex items-center gap-1.5">🎧 <span id="ui-heading-contact">联系我们 / CONTACT US</span></span>
-              <div class="k-badge bg-orange-100 text-orange-700 rounded-full"><span class="k-badge-inner font-black text-[10px] px-2.5 py-0.5 tracking-wider">KLOOK EXCLUSIVE BUTLER</span></div>
+              <span class="inline-block text-[10px] bg-orange-100 text-orange-700 px-2.5 py-1 rounded-full font-black tracking-wider leading-snug">KLOOK EXCLUSIVE BUTLER</span>
             </h3>
 
             <!-- 官方邮箱 Block -->
             <div class="bg-orange-50/60 border border-orange-100 rounded-xl p-3 flex items-center gap-3">
-              <div class="k-badge w-9 h-9 rounded-lg bg-orange-100 text-orange-600 shrink-0 font-bold text-sm shadow-2xs"><span class="k-badge-inner">✉️</span></div>
+              <div class="w-9 h-9 rounded-lg bg-orange-100 text-orange-600 text-center leading-[36px] shrink-0 font-bold text-sm shadow-2xs">✉️</div>
               <div>
                 <div class="text-[10px] text-orange-600 font-bold uppercase tracking-wider">Official Email</div>
                 <div class="text-xs text-gray-900 font-extrabold tracking-tight">china_customized_travel@klook.com</div>
@@ -278,12 +260,12 @@
             <!-- 二维码 -->
             <div class="grid grid-cols-2 gap-3 pt-1">
               <div class="bg-emerald-50/90 border border-emerald-400 rounded-xl p-3 flex flex-col items-center justify-between h-full">
-                <div class="k-badge bg-emerald-600 text-white rounded-full mb-2"><span class="k-badge-inner font-black text-xs px-3 py-1">💬 微信管家 / WeChat</span></div>
+                <span class="inline-block bg-emerald-600 text-white font-black text-xs px-3 py-1 rounded-full mb-2 leading-snug">💬 微信管家 / WeChat</span>
                 <div class="w-22 h-22 bg-white border border-emerald-200 rounded-lg p-1 overflow-hidden"><img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=KlookWechat" class="w-full h-full object-contain"></div>
                 <span id="ui-qr-wechat" class="text-xs text-emerald-800 font-extrabold mt-2">扫码添加微信管家</span>
               </div>
               <div class="bg-teal-50/90 border border-teal-400 rounded-xl p-3 flex flex-col items-center justify-between h-full">
-                <div class="k-badge bg-teal-700 text-white rounded-full mb-2"><span class="k-badge-inner font-black text-xs px-3 py-1">📱 WhatsApp / WA</span></div>
+                <span class="inline-block bg-teal-700 text-white font-black text-xs px-3 py-1 rounded-full mb-2 leading-snug">📱 WhatsApp / WA</span>
                 <div class="w-22 h-22 bg-white border border-teal-200 rounded-lg p-1 overflow-hidden"><img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://wa.me/8615181778005" class="w-full h-full object-contain"></div>
                 <span id="ui-qr-whatsapp" class="text-xs text-teal-900 font-extrabold mt-2">扫码添加 WhatsApp</span>
               </div>
@@ -292,7 +274,7 @@
 
           <!-- 页脚 -->
           <div class="text-center pt-2 border-t border-dashed border-gray-200 pb-2">
-            <div class="text-sm font-extrabold text-klook tracking-wider">klook <span class="font-normal text-gray-400">| Private Customized Trip</span></div>
+            <div class="text-xs font-extrabold text-klook tracking-wider">klook <span class="font-normal text-gray-400">| Private Customized Trip</span></div>
             <div class="text-xs text-gray-400 font-medium mt-1" id="ui-footer-sub">Klook 官方品质保障 · 专属行程规划师为您服务</div>
           </div>
         </div>
@@ -749,7 +731,7 @@
               <img src="${d.img}" onerror="if(!this.dataset.triedPng){this.dataset.triedPng='1'; this.src=this.src.endsWith('.jpg')?this.src.replace('.jpg','.png'):this.src.replace('.png','.jpg');} else {this.onerror=null; this.src='https://sallyzheng-lang.github.io/klook-tool/丽江古城.jpg';}" class="w-full h-full object-cover transform transition duration-700 group-hover:scale-105">
               <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent"></div>
               <div class="absolute bottom-2.5 left-3.5 right-3.5 flex justify-between items-end text-white">
-                <div><div class="k-badge bg-klook text-white rounded shadow-md"><span class="k-badge-inner font-black text-xs px-2.5 py-0.5">DAY ${d.dayNum}</span></div><h4 class="font-bold text-base mt-1.5 leading-snug tracking-wide drop-shadow-md">${d.title}</h4></div>
+                <div><span class="inline-block bg-klook text-white text-xs px-2.5 py-1 rounded font-black tracking-wider shadow-md leading-snug">DAY ${d.dayNum}</span><h4 class="font-bold text-base mt-1.5 leading-snug tracking-wide drop-shadow-md">${d.title}</h4></div>
               </div>
             </div>
             <div class="p-4 bg-white"><p class="text-xs text-gray-700 leading-relaxed font-normal">${d.desc}</p></div>
@@ -762,7 +744,7 @@
       // 动态渲染行程亮点列表
       document.getElementById('poster-highlights-list').innerHTML = GLOBAL_HIGHLIGHTS_DATA.map(h => `
         <div class="flex items-start gap-2.5 bg-white/90 p-2.5 rounded-lg border border-orange-100/70 shadow-2xs">
-          <div class="k-badge w-7 h-7 rounded-lg bg-orange-100 text-klook shrink-0 font-bold text-xs"><span class="k-badge-inner">${h.icon}</span></div>
+          <div class="w-7 h-7 rounded-lg bg-orange-100 text-klook text-center leading-[28px] shrink-0 font-bold text-xs">${h.icon}</div>
           <div>
             <div class="font-bold text-gray-900 text-xs leading-tight">${h.title}</div>
             <div class="text-xs text-gray-600 mt-1 leading-snug">${h.desc}</div>
@@ -806,7 +788,7 @@
       // 酒店模块根据勾选控制
       document.getElementById('poster-hotel-wrapper').style.display = isHotelChecked ? 'block' : 'none';
       if (isHotelChecked) {
-        document.getElementById('poster-hotel-list').innerHTML = hRaw.split('\n').filter(s=>s.trim()).map(h => `<div class="flex items-start gap-2 bg-gray-50 p-2 rounded-lg border border-gray-100"><div class="k-badge w-5 h-5 rounded bg-klook/10 text-klook font-bold text-xs shrink-0"><span class="k-badge-inner">🏨</span></div><span class="text-gray-800 font-medium text-xs leading-snug mt-0.5">${h}</span></div>`).join('');
+        document.getElementById('poster-hotel-list').innerHTML = hRaw.split('\n').filter(s=>s.trim()).map(h => `<div class="flex items-start gap-2 bg-gray-50 p-2 rounded-lg border border-gray-100"><span class="inline-block bg-klook/10 text-klook font-bold px-1.5 py-0.5 rounded text-xs leading-snug shrink-0">🏨</span><span class="text-gray-800 font-medium text-xs leading-snug mt-0.5">${h}</span></div>`).join('');
       }
 
       // 6. 费用不含 & 退改政策 (支持选填与单/双栏自适应渲染)
