@@ -109,7 +109,7 @@
           </div>
         </div>
 
-        <textarea id="field-itinerary" rows="6" class="w-full border border-blue-200 rounded-lg p-2 text-[11px] focus:ring-1 focus:ring-blue-400 outline-none custom-scrollbar font-mono bg-white leading-relaxed mt-2" placeholder="例：Day 1: 丽江—玉龙雪山—蓝月谷"></textarea>
+        <textarea id="field-itinerary" rows="6" class="w-full border border-blue-200 rounded-lg p-2 text-[11px] focus:ring-1 focus:ring-blue-400 outline-none custom-scrollbar font-mono bg-white leading-relaxed mt-2" placeholder="例：Day 1: 丽江—玉龙雪山—蓝月谷 或 D1 丽江—玉龙雪山"></textarea>
         
         <button id="btn-sync-middle" class="w-full mt-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 rounded-lg transition shadow-sm">
           🔄 智能生成文案并同步
@@ -284,7 +284,7 @@
               <div class="flex gap-1 text-xs">✈️ 🌍 📸 📍</div>
             </div>
             <p id="ui-brand-p1" class="text-xs font-bold leading-relaxed drop-shadow-xs">🌟 让世界更轻松地探索中国，让每一次旅行都成为独特的体验。</p>
-            <p id="ui-brand-p2" class="text-xs text-white font-bold leading-relaxed drop-shadow-xs">🚀 连接全球游客与中国目的地，用KLOOK的方式，让定制旅行更简单、更自由、更有趣。</p>
+            <p id="ui-brand-p2" class="text-xs text-white font-bold leading-relaxed drop-shadow-xs">🚀 连接全局游客与中国目的地，用KLOOK的方式，让定制旅行更简单、更自由、更有趣。</p>
           </div>
 
           <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 space-y-3">
@@ -547,7 +547,7 @@
           
           let maxDay = 0;
           lines.forEach(line => {
-            const match = line.match(/^(?:Day\s*(\d+)|\d+)/i);
+            const match = line.match(/^(?:Day|D)\s*(\d+)/i);
             if (match && match[1]) {
               const num = parseInt(match[1]);
               if (num > maxDay) maxDay = num;
@@ -569,10 +569,10 @@
 
       // 保存为多日游云端模版
       document.getElementById('btn-save-multi-tpl').addEventListener('click', async () => {
-        const category = prompt("请输入行程的目的地/分组（例：云南、哈尔滨、新疆）：", "哈尔滨");
+        const category = prompt("请输入行程的目的地/分组（例：云南、哈尔滨、广西/阳朔）：", "广西/阳朔");
         if (!category || !category.trim()) return;
 
-        const name = prompt("请输入此多日游模版的名称：", "【哈尔滨】冰雪游多日定制");
+        const name = prompt("请输入此多日游模版的名称：", "【阳朔】桂林阳朔多日深度游");
         if (!name || !name.trim()) return;
 
         const key = 'tpl_' + Date.now();
@@ -609,18 +609,18 @@
         const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
         let targetRoute = "";
         if (lines.length === 1) {
-          targetRoute = lines[0].replace(/^(?:Day\s*\d+|\d{1,2}月\d{1,2}日|\d{1,2}\.\d{1,2})[：:]\s*/i, '');
+          targetRoute = lines[0].replace(/^(?:Day|D)\s*\d+[：:\s]*|^\d{1,2}月\d{1,2}日[：:\s]*|^\d{1,2}\.\d{1,2}[：:\s]*/i, '');
         } else {
           const optionsStr = lines.map((l, idx) => `${idx + 1}. ${l}`).join('\n');
           const choice = prompt(`当前文本框有多条行程，请输入数字选择要存为模版的路线：\n\n${optionsStr}`, lines.length.toString());
           if (!choice) return;
           const selectedIndex = parseInt(choice) - 1;
           if (isNaN(selectedIndex) || selectedIndex < 0 || selectedIndex >= lines.length) return;
-          targetRoute = lines[selectedIndex].replace(/^(?:Day\s*\d+|\d{1,2}月\d{1,2}日|\d{1,2}\.\d{1,2})[：:]\s*/i, '');
+          targetRoute = lines[selectedIndex].replace(/^(?:Day|D)\s*\d+[：:\s]*|^\d{1,2}月\d{1,2}日[：:\s]*|^\d{1,2}\.\d{1,2}[：:\s]*/i, '');
         }
 
-        const category = prompt("1. 请输入目的地/分组名称（例：云南、黑龙江/哈尔滨）：", "黑龙江/哈尔滨") || "自定义目的地";
-        const tplName = prompt("2. 请输入此单日模版的展示名称：", `🏰 ${targetRoute}`) || targetRoute;
+        const category = prompt("1. 请输入目的地/分组名称（例：云南、广西/阳朔）：", "广西/阳朔") || "自定义目的地";
+        const tplName = prompt("2. 请输入此单日模版的展示名称：", `🌾 ${targetRoute}`) || targetRoute;
 
         const newArr = [{
           category: category.trim(),
@@ -669,7 +669,7 @@
         }
       }
 
-      if (pois.some(p => p.includes("接机") || p.includes("送机"))) {
+      if (pois.some(p => p.includes("接机") || p.includes("送机") || p.includes("接站") || p.includes("送站"))) {
         const carUrl = "https://images.unsplash.com/photo-1563720225384-9a0264b3a4a1?w=800&q=80";
         if (!usedImagesSet.has(carUrl)) {
           usedImagesSet.add(carUrl);
@@ -696,7 +696,7 @@
         departPrefix: "出发", headingHighlights: '行程尊享亮点', headingItinerary: '详细行程安排', headingHotel: '酒店住宿安排 (钻级品质)', headingInclusions: '服务包含与说明', headingContact: '联系我们 / CONTACT US',
         lblTickets: '🎫 包含门票明细', lblTraffic: '🚗 车辆交通明细', lblGuide: '🧭 专属导游服务', lblActivities: '🎁 特色体验与赠送明细', lblExclusions: '费用不含', lblCancellation: '退改政策', qrWechat: "扫码添加微信管家", qrWhatsapp: "扫码添加 WhatsApp",
         brandP1: "🌟 让世界更轻松地探索中国，让每一次旅行都成为独特的体验。",
-        brandP2: "🚀 连接全球游客与中国目的地，用KLOOK的方式，让定制旅行更简单、更自由、更有趣。",
+        brandP2: "🚀 连接全局游客与中国目的地，用KLOOK的方式，让定制旅行更简单、更自由、更有趣。",
         footerSub: "Klook 官方品质保障 · 专属行程规划师为您服务"
       },
       'zh-TW': { 
@@ -720,6 +720,7 @@
     const SIMP_TO_TRAD = { "国":"國", "门":"門", "车":"車", "导":"導", "游":"遊", "订":"訂", "话":"話", "费":"費", "观":"觀", "规":"規", "则":"則", "险":"險", "团":"團", "乐":"樂", "飞":"飛", "场":"場", "点":"點", "选":"選", "质":"質", "保":"保", "证":"證", "划":"劃", "动":"動", "独":"獨", "镇":"鎮", "缆":"纜", "索":"索", "赠":"贈", "气":"氣", "减":"減", "务":"務", "说":"說", "明":"明", "发":"發", "条":"條", "件":"件", "桥":"橋" };
 
     const EN_DICT = {
+      "阳朔": "Yangshuo", "桂林": "Guilin", "遇龙河": "Yulong River", "十里画廊": "Ten-Mile Gallery", "月亮山": "Moon Hill", "广州": "Guangzhou",
       "哈尔滨": "Harbin", "亚布力": "Yabuli Ski Resort", "雪乡": "China Snow Town", "长白山": "Mount Changbai", "二道白河": "Erdaobaihe Town", "天池": "Heavenly Lake",
       "大理": "Dali", "丽江": "Lijiang", "昆明": "Kunming", "香格里拉": "Shangri-La", "九寨沟": "Jiuzhaigou", 
       "玉龙雪山": "Jade Dragon Snow Mountain", "冰川公园": "Glacier Park", "蓝月谷": "Blue Moon Valley", 
@@ -816,6 +817,7 @@
     }
 
     const SMART_ROUTE_DESCS_CN = {
+      "遇龙河,十里画廊": "乘专车前往遇龙河景区，欣赏桂林山水甲天下的如画风光，竹筏漂流漫游阳朔乡村，骑行十里画廊感受自然田园风光，入住阳朔精品酒店。",
       "伏尔加庄园": "乘专车前往充满俄式风情的伏尔加庄园。游览圣尼古拉教堂重建建筑、阿什河畔风光，体验城堡冰雪滑道与俄式文化体验，惬意享受度假时光。",
       "哈尔滨,亚布力": "专车接机后前往SS级滑雪胜地亚布力。沿途观赏北国冰雪风光，办理入住后自由活动，准备开启精彩的冰雪之旅。",
       "亚布力,雪乡": "体验激情滑雪后，乘车穿梭最美亚雪公路前往“中国雪乡”。漫步雪韵大街，欣赏梦幻雪屋、童话雪蘑菇与红灯笼，夜宿雪乡特色酒店。",
@@ -845,13 +847,15 @@
       return "专属私人管家与司机将全天为您服务，根据您的需求灵活安排行程，带您深度体验地道风土人情与绝美自然风物，享受惬意的定制假期之旅。";
     }
 
+    // 🔧 高容错切分与解析函数（完美支持 D1 / D1: / Day 1 / Day1 / 格式）
     async function syncItineraryToDaysData() {
       const lang = document.getElementById('lang-select').value;
       const btn = document.getElementById('btn-sync-middle');
       btn.innerText = "🔄 正在智能翻译同步中..."; btn.disabled = true;
 
       const itineraryRaw = document.getElementById('field-itinerary').value || "";
-      const dayBlocks = itineraryRaw.split(/(?=Day\s*\d+|\d{1,2}月\d{1,2}日|\d{1,2}\.\d{1,2})/gi);
+      // 增强切分正则：支持 Day1、Day 1、D1、D1: 等各类写法
+      const dayBlocks = itineraryRaw.split(/(?=(?:Day|D)\s*\d+|\d{1,2}月\d{1,2}日|\d{1,2}\.\d{1,2})/gi);
       let newDaysData = [];
       let dayCounter = 1;
       let usedImagesSet = new Set();
@@ -860,9 +864,12 @@
         block = block.trim();
         if (!block) continue;
 
-        const headerMatch = block.match(/^(?:Day\s*\d+|\d{1,2}月\d{1,2}日|\d{1,2}\.\d{1,2})[：:]\s*([^\r\n]+)/i);
+        const headerMatch = block.match(/^(?:Day|D)\s*\d+|^\d{1,2}月\d{1,2}日|^\d{1,2}\.\d{1,2}/i);
         if (headerMatch) {
-          const routeStrCn = headerMatch[1].trim();
+          // 提取真实路线文案（自动抹去开头的 D1/Day 1 及冒号空格）
+          const routeStrCn = block.replace(/^(?:Day|D)\s*\d+[：:\s]*|^\d{1,2}月\d{1,2}日[：:\s]*|^\d{1,2}\.\d{1,2}[：:\s]*/i, '').trim();
+          if (!routeStrCn) continue;
+
           const rawPois = routeStrCn.split(/[—\-–>,\s]+/).filter(s => s.trim().length > 0);
           
           let smartDescCn = getSmartDescCn(routeStrCn);
@@ -1206,7 +1213,7 @@
         }
       }
 
-      if (pois.some(p => p.includes("接机") || p.includes("送机"))) {
+      if (pois.some(p => p.includes("接机") || p.includes("送机") || p.includes("接站") || p.includes("送站"))) {
         const carUrl = "https://images.unsplash.com/photo-1563720225384-9a0264b3a4a1?w=800&q=80";
         if (!usedImagesSet.has(carUrl)) {
           usedImagesSet.add(carUrl);
