@@ -76,16 +76,57 @@
         </div>
       </div>
 
-      <button id="btn-load-template" class="w-full text-xs bg-amber-500 hover:bg-amber-600 text-white px-3 py-2.5 rounded-xl font-bold transition shadow-xs flex justify-center items-center gap-1.5">
-        ⚡ 第一次使用？一键加载演示数据
-      </button>
-
       <div class="bg-emerald-50/70 border border-emerald-200 p-3 rounded-xl space-y-2">
         <label class="block text-[11px] font-bold text-emerald-900 flex items-center justify-between gap-1.5">
           <span class="flex items-center gap-1"><span>☁️</span> 团队公共图库 (API热同步)</span>
           <span id="cloud-status-tag" class="text-[9px] bg-emerald-200 text-emerald-800 px-1.5 py-0.5 rounded font-black">已实时扫描</span>
         </label>
         <div id="cloud-status-text" class="text-[10px] text-emerald-700 font-medium leading-tight">已自动读取 GitHub 全量图库。以后只需上传“景点名.jpg”，无需改动任何代码。</div>
+      </div>
+
+      <!-- 📌 路线排录与按目的地分类的模版库 -->
+      <div class="space-y-2 bg-blue-50/60 p-3.5 rounded-xl border border-blue-200">
+        <div class="flex items-center justify-between">
+          <label class="block text-xs font-bold text-blue-900 flex items-center gap-1">📌 路线排录与模版库</label>
+        </div>
+
+        <!-- 模版快速选择区 (带目的地分组) -->
+        <div class="space-y-1.5 pt-1">
+          <div>
+            <label class="block text-[10px] font-bold text-blue-800 mb-0.5">🗺️ 套用多日线路模版 (覆盖全套配置)</label>
+            <select id="select-multi-tpl" class="w-full bg-white border border-blue-300 rounded-lg p-1.5 text-xs outline-none focus:ring-1 focus:ring-blue-500 font-medium text-gray-700">
+              <!-- JS 动态渲染分组 -->
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-[10px] font-bold text-blue-800 mb-0.5">🧩 追加单日固定行程 (自动拼接到末尾 Day)</label>
+            <div class="flex gap-1.5">
+              <select id="select-single-tpl" class="flex-1 bg-white border border-blue-300 rounded-lg p-1.5 text-xs outline-none focus:ring-1 focus:ring-blue-500 font-medium text-gray-700">
+                <!-- JS 动态渲染分组 -->
+              </select>
+              <button id="btn-append-single" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold shrink-0 transition">
+                + 追加
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <textarea id="field-itinerary" rows="6" class="w-full border border-blue-200 rounded-lg p-2 text-[11px] focus:ring-1 focus:ring-blue-400 outline-none custom-scrollbar font-mono bg-white leading-relaxed mt-2" placeholder="例：Day 1: 丽江—玉龙雪山—蓝月谷"></textarea>
+        
+        <button id="btn-sync-middle" class="w-full mt-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 rounded-lg transition shadow-sm">
+          🔄 智能生成文案并同步
+        </button>
+
+        <!-- 存为模版操作 -->
+        <div class="grid grid-cols-2 gap-2 pt-1 border-t border-blue-200/60 mt-2">
+          <button id="btn-save-multi-tpl" class="bg-amber-500 hover:bg-amber-600 text-white text-[10px] font-bold py-1.5 rounded-lg transition">
+            💾 存为多日全套模版
+          </button>
+          <button id="btn-save-single-tpl" class="bg-teal-600 hover:bg-teal-700 text-white text-[10px] font-bold py-1.5 rounded-lg transition">
+            📌 提取存为单日模版
+          </button>
+        </div>
       </div>
 
       <div class="bg-gray-50 border border-gray-200 p-3 rounded-xl space-y-2.5">
@@ -106,15 +147,6 @@
           <div class="flex items-center gap-2"><span class="w-16 text-[10px] text-gray-500 font-bold text-right shrink-0">出行人数</span><input type="text" id="field-group" class="flex-1 border border-gray-200 rounded-lg p-1.5 text-xs outline-none bg-gray-50" placeholder="例: 4大1小"></div>
           <div class="flex items-center gap-2"><span class="w-16 text-[10px] text-gray-500 font-bold text-right shrink-0">费用报价</span><input type="text" id="field-price" class="flex-1 border border-gray-200 rounded-lg p-1.5 text-xs outline-none bg-gray-50" placeholder="例: 9000元/定制团"></div>
         </div>
-      </div>
-
-      <div class="space-y-1.5 bg-blue-50/50 p-3 rounded-xl border border-blue-100">
-        <div class="flex items-center justify-between"><label class="block text-xs font-bold text-blue-900">📌 快速排录路线</label></div>
-        <p class="text-[10px] text-blue-600 mb-2">输入Day简要路线，点击生成将自动同步并触发多语言翻译。</p>
-        <textarea id="field-itinerary" rows="5" class="w-full border border-blue-200 rounded-lg p-2 text-[11px] focus:ring-1 focus:ring-blue-400 outline-none custom-scrollbar font-mono bg-white leading-relaxed"></textarea>
-        <button id="btn-sync-middle" class="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 rounded-lg transition shadow-sm">
-          🔄 智能生成文案并同步
-        </button>
       </div>
 
       <!-- 动态显示/隐藏的服务模块明细输入框 -->
@@ -329,6 +361,254 @@
       "https://images.unsplash.com/photo-1563720225384-9a0264b3a4a1?w=800&q=80"
     ];
 
+    // ================= 📚 模版系统引擎 (支持目的地分组与自动提取) =================
+    const PRESET_MULTI_TEMPLATES = {
+      "yn5d": {
+        category: "云南",
+        name: "【云南】大理丽江 5日经典深度游",
+        itinerary: "Day 1: 昆明接机—高铁前往大理—理想邦—文笔村\nDay 2: 磻溪村S湾—喜洲古镇—文笔村—双廊古镇—大理\nDay 3: 大理—沙溪古镇—白沙古镇—丽江古城\nDay 4: 丽江—甘海子—玉龙雪山—冰川公园—蓝月谷\nDay 5: 丽江—拉市海—丽江送机",
+        date: "10月12日", group: "4大1小", price: "9000元/定制团",
+        tickets: "玉龙雪山大索道及环保车、印象丽江实景演出",
+        traffic: "7座别克GL8商务车（含油费过路费司机食宿）",
+        guide: "全程资深专属私人管家 1对1贴心服务",
+        exp: "磻溪村S湾骑行体验、每人赠送大理烤乳扇与雪山防寒服使用",
+        hotel: "大理洱海海景客栈 2晚\n丽江古城精品客栈 2晚",
+        exclusions: "全程酒店住宿自理\n全程正餐及晚餐自理",
+        cancellation: "提前6日至4日取消，扣除20%违约金；\n行程开始当日取消，扣除60%违约金。"
+      },
+      "hlj5d": {
+        category: "黑龙江/哈尔滨",
+        name: "【东北】哈尔滨亚布力雪乡长白山 5日冰雪游",
+        itinerary: "Day 1: 哈尔滨—亚布力\nDay 2: 亚布力—雪乡\nDay 3: 雪乡—二道白河\nDay 4: 长白山—天池\nDay 5: 拉市海—送机",
+        date: "12月20日", group: "2大0小", price: "8800元/定制团",
+        tickets: "亚布力滑雪门票、雪乡门票+环保车、长白山北景区门票+倒站车",
+        traffic: "5座四驱SUV专车全程服务（含防滑链与司机食宿）",
+        guide: "东北在地资深专车管家服务",
+        exp: "雪乡体验“泼水成冰”奇观摄影、火山雪地温泉体验",
+        hotel: "雪乡暖炕精品客栈 1晚\n二道白河温泉酒店 2晚",
+        exclusions: "个人滑雪装备租用费\n往返大交通机票",
+        cancellation: "行程开始前7日取消可免费退改；\n行程前3日内取消扣除30%违约金。"
+      }
+    };
+
+    const PRESET_SINGLE_TEMPLATES = [
+      { category: "云南", name: "🏔️ 玉龙雪山+冰川公园+蓝月谷", route: "丽江—甘海子—玉龙雪山—冰川公园—蓝月谷" },
+      { category: "云南", name: "🌊 洱海S湾+喜洲古镇+双廊", route: "磻溪村S湾—喜洲古镇—文笔村—双廊古镇—大理" },
+      { category: "云南", name: "🛖 沙溪古镇+白沙古镇", route: "大理—沙溪古镇—白沙古镇—丽江古城" },
+      { category: "黑龙江/哈尔滨", name: "🏰 伏尔加庄园一日游", route: "哈尔滨—伏尔加庄园—哈尔滨" },
+      { category: "黑龙江/哈尔滨", name: "⛷️ 亚布力滑雪+雪乡夜景", route: "亚布力—雪乡" },
+      { category: "吉林/长白山", name: "🌋 长白山天池+温泉", route: "长白山—天池" },
+      { category: "通用服务", name: "✈️ 专车接机/接站服务", route: "昆明接机—高铁前往大理—理想邦—文笔村" },
+      { category: "通用服务", name: "🛫 专车送机/送站服务", route: "丽江—拉市海—丽江送机" }
+    ];
+
+    function renderTemplateOptions() {
+      const selectMulti = document.getElementById('select-multi-tpl');
+      const selectSingle = document.getElementById('select-single-tpl');
+
+      // 1. 渲染多日游模版 (按目的地分组)
+      selectMulti.innerHTML = '<option value="">-- 选择多日游模版 (按目的地分类) --</option>';
+      const allMulti = [];
+      for (let k in PRESET_MULTI_TEMPLATES) {
+        allMulti.push({ id: `preset_${k}`, ...PRESET_MULTI_TEMPLATES[k] });
+      }
+      const customMulti = JSON.parse(localStorage.getItem('klook_custom_multi') || '{}');
+      for (let k in customMulti) {
+        allMulti.push({ id: `custom_${k}`, ...customMulti[k] });
+      }
+
+      const multiGroups = {};
+      allMulti.forEach(item => {
+        const cat = item.category || "自定义目的地";
+        if (!multiGroups[cat]) multiGroups[cat] = [];
+        multiGroups[cat].push(item);
+      });
+
+      for (let cat in multiGroups) {
+        const group = document.createElement('optgroup');
+        group.label = `📍 ${cat}`;
+        multiGroups[cat].forEach(item => {
+          group.innerHTML += `<option value="${item.id}">${item.name}</option>`;
+        });
+        selectMulti.appendChild(group);
+      }
+
+      // 2. 渲染单日行程模版 (按目的地分组)
+      selectSingle.innerHTML = '<option value="">-- 选择单日行程模版 (按目的地分类) --</option>';
+      const allSingle = [];
+      PRESET_SINGLE_TEMPLATES.forEach((item, idx) => {
+        allSingle.push({ id: `preset_${idx}`, ...item });
+      });
+      const customSingle = JSON.parse(localStorage.getItem('klook_custom_single') || '[]');
+      customSingle.forEach((item, idx) => {
+        allSingle.push({ id: `custom_${idx}`, ...item });
+      });
+
+      const singleGroups = {};
+      allSingle.forEach(item => {
+        const cat = item.category || "自定义目的地";
+        if (!singleGroups[cat]) singleGroups[cat] = [];
+        singleGroups[cat].push(item);
+      });
+
+      for (let cat in singleGroups) {
+        const group = document.createElement('optgroup');
+        group.label = `📍 ${cat}`;
+        singleGroups[cat].forEach(item => {
+          group.innerHTML += `<option value="${item.id}">${item.name}</option>`;
+        });
+        selectSingle.appendChild(group);
+      }
+    }
+
+    function initTemplateEvents() {
+      renderTemplateOptions();
+
+      // 套用多日游模版
+      document.getElementById('select-multi-tpl').addEventListener('change', (e) => {
+        const val = e.target.value;
+        if (!val) return;
+        let tpl = null;
+        if (val.startsWith('preset_')) {
+          tpl = PRESET_MULTI_TEMPLATES[val.replace('preset_', '')];
+        } else if (val.startsWith('custom_')) {
+          const customMulti = JSON.parse(localStorage.getItem('klook_custom_multi') || '{}');
+          tpl = customMulti[val.replace('custom_', '')];
+        }
+
+        if (tpl) {
+          document.getElementById('field-itinerary').value = tpl.itinerary || '';
+          document.getElementById('field-date').value = tpl.date || '';
+          document.getElementById('field-group').value = tpl.group || '';
+          document.getElementById('field-price').value = tpl.price || '';
+          document.getElementById('field-tickets').value = tpl.tickets || '';
+          document.getElementById('field-traffic').value = tpl.traffic || '';
+          document.getElementById('field-guide').value = tpl.guide || '';
+          document.getElementById('field-exp').value = tpl.exp || '';
+          document.getElementById('field-hotel').value = tpl.hotel || '';
+          document.getElementById('field-exclusions').value = tpl.exclusions || '';
+          document.getElementById('field-cancellation').value = tpl.cancellation || '';
+          syncItineraryToDaysData();
+        }
+      });
+
+      // 追加单日游行程 (无缝续写 Day N)
+      document.getElementById('btn-append-single').addEventListener('click', () => {
+        const val = document.getElementById('select-single-tpl').value;
+        if (!val) { alert("请先选择一条单日行程！"); return; }
+        
+        let routeText = "";
+        if (val.startsWith('preset_')) {
+          const idx = parseInt(val.replace('preset_', ''));
+          routeText = PRESET_SINGLE_TEMPLATES[idx].route;
+        } else if (val.startsWith('custom_')) {
+          const idx = parseInt(val.replace('custom_', ''));
+          const customSingle = JSON.parse(localStorage.getItem('klook_custom_single') || '[]');
+          routeText = customSingle[idx].route;
+        }
+
+        if (routeText) {
+          const textarea = document.getElementById('field-itinerary');
+          const lines = textarea.value.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+          
+          let maxDay = 0;
+          lines.forEach(line => {
+            const match = line.match(/^(?:Day\s*(\d+)|\d+)/i);
+            if (match && match[1]) {
+              const num = parseInt(match[1]);
+              if (num > maxDay) maxDay = num;
+            }
+          });
+
+          const nextDayNum = maxDay > 0 ? maxDay + 1 : (lines.length + 1);
+          const newLine = `Day ${nextDayNum}: ${routeText}`;
+
+          if (textarea.value.trim().length > 0) {
+            textarea.value += `\n${newLine}`;
+          } else {
+            textarea.value = newLine;
+          }
+
+          syncItineraryToDaysData();
+        }
+      });
+
+      // 存为多日模版 (支持目的地分组)
+      document.getElementById('btn-save-multi-tpl').addEventListener('click', () => {
+        const category = prompt("请输入此行程的目的地/分组名称（例：云南、哈尔滨、新疆、四川）：", "哈尔滨");
+        if (!category || !category.trim()) return;
+
+        const name = prompt("请输入此多日游模版的名称：", "【哈尔滨】冰雪游多日定制");
+        if (!name || !name.trim()) return;
+
+        const customMulti = JSON.parse(localStorage.getItem('klook_custom_multi') || '{}');
+        const key = 'custom_' + Date.now();
+        customMulti[key] = {
+          category: category.trim(),
+          name: name.trim(),
+          itinerary: document.getElementById('field-itinerary').value,
+          date: document.getElementById('field-date').value,
+          group: document.getElementById('field-group').value,
+          price: document.getElementById('field-price').value,
+          tickets: document.getElementById('field-tickets').value,
+          traffic: document.getElementById('field-traffic').value,
+          guide: document.getElementById('field-guide').value,
+          exp: document.getElementById('field-exp').value,
+          hotel: document.getElementById('field-hotel').value,
+          exclusions: document.getElementById('field-exclusions').value,
+          cancellation: document.getElementById('field-cancellation').value
+        };
+        localStorage.setItem('klook_custom_multi', JSON.stringify(customMulti));
+        alert(`🎉 已成功保存到【📍 ${category.trim()}】多日模版库！`);
+        renderTemplateOptions();
+      });
+
+      // 智能提取已写好的单日行程并存为模版 (关键功能)
+      document.getElementById('btn-save-single-tpl').addEventListener('click', () => {
+        const textarea = document.getElementById('field-itinerary');
+        const text = textarea.value.trim();
+        if (!text) {
+          alert("请先在路线文本框中输入行程！");
+          return;
+        }
+
+        const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+        if (lines.length === 0) {
+          alert("未找到有效路线！");
+          return;
+        }
+
+        let targetRoute = "";
+        if (lines.length === 1) {
+          targetRoute = lines[0].replace(/^(?:Day\s*\d+|\d{1,2}月\d{1,2}日|\d{1,2}\.\d{1,2})[：:]\s*/i, '');
+        } else {
+          const optionsStr = lines.map((l, idx) => `${idx + 1}. ${l}`).join('\n');
+          const choice = prompt(`当前文本框有多条行程，请输入数字选择要存为模版的路线：\n\n${optionsStr}`, lines.length.toString());
+          if (!choice) return;
+          const selectedIndex = parseInt(choice) - 1;
+          if (isNaN(selectedIndex) || selectedIndex < 0 || selectedIndex >= lines.length) {
+            alert("无效的选择！");
+            return;
+          }
+          targetRoute = lines[selectedIndex].replace(/^(?:Day\s*\d+|\d{1,2}月\d{1,2}日|\d{1,2}\.\d{1,2})[：:]\s*/i, '');
+        }
+
+        const category = prompt("1. 请输入目的地/分组名称（例：云南、黑龙江/哈尔滨、新疆）：", "黑龙江/哈尔滨") || "自定义目的地";
+        const tplName = prompt("2. 请输入此单日模版的展示名称：", `🏰 ${targetRoute}`) || targetRoute;
+
+        const customSingle = JSON.parse(localStorage.getItem('klook_custom_single') || '[]');
+        customSingle.push({
+          category: category.trim(),
+          name: tplName.trim(),
+          route: targetRoute.trim()
+        });
+        localStorage.setItem('klook_custom_single', JSON.stringify(customSingle));
+
+        alert(`🎉 成功提取“${targetRoute}”并归入【📍 ${category.trim()}】单日模版库！`);
+        renderTemplateOptions();
+      });
+    }
+
     async function scanGitHubRepositoryImages() {
       const GITHUB_BASE = "https://sallyzheng-lang.github.io/klook-tool/";
       try {
@@ -513,6 +793,7 @@
     }
 
     const SMART_ROUTE_DESCS_CN = {
+      "伏尔加庄园": "乘专车前往充满俄式风情的伏尔加庄园。游览圣尼古拉教堂重建建筑、阿什河畔风光，体验城堡冰雪滑道与俄式文化体验，惬意享受度假时光。",
       "哈尔滨,亚布力": "专车接机后前往SS级滑雪胜地亚布力。沿途观赏北国冰雪风光，办理入住后自由活动，准备开启精彩的冰雪之旅。",
       "亚布力,雪乡": "体验激情滑雪后，乘车穿梭最美亚雪公路前往“中国雪乡”。漫步雪韵大街，欣赏梦幻雪屋、童话雪蘑菇与红灯笼，夜宿雪乡特色酒店。",
       "雪乡,长白山": "清晨在雪乡体验震撼的“泼水成冰”奇观。随后乘车前往长白山脚下的二道白河镇，入住温泉酒店，洗去疲惫，体验火山雪地温泉。",
@@ -875,10 +1156,10 @@
 
     document.addEventListener('DOMContentLoaded', async () => {
       await scanGitHubRepositoryImages();
+      initTemplateEvents();
       loadTemplate();
       
       document.getElementById('lang-select').addEventListener('change', () => { syncItineraryToDaysData(); });
-      document.getElementById('btn-load-template').addEventListener('click', loadTemplate);
       document.getElementById('btn-sync-middle').addEventListener('click', () => syncItineraryToDaysData());
       
       document.getElementById('btn-reset-highlights').addEventListener('click', async () => {
