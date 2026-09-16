@@ -90,22 +90,22 @@
           <label class="block text-xs font-bold text-blue-900 flex items-center gap-1">📌 路线排录与模版库</label>
         </div>
 
-        <!-- 模版快速选择区 (带目的地分组) -->
-        <div class="space-y-1.5 pt-1">
+        <!-- 模版快速选择区 (防挤压布局优化) -->
+        <div class="space-y-2 pt-1">
           <div>
             <label class="block text-[10px] font-bold text-blue-800 mb-0.5">🗺️ 套用多日线路模版 (覆盖全套配置)</label>
-            <select id="select-multi-tpl" class="w-full bg-white border border-blue-300 rounded-lg p-1.5 text-xs outline-none focus:ring-1 focus:ring-blue-500 font-medium text-gray-700">
+            <select id="select-multi-tpl" class="w-full bg-white border border-blue-300 rounded-lg p-1.5 text-xs outline-none focus:ring-1 focus:ring-blue-500 font-medium text-gray-700 truncate">
               <!-- JS 动态渲染分组 -->
             </select>
           </div>
 
           <div>
             <label class="block text-[10px] font-bold text-blue-800 mb-0.5">🧩 追加单日固定行程 (自动拼接到末尾 Day)</label>
-            <div class="flex gap-1.5">
-              <select id="select-single-tpl" class="flex-1 bg-white border border-blue-300 rounded-lg p-1.5 text-xs outline-none focus:ring-1 focus:ring-blue-500 font-medium text-gray-700">
+            <div class="flex items-center gap-1.5">
+              <select id="select-single-tpl" class="flex-1 min-w-0 bg-white border border-blue-300 rounded-lg p-1.5 text-xs outline-none focus:ring-1 focus:ring-blue-500 font-medium text-gray-700 truncate">
                 <!-- JS 动态渲染分组 -->
               </select>
-              <button id="btn-append-single" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold shrink-0 transition">
+              <button id="btn-append-single" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold shrink-0 transition whitespace-nowrap shadow-2xs">
                 + 追加
               </button>
             </div>
@@ -563,7 +563,7 @@
         renderTemplateOptions();
       });
 
-      // 智能提取已写好的单日行程并存为模版 (关键功能)
+      // 智能提取已写好的单日行程并存为模版
       document.getElementById('btn-save-single-tpl').addEventListener('click', () => {
         const textarea = document.getElementById('field-itinerary');
         const text = textarea.value.trim();
@@ -681,7 +681,7 @@
         departPrefix: "出發", headingHighlights: '行程尊享亮點', headingItinerary: '詳細行程安排', headingHotel: '酒店住宿安排 (鑽級品質)', headingInclusions: '服務包含與說明', headingContact: '聯絡我們 / CONTACT US',
         lblTickets: '🎫 包含門票明細', lblTraffic: '🚗 車輛交通明細', lblGuide: '🧭 專屬導遊服務', lblActivities: '🎁 特色體驗與贈送明細', lblExclusions: '費用不含', lblCancellation: '退改政策', qrWechat: "掃碼添加微信管家", qrWhatsapp: "掃碼添加 WhatsApp",
         brandP1: "🌟 讓世界更輕鬆地探索中國，讓每一次旅行都成為獨特的體驗。",
-        brandP2: "🚀 連接全球遊客與中國目的地，用KLOOK的方式，讓訂製旅行更簡單、更自由、更有趣。",
+        brandP2: "🚀 連接全局遊客與中國目的地，用KLOOK的方式，讓訂製旅行更簡單、更自由、更有趣。",
         footerSub: "Klook 官方品質保障 · 專屬行程規劃師為您服務"
       },
       'en': { 
@@ -695,7 +695,7 @@
     };
 
     const SIMP_TO_TRAD = { "国":"國", "门":"門", "车":"車", "导":"導", "游":"遊", "订":"訂", "话":"話", "费":"費", "观":"觀", "规":"規", "则":"則", "险":"險", "团":"團", "乐":"樂", "飞":"飛", "场":"場", "点":"點", "选":"選", "质":"質", "保":"保", "证":"證", "划":"劃", "动":"動", "独":"獨", "镇":"鎮", "缆":"纜", "索":"索", "赠":"贈", "气":"氣", "减":"減", "务":"務", "说":"說", "明":"明", "发":"發", "条":"條", "件":"件", "桥":"橋" };
-    
+
     const EN_DICT = {
       "哈尔滨": "Harbin", "亚布力": "Yabuli Ski Resort", "雪乡": "China Snow Town", "长白山": "Mount Changbai", "二道白河": "Erdaobaihe Town", "天池": "Heavenly Lake",
       "大理": "Dali", "丽江": "Lijiang", "昆明": "Kunming", "香格里拉": "Shangri-La", "九寨沟": "Jiuzhaigou", 
