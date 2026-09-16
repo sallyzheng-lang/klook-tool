@@ -21,7 +21,6 @@
     .scrollable-panel { height: calc(100vh - 2rem); overflow-y: auto; }
     #export-poster { width: 480px; margin: 0 auto; background: #FAFAFA; }
 
-    /* html2canvas 导出文字垂直居中修复：仅作用于海报导出区域 */
     #export-poster .tag-badge {
       display: inline-flex !important;
       align-items: center !important;
@@ -42,7 +41,6 @@
       transform: translateY(-1px) !important;
     }
 
-    /* 小尺寸图标 Badge：保持图标几何中心，不受字体 baseline 影响 */
     #export-poster .tag-badge .tag-text:only-child {
       line-height: 1 !important;
     }
@@ -78,10 +76,10 @@
 
       <div class="bg-emerald-50/70 border border-emerald-200 p-3 rounded-xl space-y-2">
         <label class="block text-[11px] font-bold text-emerald-900 flex items-center justify-between gap-1.5">
-          <span class="flex items-center gap-1"><span>☁️</span> 团队公共图库 (API热同步)</span>
+          <span class="flex items-center gap-1"><span>☁️</span> 团队公共云端 (全员实时同步)</span>
           <span id="cloud-status-tag" class="text-[9px] bg-emerald-200 text-emerald-800 px-1.5 py-0.5 rounded font-black">已实时扫描</span>
         </label>
-        <div id="cloud-status-text" class="text-[10px] text-emerald-700 font-medium leading-tight">已自动读取 GitHub 全量图库。以后只需上传“景点名.jpg”，无需改动任何代码。</div>
+        <div id="cloud-status-text" class="text-[10px] text-emerald-700 font-medium leading-tight">已自动读取云端共享模版库与 GitHub 图库，保存即全员同步。</div>
       </div>
 
       <!-- 📌 路线排录与按目的地分类的模版库 -->
@@ -90,7 +88,6 @@
           <label class="block text-xs font-bold text-blue-900 flex items-center gap-1">📌 路线排录与模版库</label>
         </div>
 
-        <!-- 模版快速选择区 (防挤压布局优化) -->
         <div class="space-y-2 pt-1">
           <div>
             <label class="block text-[10px] font-bold text-blue-800 mb-0.5">🗺️ 套用多日线路模版 (覆盖全套配置)</label>
@@ -118,13 +115,13 @@
           🔄 智能生成文案并同步
         </button>
 
-        <!-- 存为模版操作 -->
+        <!-- 存为模版（自动同步云端） -->
         <div class="grid grid-cols-2 gap-2 pt-1 border-t border-blue-200/60 mt-2">
-          <button id="btn-save-multi-tpl" class="bg-amber-500 hover:bg-amber-600 text-white text-[10px] font-bold py-1.5 rounded-lg transition">
-            💾 存为多日全套模版
+          <button id="btn-save-multi-tpl" class="bg-amber-500 hover:bg-amber-600 text-white text-[10px] font-bold py-1.5 rounded-lg transition shadow-2xs">
+            ☁️ 存为全员多日模版
           </button>
-          <button id="btn-save-single-tpl" class="bg-teal-600 hover:bg-teal-700 text-white text-[10px] font-bold py-1.5 rounded-lg transition">
-            📌 提取存为单日模版
+          <button id="btn-save-single-tpl" class="bg-teal-600 hover:bg-teal-700 text-white text-[10px] font-bold py-1.5 rounded-lg transition shadow-2xs">
+            ☁️ 存为全员单日模版
           </button>
         </div>
       </div>
@@ -149,7 +146,6 @@
         </div>
       </div>
 
-      <!-- 动态显示/隐藏的服务模块明细输入框 -->
       <div class="space-y-3 pt-2">
         <div id="hotel-input-block" style="display:none;">
           <label class="block text-[11px] font-bold text-gray-800 mb-1">🏨 酒店安排</label>
@@ -206,7 +202,6 @@
         提示：系统已为您自动生成走心文案、亮点与去重匹配图。右侧所有文案与图片均支持手动自定义修改，手动修改优先级最高。
       </div>
 
-      <!-- 行程亮点在线编辑器 -->
       <div id="highlights-editor-container" class="bg-amber-50/60 border border-amber-200 rounded-xl p-3.5 space-y-3">
         <div class="flex items-center justify-between border-b border-amber-200/60 pb-2">
           <span class="text-xs font-bold text-amber-900 flex items-center gap-1">✨ 行程亮点配置 (智能计算/手动修改)</span>
@@ -217,7 +212,6 @@
         <div id="highlights-inputs-list" class="space-y-2.5"></div>
       </div>
 
-      <!-- 每日行程卡片编辑器 -->
       <div id="day-editors-container" class="space-y-5 mt-4"></div>
     </div>
 
@@ -253,31 +247,26 @@
         </div>
 
         <div class="p-5 space-y-5">
-          <!-- 行程尊享亮点 -->
           <div id="poster-highlights-box" class="bg-gradient-to-br from-orange-50/80 via-amber-50/40 to-white p-4 rounded-xl border border-orange-100 shadow-sm space-y-2.5">
             <h3 class="text-sm font-bold text-gray-900 uppercase tracking-wider flex items-center justify-between"><span class="flex items-center gap-1.5">✨ <span id="ui-heading-highlights">行程尊享亮点</span></span><span class="tag-badge text-xs bg-klook/10 text-klook font-bold px-2.5 py-1 rounded-full"><span class="tag-text">Klook Exclusive</span></span></h3>
             <div id="poster-highlights-list" class="grid grid-cols-1 gap-2 pt-0.5 text-xs"></div>
           </div>
 
-          <!-- 详细行程安排 -->
           <div>
             <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-1"><span>📅</span> <span id="ui-heading-itinerary">详细行程安排</span></h3>
             <div id="poster-daily-list" class="space-y-4"></div>
           </div>
 
-          <!-- 酒店住宿安排 -->
           <div id="poster-hotel-wrapper" class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 space-y-2">
             <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-1"><span>🏨</span> <span id="ui-heading-hotel">酒店住宿安排 (钻级品质)</span></h3>
             <div id="poster-hotel-list" class="space-y-2 text-xs"></div>
           </div>
 
-          <!-- 服务包含与说明 -->
           <div id="poster-inclusions-wrapper" class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 space-y-3">
             <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1"><span>🛡️</span> <span id="ui-heading-inclusions">服务包含与说明</span></h3>
             <div id="poster-inclusions-dynamic-list" class="space-y-2.5 text-xs"></div>
           </div>
 
-          <!-- 费用不含 & 退改政策 -->
           <div id="poster-policy-wrapper" class="grid gap-3 text-xs">
             <div id="poster-exclusions-box" class="bg-gray-50 p-3.5 rounded-xl border border-gray-200">
               <span class="font-bold text-gray-800 block mb-1 text-xs">➖ <span id="ui-lbl-exclusions">费用不含</span></span>
@@ -289,7 +278,6 @@
             </div>
           </div>
 
-          <!-- Klook 品牌宗旨卡片 -->
           <div class="bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 rounded-2xl p-4 text-white shadow-md space-y-2">
             <div class="flex items-center justify-between">
               <span class="tag-badge bg-white/20 backdrop-blur-md text-xs font-black px-2.5 py-1 rounded-full shadow-xs"><span class="tag-text">✨ KLOOK TRAVEL 🧳</span></span>
@@ -299,14 +287,12 @@
             <p id="ui-brand-p2" class="text-xs text-white font-bold leading-relaxed drop-shadow-xs">🚀 连接全球游客与中国目的地，用KLOOK的方式，让定制旅行更简单、更自由、更有趣。</p>
           </div>
 
-          <!-- 联系我们 -->
           <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 space-y-3">
             <h3 class="text-sm font-bold text-gray-800 uppercase tracking-wider flex items-center justify-between border-b border-gray-100 pb-2">
               <span class="flex items-center gap-1.5">🎧 <span id="ui-heading-contact">联系我们 / CONTACT US</span></span>
               <span class="tag-badge text-[10px] bg-orange-100 text-orange-700 px-2.5 py-1 rounded-full font-black tracking-wider"><span class="tag-text">KLOOK EXCLUSIVE BUTLER</span></span>
             </h3>
 
-            <!-- 官方邮箱 Block -->
             <div class="bg-orange-50/60 border border-orange-100 rounded-xl p-3 flex items-center gap-3">
               <div class="w-9 h-9 rounded-lg bg-orange-100 text-orange-600 tag-badge shrink-0 font-bold text-sm shadow-2xs"><span class="tag-text">✉️</span></div>
               <div>
@@ -315,7 +301,6 @@
               </div>
             </div>
 
-            <!-- 二维码 -->
             <div class="grid grid-cols-2 gap-3 pt-1">
               <div class="bg-emerald-50/90 border border-emerald-400 rounded-xl p-3 flex flex-col items-center justify-between h-full">
                 <span class="tag-badge bg-emerald-600 text-white font-black text-xs px-3 py-1.5 rounded-full mb-2"><span class="tag-text">💬 微信管家 / WeChat</span></span>
@@ -330,7 +315,6 @@
             </div>
           </div>
 
-          <!-- 页脚 -->
           <div class="text-center pt-2 border-t border-dashed border-gray-200 pb-2">
             <div class="text-sm font-extrabold text-klook tracking-wider">klook <span class="font-normal text-gray-400">| Private Customized Trip</span></div>
             <div class="text-xs text-gray-400 font-medium mt-1" id="ui-footer-sub">Klook 官方品质保障 · 专属行程规划师为您服务</div>
@@ -341,9 +325,15 @@
   </div>
 
   <script>
-    // ================= 全局状态管理 =================
+    // ================= ⚙️ JSONBin 免费云端数据库配置 =================
+    const JSONBIN_ID = "6aaa5beaac6210605ad3cf38";
+    const JSONBIN_MASTER_KEY = "$2a$10$1cGzLdAUqcvSzIKe3TG4bO1LUIRqRkuzpzobNeXNeEziCMO44laq";
+    const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_ID}`;
+
     let GLOBAL_DAYS_DATA = [];
     let AUTO_CLOUD_IMAGES = {};
+    let CLOUD_MULTI_TEMPLATES = {};
+    let CLOUD_SINGLE_TEMPLATES = [];
 
     let GLOBAL_HIGHLIGHTS_DATA = [
       { icon: "🚘", title: "", desc: "", isManual: false },
@@ -361,7 +351,6 @@
       "https://images.unsplash.com/photo-1563720225384-9a0264b3a4a1?w=800&q=80"
     ];
 
-    // ================= 📚 模版系统引擎 (支持目的地分组与自动提取) =================
     const PRESET_MULTI_TEMPLATES = {
       "yn5d": {
         category: "云南",
@@ -402,19 +391,67 @@
       { category: "通用服务", name: "🛫 专车送机/送站服务", route: "丽江—拉市海—丽江送机" }
     ];
 
+    // ☁️ 自动从 JSONBin 云端抓取所有人共享的模版
+    async function fetchCloudTemplates() {
+      try {
+        const res = await fetch(JSONBIN_URL + "/latest", {
+          headers: { "X-Master-Key": JSONBIN_MASTER_KEY }
+        });
+        if (res.ok) {
+          const result = await res.json();
+          const record = result.record || {};
+          CLOUD_MULTI_TEMPLATES = record.multi || {};
+          CLOUD_SINGLE_TEMPLATES = record.single || [];
+          renderTemplateOptions();
+        }
+      } catch (e) {
+        console.warn("JSONBin fetch fallback:", e);
+      }
+    }
+
+    // ☁️ 自动追加新模版并同步提交到云端
+    async function updateCloudTemplates(newMulti, newSingle) {
+      try {
+        if (newMulti) CLOUD_MULTI_TEMPLATES = { ...CLOUD_MULTI_TEMPLATES, ...newMulti };
+        if (newSingle) CLOUD_SINGLE_TEMPLATES.push(...newSingle);
+
+        const payload = {
+          multi: CLOUD_MULTI_TEMPLATES,
+          single: CLOUD_SINGLE_TEMPLATES
+        };
+
+        const res = await fetch(JSONBIN_URL, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Master-Key": JSONBIN_MASTER_KEY
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+          alert("🚀 模版已全自动同步至云端！团队所有使用者打开网页均可直接使用。");
+          renderTemplateOptions();
+        } else {
+          alert("云端同步失败，请检查网络后再试。");
+        }
+      } catch (e) {
+        alert("网络连接异常，同步失败。");
+      }
+    }
+
     function renderTemplateOptions() {
       const selectMulti = document.getElementById('select-multi-tpl');
       const selectSingle = document.getElementById('select-single-tpl');
 
-      // 1. 渲染多日游模版 (按目的地分组)
+      // 1. 渲染多日游模版 (内置 + 团队云端同步)
       selectMulti.innerHTML = '<option value="">-- 选择多日游模版 (按目的地分类) --</option>';
       const allMulti = [];
       for (let k in PRESET_MULTI_TEMPLATES) {
         allMulti.push({ id: `preset_${k}`, ...PRESET_MULTI_TEMPLATES[k] });
       }
-      const customMulti = JSON.parse(localStorage.getItem('klook_custom_multi') || '{}');
-      for (let k in customMulti) {
-        allMulti.push({ id: `custom_${k}`, ...customMulti[k] });
+      for (let k in CLOUD_MULTI_TEMPLATES) {
+        allMulti.push({ id: `cloud_${k}`, ...CLOUD_MULTI_TEMPLATES[k] });
       }
 
       const multiGroups = {};
@@ -433,15 +470,14 @@
         selectMulti.appendChild(group);
       }
 
-      // 2. 渲染单日行程模版 (按目的地分组)
+      // 2. 渲染单日行程模版 (内置 + 团队云端同步)
       selectSingle.innerHTML = '<option value="">-- 选择单日行程模版 (按目的地分类) --</option>';
       const allSingle = [];
       PRESET_SINGLE_TEMPLATES.forEach((item, idx) => {
         allSingle.push({ id: `preset_${idx}`, ...item });
       });
-      const customSingle = JSON.parse(localStorage.getItem('klook_custom_single') || '[]');
-      customSingle.forEach((item, idx) => {
-        allSingle.push({ id: `custom_${idx}`, ...item });
+      CLOUD_SINGLE_TEMPLATES.forEach((item, idx) => {
+        allSingle.push({ id: `cloud_${idx}`, ...item });
       });
 
       const singleGroups = {};
@@ -471,9 +507,8 @@
         let tpl = null;
         if (val.startsWith('preset_')) {
           tpl = PRESET_MULTI_TEMPLATES[val.replace('preset_', '')];
-        } else if (val.startsWith('custom_')) {
-          const customMulti = JSON.parse(localStorage.getItem('klook_custom_multi') || '{}');
-          tpl = customMulti[val.replace('custom_', '')];
+        } else if (val.startsWith('cloud_')) {
+          tpl = CLOUD_MULTI_TEMPLATES[val.replace('cloud_', '')];
         }
 
         if (tpl) {
@@ -492,7 +527,7 @@
         }
       });
 
-      // 追加单日游行程 (无缝续写 Day N)
+      // 追加单日游行程
       document.getElementById('btn-append-single').addEventListener('click', () => {
         const val = document.getElementById('select-single-tpl').value;
         if (!val) { alert("请先选择一条单日行程！"); return; }
@@ -501,10 +536,9 @@
         if (val.startsWith('preset_')) {
           const idx = parseInt(val.replace('preset_', ''));
           routeText = PRESET_SINGLE_TEMPLATES[idx].route;
-        } else if (val.startsWith('custom_')) {
-          const idx = parseInt(val.replace('custom_', ''));
-          const customSingle = JSON.parse(localStorage.getItem('klook_custom_single') || '[]');
-          routeText = customSingle[idx].route;
+        } else if (val.startsWith('cloud_')) {
+          const idx = parseInt(val.replace('cloud_', ''));
+          routeText = CLOUD_SINGLE_TEMPLATES[idx].route;
         }
 
         if (routeText) {
@@ -533,38 +567,38 @@
         }
       });
 
-      // 存为多日模版 (支持目的地分组)
-      document.getElementById('btn-save-multi-tpl').addEventListener('click', () => {
-        const category = prompt("请输入此行程的目的地/分组名称（例：云南、哈尔滨、新疆、四川）：", "哈尔滨");
+      // 保存为多日游云端模版
+      document.getElementById('btn-save-multi-tpl').addEventListener('click', async () => {
+        const category = prompt("请输入行程的目的地/分组（例：云南、哈尔滨、新疆）：", "哈尔滨");
         if (!category || !category.trim()) return;
 
         const name = prompt("请输入此多日游模版的名称：", "【哈尔滨】冰雪游多日定制");
         if (!name || !name.trim()) return;
 
-        const customMulti = JSON.parse(localStorage.getItem('klook_custom_multi') || '{}');
-        const key = 'custom_' + Date.now();
-        customMulti[key] = {
-          category: category.trim(),
-          name: name.trim(),
-          itinerary: document.getElementById('field-itinerary').value,
-          date: document.getElementById('field-date').value,
-          group: document.getElementById('field-group').value,
-          price: document.getElementById('field-price').value,
-          tickets: document.getElementById('field-tickets').value,
-          traffic: document.getElementById('field-traffic').value,
-          guide: document.getElementById('field-guide').value,
-          exp: document.getElementById('field-exp').value,
-          hotel: document.getElementById('field-hotel').value,
-          exclusions: document.getElementById('field-exclusions').value,
-          cancellation: document.getElementById('field-cancellation').value
+        const key = 'tpl_' + Date.now();
+        const newObj = {
+          [key]: {
+            category: category.trim(),
+            name: name.trim(),
+            itinerary: document.getElementById('field-itinerary').value,
+            date: document.getElementById('field-date').value,
+            group: document.getElementById('field-group').value,
+            price: document.getElementById('field-price').value,
+            tickets: document.getElementById('field-tickets').value,
+            traffic: document.getElementById('field-traffic').value,
+            guide: document.getElementById('field-guide').value,
+            exp: document.getElementById('field-exp').value,
+            hotel: document.getElementById('field-hotel').value,
+            exclusions: document.getElementById('field-exclusions').value,
+            cancellation: document.getElementById('field-cancellation').value
+          }
         };
-        localStorage.setItem('klook_custom_multi', JSON.stringify(customMulti));
-        alert(`🎉 已成功保存到【📍 ${category.trim()}】多日模版库！`);
-        renderTemplateOptions();
+
+        await updateCloudTemplates(newObj, null);
       });
 
-      // 智能提取已写好的单日行程并存为模版
-      document.getElementById('btn-save-single-tpl').addEventListener('click', () => {
+      // 智能提取已写好的单日行程并存为云端模版
+      document.getElementById('btn-save-single-tpl').addEventListener('click', async () => {
         const textarea = document.getElementById('field-itinerary');
         const text = textarea.value.trim();
         if (!text) {
@@ -573,11 +607,6 @@
         }
 
         const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-        if (lines.length === 0) {
-          alert("未找到有效路线！");
-          return;
-        }
-
         let targetRoute = "";
         if (lines.length === 1) {
           targetRoute = lines[0].replace(/^(?:Day\s*\d+|\d{1,2}月\d{1,2}日|\d{1,2}\.\d{1,2})[：:]\s*/i, '');
@@ -586,26 +615,20 @@
           const choice = prompt(`当前文本框有多条行程，请输入数字选择要存为模版的路线：\n\n${optionsStr}`, lines.length.toString());
           if (!choice) return;
           const selectedIndex = parseInt(choice) - 1;
-          if (isNaN(selectedIndex) || selectedIndex < 0 || selectedIndex >= lines.length) {
-            alert("无效的选择！");
-            return;
-          }
+          if (isNaN(selectedIndex) || selectedIndex < 0 || selectedIndex >= lines.length) return;
           targetRoute = lines[selectedIndex].replace(/^(?:Day\s*\d+|\d{1,2}月\d{1,2}日|\d{1,2}\.\d{1,2})[：:]\s*/i, '');
         }
 
-        const category = prompt("1. 请输入目的地/分组名称（例：云南、黑龙江/哈尔滨、新疆）：", "黑龙江/哈尔滨") || "自定义目的地";
+        const category = prompt("1. 请输入目的地/分组名称（例：云南、黑龙江/哈尔滨）：", "黑龙江/哈尔滨") || "自定义目的地";
         const tplName = prompt("2. 请输入此单日模版的展示名称：", `🏰 ${targetRoute}`) || targetRoute;
 
-        const customSingle = JSON.parse(localStorage.getItem('klook_custom_single') || '[]');
-        customSingle.push({
+        const newArr = [{
           category: category.trim(),
           name: tplName.trim(),
           route: targetRoute.trim()
-        });
-        localStorage.setItem('klook_custom_single', JSON.stringify(customSingle));
+        }];
 
-        alert(`🎉 成功提取“${targetRoute}”并归入【📍 ${category.trim()}】单日模版库！`);
-        renderTemplateOptions();
+        await updateCloudTemplates(null, newArr);
       });
     }
 
@@ -979,21 +1002,18 @@
       const lang = document.getElementById('lang-select').value;
       const dict = I18N[lang] || I18N['zh-CN'];
 
-      // 1. 读取所有服务模块勾选状态
       const isCarChecked = document.querySelector('input[name="pkg-module"][value="car"]').checked;
       const isTicketChecked = document.querySelector('input[name="pkg-module"][value="ticket"]').checked;
       const isGuideChecked = document.querySelector('input[name="pkg-module"][value="guide"]').checked;
       const isHotelChecked = document.querySelector('input[name="pkg-module"][value="hotel"]').checked;
       const isExpChecked = document.querySelector('input[name="pkg-module"][value="exp"]').checked;
 
-      // 2. 动态切换左侧面板的输入框显示/隐藏
       document.getElementById('car-input-block').style.display = isCarChecked ? 'block' : 'none';
       document.getElementById('ticket-input-block').style.display = isTicketChecked ? 'block' : 'none';
       document.getElementById('guide-input-block').style.display = isGuideChecked ? 'block' : 'none';
       document.getElementById('hotel-input-block').style.display = isHotelChecked ? 'block' : 'none';
       document.getElementById('exp-input-block').style.display = isExpChecked ? 'block' : 'none';
 
-      // 3. UI 文本国际化
       document.getElementById('ui-banner-tag').innerText = dict.bannerTag;
       document.getElementById('ui-banner-title').innerText = dict.bannerTitle;
       document.getElementById('ui-banner-sub1').innerText = dict.bannerSub;
@@ -1029,7 +1049,6 @@
       document.getElementById('ui-group-info').innerText = groupVal;
       document.getElementById('poster-price-box').innerHTML = priceVal;
 
-      // 4. 每日行程渲染
       const dailyContainer = document.getElementById('poster-daily-list');
       if (GLOBAL_DAYS_DATA.length > 0) {
         dailyContainer.innerHTML = GLOBAL_DAYS_DATA.map((d) => `
@@ -1048,7 +1067,6 @@
         dailyContainer.innerHTML = `<div class="text-center text-xs text-gray-400 py-6 border border-dashed border-gray-200 rounded-xl">Empty Itinerary / 暂无行程</div>`;
       }
 
-      // 动态渲染行程亮点列表
       document.getElementById('poster-highlights-list').innerHTML = GLOBAL_HIGHLIGHTS_DATA.map(h => `
         <div class="flex items-start gap-2.5 bg-white/90 p-2.5 rounded-lg border border-orange-100/70 shadow-2xs">
           <div class="w-7 h-7 rounded-lg bg-orange-100 text-klook tag-badge shrink-0 text-xs font-bold"><span class="tag-text">${h.icon}</span></div>
@@ -1059,7 +1077,6 @@
         </div>
       `).join('');
 
-      // 5. 渲染“服务包含与说明”
       let hRaw = document.getElementById('field-hotel').value || "严选钻级精品客栈/高口碑酒店入住";
       let tickRaw = document.getElementById('field-tickets').value;
       let trafRaw = document.getElementById('field-traffic').value;
@@ -1092,13 +1109,11 @@
       document.getElementById('poster-inclusions-wrapper').style.display = hasAnyInclusions ? 'block' : 'none';
       document.getElementById('poster-inclusions-dynamic-list').innerHTML = incHTML;
 
-      // 酒店模块根据勾选控制
       document.getElementById('poster-hotel-wrapper').style.display = isHotelChecked ? 'block' : 'none';
       if (isHotelChecked) {
         document.getElementById('poster-hotel-list').innerHTML = hRaw.split('\n').filter(s=>s.trim()).map(h => `<div class="flex items-start gap-2 bg-gray-50 p-2 rounded-lg border border-gray-100"><span class="tag-badge bg-klook/10 text-klook font-bold px-1.5 py-0.5 rounded text-xs shrink-0"><span class="tag-text">🏨</span></span><span class="text-gray-800 font-medium text-xs leading-snug mt-0.5">${h}</span></div>`).join('');
       }
 
-      // 6. 费用不含 & 退改政策 (支持选填与单/双栏自适应渲染)
       let exRaw = document.getElementById('field-exclusions').value.trim();
       let canRaw = document.getElementById('field-cancellation').value.trim();
 
@@ -1154,8 +1169,66 @@
       syncItineraryToDaysData();
     }
 
+    async function scanGitHubRepositoryImages() {
+      const GITHUB_BASE = "https://sallyzheng-lang.github.io/klook-tool/";
+      try {
+        const res = await fetch('https://api.github.com/repos/sallyzheng-lang/klook-tool/contents/');
+        if (res.ok) {
+          const files = await res.json();
+          files.forEach(file => {
+            const fileName = file.name;
+            const match = fileName.match(/\.(jpg|jpeg|png|webp)$/i);
+            if (match) {
+              const cleanKeyword = fileName.replace(/\.(jpg|jpeg|png|webp)$/i, '');
+              AUTO_CLOUD_IMAGES[cleanKeyword] = GITHUB_BASE + encodeURIComponent(fileName);
+            }
+          });
+          const tag = document.getElementById('cloud-status-tag');
+          if (tag) {
+            tag.innerText = `已连线 (含 ${Object.keys(AUTO_CLOUD_IMAGES).length} 张云图)`;
+          }
+        }
+      } catch (e) {
+        console.warn("API scan fallback:", e);
+      }
+    }
+
+    function findTeamCloudImage(pois, dayIndex, usedImagesSet) {
+      const routeStr = pois.join(" ");
+
+      for (let key in AUTO_CLOUD_IMAGES) {
+        if (key.length >= 2 && routeStr.includes(key)) {
+          const imgUrl = AUTO_CLOUD_IMAGES[key];
+          if (!usedImagesSet.has(imgUrl)) {
+            usedImagesSet.add(imgUrl);
+            return imgUrl;
+          }
+        }
+      }
+
+      if (pois.some(p => p.includes("接机") || p.includes("送机"))) {
+        const carUrl = "https://images.unsplash.com/photo-1563720225384-9a0264b3a4a1?w=800&q=80";
+        if (!usedImagesSet.has(carUrl)) {
+          usedImagesSet.add(carUrl);
+          return carUrl;
+        }
+      }
+
+      for (let fallback of MULTI_FALLBACK_IMAGES) {
+        if (!usedImagesSet.has(fallback)) {
+          usedImagesSet.add(fallback);
+          return fallback;
+        }
+      }
+
+      const fallback = MULTI_FALLBACK_IMAGES[dayIndex % MULTI_FALLBACK_IMAGES.length];
+      usedImagesSet.add(fallback);
+      return fallback;
+    }
+
     document.addEventListener('DOMContentLoaded', async () => {
       await scanGitHubRepositoryImages();
+      await fetchCloudTemplates();
       initTemplateEvents();
       loadTemplate();
       
