@@ -13,7 +13,7 @@
   </script>
   <!-- html2canvas -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <!-- jsPDF for compact PDF export -->
+  <!-- jsPDF for PDF export -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     .custom-scrollbar::-webkit-scrollbar { width: 4px; }
@@ -219,7 +219,7 @@
     <div id="poster-wrapper" class="lg:col-span-5 flex flex-col items-center">
       <div class="w-[480px] grid grid-cols-2 gap-3 mb-4 no-print">
         <button id="btn-export" class="bg-gray-900 hover:bg-black text-white font-medium py-3 rounded-xl shadow-md transition text-[13px] flex items-center justify-center gap-1.5"><span>📥</span> 导出高清长图</button>
-        <button id="btn-print-pdf" class="bg-amber-600 hover:bg-amber-700 text-white font-medium py-3 rounded-xl shadow-md transition text-[13px] flex items-center justify-center gap-1.5"><span>📄</span> 保存为 PDF (极速压缩)</button>
+        <button id="btn-print-pdf" class="bg-amber-600 hover:bg-amber-700 text-white font-medium py-3 rounded-xl shadow-md transition text-[13px] flex items-center justify-center gap-1.5"><span>📄</span> 保存为高清 PDF</button>
       </div>
       <div class="text-[11px] text-gray-400 mb-2 preview-tip font-medium">海报实时预览区</div>
       
@@ -854,7 +854,6 @@
       btn.innerText = "🔄 正在智能翻译同步中..."; btn.disabled = true;
 
       const itineraryRaw = document.getElementById('field-itinerary').value || "";
-      // 增强切分正则：支持 Day1、Day 1、D1、D1: 等各类写法
       const dayBlocks = itineraryRaw.split(/(?=(?:Day|D)\s*\d+|\d{1,2}月\d{1,2}日|\d{1,2}\.\d{1,2})/gi);
       let newDaysData = [];
       let dayCounter = 1;
@@ -866,7 +865,6 @@
 
         const headerMatch = block.match(/^(?:Day|D)\s*\d+|^\d{1,2}月\d{1,2}日|^\d{1,2}\.\d{1,2}/i);
         if (headerMatch) {
-          // 提取真实路线文案（自动抹去开头的 D1/Day 1 及冒号空格）
           const routeStrCn = block.replace(/^(?:Day|D)\s*\d+[：:\s]*|^\d{1,2}月\d{1,2}日[：:\s]*|^\d{1,2}\.\d{1,2}[：:\s]*/i, '').trim();
           if (!routeStrCn) continue;
 
@@ -1176,63 +1174,6 @@
       syncItineraryToDaysData();
     }
 
-    async function scanGitHubRepositoryImages() {
-      const GITHUB_BASE = "https://sallyzheng-lang.github.io/klook-tool/";
-      try {
-        const res = await fetch('https://api.github.com/repos/sallyzheng-lang/klook-tool/contents/');
-        if (res.ok) {
-          const files = await res.json();
-          files.forEach(file => {
-            const fileName = file.name;
-            const match = fileName.match(/\.(jpg|jpeg|png|webp)$/i);
-            if (match) {
-              const cleanKeyword = fileName.replace(/\.(jpg|jpeg|png|webp)$/i, '');
-              AUTO_CLOUD_IMAGES[cleanKeyword] = GITHUB_BASE + encodeURIComponent(fileName);
-            }
-          });
-          const tag = document.getElementById('cloud-status-tag');
-          if (tag) {
-            tag.innerText = `已连线 (含 ${Object.keys(AUTO_CLOUD_IMAGES).length} 张云图)`;
-          }
-        }
-      } catch (e) {
-        console.warn("API scan fallback:", e);
-      }
-    }
-
-    function findTeamCloudImage(pois, dayIndex, usedImagesSet) {
-      const routeStr = pois.join(" ");
-
-      for (let key in AUTO_CLOUD_IMAGES) {
-        if (key.length >= 2 && routeStr.includes(key)) {
-          const imgUrl = AUTO_CLOUD_IMAGES[key];
-          if (!usedImagesSet.has(imgUrl)) {
-            usedImagesSet.add(imgUrl);
-            return imgUrl;
-          }
-        }
-      }
-
-      if (pois.some(p => p.includes("接机") || p.includes("送机") || p.includes("接站") || p.includes("送站"))) {
-        const carUrl = "https://images.unsplash.com/photo-1563720225384-9a0264b3a4a1?w=800&q=80";
-        if (!usedImagesSet.has(carUrl)) {
-          usedImagesSet.add(carUrl);
-          return carUrl;
-        }
-      }
-
-      for (let fallback of MULTI_FALLBACK_IMAGES) {
-        if (!usedImagesSet.has(fallback)) {
-          usedImagesSet.add(fallback);
-          return fallback;
-        }
-      }
-
-      const fallback = MULTI_FALLBACK_IMAGES[dayIndex % MULTI_FALLBACK_IMAGES.length];
-      usedImagesSet.add(fallback);
-      return fallback;
-    }
-
     document.addEventListener('DOMContentLoaded', async () => {
       await scanGitHubRepositoryImages();
       await fetchCloudTemplates();
@@ -1267,22 +1208,22 @@
         }); 
       });
 
-      // PDF 极速压缩导出引擎
+      // PDF 高清无损导出引擎 (原图模式)
       document.getElementById('btn-print-pdf').addEventListener('click', async () => {
         const posterContainer = document.getElementById('export-poster');
         const btn = document.getElementById('btn-print-pdf');
         const origText = btn.innerHTML;
-        btn.innerHTML = `⌛ 极速生成 PDF 中...`; btn.disabled = true;
+        btn.innerHTML = `⌛ 生成高清 PDF 中...`; btn.disabled = true;
         try {
-          const canvas = await html2canvas(posterContainer, { scale: 1.6, useCORS: true, backgroundColor: "#FAFAFA" });
-          const imgData = canvas.toDataURL('image/jpeg', 0.78);
+          const canvas = await html2canvas(posterContainer, { scale: 2.5, useCORS: true, backgroundColor: "#FAFAFA" });
+          const imgData = canvas.toDataURL('image/png');
           
           const { jsPDF } = window.jspdf;
           const pdfWidth = 210;
           const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
           
           const pdf = new jsPDF('p', 'mm', [pdfWidth, pdfHeight]);
-          pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
+          pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight, undefined, 'NONE');
           pdf.save(`Klook_Customized_Tour.pdf`);
         } catch (err) {
           console.warn("jsPDF error, falling back to browser print:", err);
@@ -1299,7 +1240,7 @@
         const origText = btn.innerHTML;
         btn.innerHTML = `生成海报中...`; btn.disabled = true;
         try {
-          const canvas = await html2canvas(posterContainer, { scale: 1.8, useCORS: true, backgroundColor: "#FAFAFA" });
+          const canvas = await html2canvas(posterContainer, { scale: 2.5, useCORS: true, backgroundColor: "#FAFAFA" });
           const link = document.createElement('a');
           link.download = `Klook_Premium_Tour.png`;
           link.href = canvas.toDataURL('image/png');
