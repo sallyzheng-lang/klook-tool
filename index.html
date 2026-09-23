@@ -1333,34 +1333,272 @@ D1-D2：北京王府井酒店
       }
     };
 
-    // 智能配图与去重匹配工具
-    function matchPhotoForRoute(route, usedUrls = new Set()) {
-      if (!route) return PHOTO_LIBRARY[0].url;
-      // 1. 关键词优先匹配
-      for (const p of PHOTO_LIBRARY) {
-        if (usedUrls.has(p.url)) continue;
-        for (const tag of p.tags) {
-          if (route.includes(tag)) {
-            usedUrls.add(p.url);
-            return p.url;
+    // =====================================================================
+    // 智能配图引擎：GitHub 团队图库 → Wikimedia Commons 公共图库 → 本地公共图库
+    // 规则：整条行程全局去重；手动选图优先保留；自动配图优先使用项目仓库图片。
+    // =====================================================================
+    const IMAGE_ENGINE_CONFIG = {
+      githubOwner: 'sallyzheng-lang',
+      githubRepo: 'klook-tool',
+      githubBranch: 'main',
+      githubTreeApi: 'https://api.github.com/repos/sallyzheng-lang/klook-tool/git/trees/main?recursive=1',
+      githubRawBase: 'https://raw.githubusercontent.com/sallyzheng-lang/klook-tool/main/',
+      githubCacheKey: 'klook_github_image_index_v1',
+      githubCacheTTL: 6 * 60 * 60 * 1000,
+      publicCacheTTL: 24 * 60 * 60 * 1000,
+      maxGitHubCandidates: 30,
+      maxPublicCandidates: 12
+    };
+
+    let githubImageIndex = null;
+    const publicImageCache = new Map();
+
+    function normalizeImageText(value = '') {
+      return String(value)
+        .toLowerCase()
+        .replace(/%20/g, ' ')
+        .replace(/[._()\[\]{}\-—_/\\]+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
+    function imageTextTokens(value = '') {
+      const normalized = normalizeImageText(value);
+      if (!normalized) return [];
+      const stopWords = new Set([
+        '中国','旅游','旅行','景区','景点','一日游','二日游','三日游','四日游','五日游','六日游','七日游',
+        '专车','送机','接机','出发','返回','前往','抵达','入住','酒店','自由活动','全天','上午','下午','晚上',
+        'day','d1','d2','d3','d4','d5','d6','d7','d8','the','and','of','to','trip','tour','travel','china'
+      ]);
+      return normalized.split(/[^a-z0-9\u3400-\u9fff]+/i).filter(t => t && t.length >= 2 && !stopWords.has(t));
+    }
+
+    function getRouteSearchTerms(route = '') {
+      const raw = String(route || '');
+      const tokens = imageTextTokens(raw);
+      const terms = [];
+
+      // 保留完整路线作为最高层级查询，同时提取中文连续词组、城市/景点词。
+      const add = (v) => {
+        const x = String(v || '').trim();
+        if (x && x.length >= 2 && !terms.includes(x)) terms.push(x);
+      };
+      add(raw.replace(/^(D|Day)\s*\d+\s*[:：]?/i, ''));
+
+      const knownTerms = [
+        '故宫','长城','慕田峪','八达岭','颐和园','天坛','什刹海','胡同','鸟巢','水立方','天安门',
+        '外滩','陆家嘴','豫园','西湖','雷峰塔','灵隐寺','拙政园','平江路','乌镇','西塘',
+        '熊猫','大熊猫','熊猫基地','都江堰','青城山','洪崖洞','解放碑','李子坝','九寨沟','黄龙','四姑娘山','双桥沟',
+        '洱海','大理古城','双廊','苍山','玉龙雪山','蓝月谷','丽江古城','香格里拉','普达措','松赞林寺',
+        '喀纳斯','禾木','白哈巴','天山','天池','喀什','吐鲁番','五彩滩',
+        '漓江','阳朔','遇龙河','兴坪','兵马俑','大雁塔','大唐不夜城','西安城墙'
+      ];
+      knownTerms.forEach(term => { if (raw.includes(term)) add(term); });
+
+      tokens.forEach(t => add(t));
+      return terms.slice(0, 10);
+    }
+
+    function imagePathLooksLikeImage(path = '') {
+      return /\.(jpe?g|png|webp|gif)$/i.test(path.split('?')[0]);
+    }
+
+    function imageFileName(path = '') {
+      const name = String(path).split('/').pop() || '';
+      return decodeURIComponent(name.replace(/\.[^.]+$/, ''));
+    }
+
+    function getCachedGitHubImageIndex() {
+      try {
+        const raw = localStorage.getItem(IMAGE_ENGINE_CONFIG.githubCacheKey);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        if (!parsed?.savedAt || Date.now() - parsed.savedAt > IMAGE_ENGINE_CONFIG.githubCacheTTL) return null;
+        return Array.isArray(parsed.items) ? parsed.items : null;
+      } catch { return null; }
+    }
+
+    function saveGitHubImageIndex(items) {
+      try {
+        localStorage.setItem(IMAGE_ENGINE_CONFIG.githubCacheKey, JSON.stringify({ savedAt: Date.now(), items }));
+      } catch {}
+    }
+
+    async function loadGitHubImageIndex(forceRefresh = false) {
+      if (!forceRefresh && Array.isArray(githubImageIndex)) return githubImageIndex;
+      if (!forceRefresh) {
+        const cached = getCachedGitHubImageIndex();
+        if (cached?.length) {
+          githubImageIndex = cached;
+          return githubImageIndex;
+        }
+      }
+
+      try {
+        const response = await fetch(IMAGE_ENGINE_CONFIG.githubTreeApi, {
+          headers: { 'Accept': 'application/vnd.github+json' }
+        });
+        if (!response.ok) throw new Error(`GitHub API ${response.status}`);
+        const data = await response.json();
+        const items = (data.tree || [])
+          .filter(item => item.type === 'blob' && imagePathLooksLikeImage(item.path))
+          .map(item => ({
+            path: item.path,
+            name: imageFileName(item.path),
+            url: IMAGE_ENGINE_CONFIG.githubRawBase + item.path.split('/').map(encodeURIComponent).join('/')
+          }));
+        githubImageIndex = items;
+        saveGitHubImageIndex(items);
+        return items;
+      } catch (err) {
+        console.warn('GitHub 团队图库索引获取失败，将启用公共图库兜底：', err);
+        return [];
+      }
+    }
+
+    function scoreGitHubImage(item, terms) {
+      const haystack = normalizeImageText(`${item.name} ${item.path}`);
+      let score = 0;
+      terms.forEach(term => {
+        const t = normalizeImageText(term);
+        if (!t) return;
+        if (haystack.includes(t)) score += t.length >= 4 ? 100 : 60;
+        const tTokens = imageTextTokens(t);
+        tTokens.forEach(token => {
+          if (haystack.includes(token)) score += token.length >= 4 ? 24 : 10;
+        });
+      });
+      return score;
+    }
+
+    function findGitHubImageCandidates(items, terms, usedUrls) {
+      return items
+        .filter(item => item?.url && !usedUrls.has(item.url))
+        .map(item => ({ item, score: scoreGitHubImage(item, terms) }))
+        .filter(x => x.score > 0)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, IMAGE_ENGINE_CONFIG.maxGitHubCandidates)
+        .map(x => x.item);
+    }
+
+    async function searchWikimediaCommons(query) {
+      const q = String(query || '').trim();
+      if (!q) return [];
+      const cacheKey = normalizeImageText(q);
+      const cached = publicImageCache.get(cacheKey);
+      if (cached && Date.now() - cached.savedAt < IMAGE_ENGINE_CONFIG.publicCacheTTL) return cached.items;
+
+      try {
+        const url = new URL('https://commons.wikimedia.org/w/api.php');
+        url.searchParams.set('action', 'query');
+        url.searchParams.set('generator', 'search');
+        url.searchParams.set('gsrsearch', q);
+        url.searchParams.set('gsrnamespace', '6');
+        url.searchParams.set('gsrlimit', String(IMAGE_ENGINE_CONFIG.maxPublicCandidates));
+        url.searchParams.set('prop', 'imageinfo');
+        url.searchParams.set('iiprop', 'url');
+        url.searchParams.set('iiurlwidth', '1600');
+        url.searchParams.set('format', 'json');
+        url.searchParams.set('origin', '*');
+
+        const response = await fetch(url.toString());
+        if (!response.ok) throw new Error(`Wikimedia ${response.status}`);
+        const data = await response.json();
+        const items = Object.values(data.query?.pages || {})
+          .map(page => ({
+            name: page.title?.replace(/^File:/i, '') || '',
+            url: page.imageinfo?.[0]?.thumburl || page.imageinfo?.[0]?.url || '',
+            source: 'wikimedia'
+          }))
+          .filter(item => item.url && /^https?:\/\//i.test(item.url));
+
+        publicImageCache.set(cacheKey, { savedAt: Date.now(), items });
+        return items;
+      } catch (err) {
+        console.warn(`公共图库搜索失败：${q}`, err);
+        return [];
+      }
+    }
+
+    async function findPublicImage(route, usedUrls) {
+      const terms = getRouteSearchTerms(route);
+      if (!terms.length) return null;
+
+      // 先用最具体的 POI 搜索，再逐级放宽到城市/路线。
+      const queries = [];
+      terms.slice(0, 4).forEach(term => {
+        if (!queries.includes(term)) queries.push(term);
+      });
+      if (terms.length > 1) queries.push(terms.slice(0, 2).join(' '));
+
+      for (const query of queries) {
+        const candidates = await searchWikimediaCommons(query);
+        for (const item of candidates) {
+          if (!usedUrls.has(item.url)) {
+            usedUrls.add(item.url);
+            return item.url;
           }
         }
       }
-      // 2. 次级匹配 (城市或区域)
-      for (const p of PHOTO_LIBRARY) {
-        if (!usedUrls.has(p.url) && (route.includes(p.city) || route.includes(p.name))) {
-          usedUrls.add(p.url);
-          return p.url;
-        }
+      return null;
+    }
+
+    function findLocalFallbackImage(route, usedUrls) {
+      if (!Array.isArray(PHOTO_LIBRARY) || !PHOTO_LIBRARY.length) return '';
+      const terms = getRouteSearchTerms(route);
+      const scored = PHOTO_LIBRARY
+        .filter(p => p?.url && !usedUrls.has(p.url))
+        .map(p => ({ p, score: scoreGitHubImage({ name: p.name, path: `${p.city} ${(p.tags || []).join(' ')}` }, terms) }))
+        .sort((a, b) => b.score - a.score);
+      const hit = scored.find(x => x.score > 0)?.p || scored[0]?.p;
+      if (hit) {
+        usedUrls.add(hit.url);
+        return hit.url;
       }
-      // 3. 兜底选取未使用过的
-      for (const p of PHOTO_LIBRARY) {
-        if (!usedUrls.has(p.url)) {
-          usedUrls.add(p.url);
-          return p.url;
-        }
+      return '';
+    }
+
+    async function matchPhotoForRoute(route, usedUrls = new Set()) {
+      if (!route) return findLocalFallbackImage('', usedUrls) || '';
+
+      // ① 第一优先：当前 GitHub 仓库中已经录入的团队图片。
+      const githubItems = await loadGitHubImageIndex();
+      const terms = getRouteSearchTerms(route);
+      const githubCandidates = findGitHubImageCandidates(githubItems, terms, usedUrls);
+      if (githubCandidates.length) {
+        const chosen = githubCandidates[0];
+        usedUrls.add(chosen.url);
+        return chosen.url;
       }
-      return PHOTO_LIBRARY[0].url;
+
+      // ② 第二优先：Wikimedia Commons 公共图库。
+      const publicImage = await findPublicImage(route, usedUrls);
+      if (publicImage) return publicImage;
+
+      // ③ 最终兜底：现有内置公共图库，仍然遵守全行程去重。
+      return findLocalFallbackImage(route, usedUrls) || '';
+    }
+
+    async function assignUniqueImagesToDays(days, existingDays = []) {
+      const usedUrls = new Set();
+      const oldMap = new Map((existingDays || []).map(d => [d.day, d]));
+      const result = [];
+
+      for (const day of days || []) {
+        const oldDay = oldMap.get(day.day);
+
+        // 用户手动上传/手动选取的图片永远保留，并进入全局去重池。
+        if (oldDay?.manuallyEdited && oldDay.image) {
+          usedUrls.add(oldDay.image);
+          result.push({ ...day, image: oldDay.image, manuallyEdited: true });
+          continue;
+        }
+
+        const image = await matchPhotoForRoute(day.route, usedUrls);
+        result.push({ ...day, image, manuallyEdited: false });
+      }
+
+      return result;
     }
 
     // 呼叫 Gemini 3 Flash 生成全套高端定制行程
@@ -2075,7 +2313,7 @@ ${daysContext}
     }
 
     // 仅本地智能解析与同步
-    function syncAndGenerateLocal() {
+    async function syncAndGenerateLocal() {
       readFormInputs();
       const parsed = parseItineraryText(state.itineraryText);
       if (parsed.length === 0) {
@@ -2086,31 +2324,23 @@ ${daysContext}
       state.destination = DestinationEngine.detectDestination(state.destination, parsed);
       document.getElementById('field-destination').value = state.destination;
 
-      const usedPhotoUrls = new Set();
-      state.days = parsed.map(p => {
-        const oldDay = state.days.find(d => d.day === p.day);
-        if (oldDay && oldDay.manuallyEdited) {
-          return {
-            ...oldDay,
-            route: p.route
-          };
-        }
-        return {
-          day: p.day,
-          route: p.route,
-          title: `探索 · ${p.route.split(/[-—,\s/]/)[0] || '核心胜境'}`,
-          description: `专属专车平稳直达，在金牌向导带领下深度领略【${p.route}】的独特风光与人文内涵，按客人专属节奏舒心游览。`,
-          image: matchPhotoForRoute(p.route, usedPhotoUrls),
-          manuallyEdited: false
-        };
-      });
+      showNotification('🖼️ 正在按「GitHub团队图库 → 公共图库 → 内置图库」自动配图，并确保全行程不重复...', '⏳');
+      const existingDays = Array.isArray(state.days) ? state.days : [];
+      state.days = await assignUniqueImagesToDays(parsed.map(p => ({
+        day: p.day,
+        route: p.route,
+        title: `探索 · ${p.route.split(/[-—,\s/]/)[0] || '核心胜境'}`,
+        description: `专属专车平稳直达，在金牌向导带领下深度领略【${p.route}】的独特风光与人文内涵，按客人专属节奏舒心游览。`,
+        image: '',
+        manuallyEdited: false
+      })), existingDays);
 
       state.overallHighlights = DestinationEngine.generateFallbackHighlights(state.destination);
       updateBannerSourceOptions();
       renderMiddleCardEditors();
       renderPosterPreview();
       saveDraftToLocalStorage();
-      showNotification('✅ 路线解析与配图同步成功！');
+      showNotification('✅ 路线解析与配图同步成功：团队 GitHub 图片优先，整条行程已完成去重。');
     }
 
     // 点击「✨ AI 帮写：智能生成全套高端定制文案」
@@ -2136,8 +2366,6 @@ ${daysContext}
       btn.classList.remove('opacity-80');
       spinner.classList.add('hidden');
 
-      const usedPhotoUrls = new Set();
-
       if (aiResult) {
         if (aiResult.destination && !state.destination.trim()) {
           state.destination = aiResult.destination;
@@ -2155,21 +2383,20 @@ ${daysContext}
           state.overallHighlights = aiResult.overallHighlights;
         }
 
-        // 匹配每日文案
-        state.days = parsed.map(p => {
+        // 匹配每日文案 + 统一图片引擎：GitHub 团队图库优先，整条行程全局去重
+        const existingDays = Array.isArray(state.days) ? state.days : [];
+        const generatedDays = parsed.map(p => {
           const aiDay = aiResult.days?.find(ad => ad.day === p.day);
-          const oldDay = state.days.find(d => d.day === p.day);
-          const img = oldDay?.image || matchPhotoForRoute(p.route, usedPhotoUrls);
-
           return {
             day: p.day,
             route: p.route,
             title: aiDay?.title || `探索 · ${p.route.split(/[-—,\s/]/)[0]}`,
             description: aiDay?.description || `专车前往【${p.route}】，金牌向导为您讲述深厚人文脉络，尽享纯玩私密惬意时光。`,
-            image: img,
+            image: '',
             manuallyEdited: false
           };
         });
+        state.days = await assignUniqueImagesToDays(generatedDays, existingDays);
 
         translationCache['zh-HK'] = null;
         translationCache['en'] = null;
@@ -2220,33 +2447,42 @@ ${daysContext}
     let currentTemplateFolder = 'all';
 
     // 获取所有可用目的地文件夹列表 (综合官方预置 + 模版动态抽取 + 用户新建文件夹)
-    // 统一计算“模板实际所属文件夹”。统计和筛选必须共用这一套规则，避免出现“标签显示 1 个，但点进去是空的”。
-    function resolveTemplateFolder(t) {
-      const explicitFolder = String(t?.folder || '').trim();
-      if (explicitFolder) return explicitFolder;
-      const dest = String(t?.destination || '').trim();
-      if (!dest) return '综合定制';
-      if (dest === '北京' || dest.includes('北京')) return '北京';
-      if (dest === '华东江南' || /(上海|苏州|杭州|乌镇)/.test(dest)) return '华东江南';
-      if (dest === '川渝地区' || /(成都|重庆|九寨沟|四姑娘山|毕棚沟)/.test(dest)) return '川渝地区';
-      if (dest === '云南地区' || /(云南|大理|丽江|香格里拉|昆明|西双版纳)/.test(dest)) return '云南地区';
-      if (dest === '新疆西北' || /(新疆|喀纳斯|乌鲁木齐|喀什|伊犁)/.test(dest)) return '新疆西北';
-      if (dest === '陕西西安' || /(西安|陕西)/.test(dest)) return '陕西西安';
-      return dest.split(/[-—,，、\s/]/)[0] || '综合定制';
-    }
-
     function getTemplateDestinationFolders(allList) {
       const folderMap = new Map();
+
+      // 默认基础文件夹列表
       const baseFolders = ['北京', '华东江南', '川渝地区', '云南地区', '新疆西北', '陕西西安'];
       baseFolders.forEach(f => folderMap.set(f, 0));
-      getCustomFolders().forEach(f => {
-        const name = String(f || '').trim();
-        if (name && !folderMap.has(name)) folderMap.set(name, 0);
+
+      // 用户自定义新建的文件夹
+      const customFolders = getCustomFolders();
+      customFolders.forEach(f => {
+        if (!folderMap.has(f)) folderMap.set(f, 0);
       });
+
+      // 统计各文件夹内“实际归属”的模版数量
+      // 规则：有明确 folder 的模版只计入该 folder；没有 folder 的历史/官方预置模版才按目的地规则归类。
+      // 这样可以避免“新建空文件夹”因为 destination 恰好匹配而错误显示 1。
       allList.forEach(t => {
-        const folderName = resolveTemplateFolder(t);
-        if (folderMap.has(folderName)) folderMap.set(folderName, folderMap.get(folderName) + 1);
+        let folderName = (t.folder || '').trim();
+
+        if (!folderName) {
+          const dest = t.destination || '';
+          if (dest.includes('北京')) folderName = '北京';
+          else if (dest.includes('上海') || dest.includes('苏州') || dest.includes('杭州') || dest.includes('乌镇')) folderName = '华东江南';
+          else if (dest.includes('成都') || dest.includes('重庆') || dest.includes('九寨沟')) folderName = '川渝地区';
+          else if (dest.includes('云南') || dest.includes('大理') || dest.includes('丽江') || dest.includes('香格里拉')) folderName = '云南地区';
+          else if (dest.includes('新疆') || dest.includes('喀纳斯') || dest.includes('乌鲁木齐')) folderName = '新疆西北';
+          else if (dest.includes('西安') || dest.includes('陕西')) folderName = '陕西西安';
+          else folderName = dest.split(/[-—,\s/]/)[0] || '综合定制';
+        }
+
+        // 只有已经存在的文件夹才累计；避免产生幽灵文件夹计数。
+        if (folderMap.has(folderName)) {
+          folderMap.set(folderName, folderMap.get(folderName) + 1);
+        }
       });
+
       return folderMap;
     }
 
@@ -2473,8 +2709,17 @@ ${daysContext}
 
       // 文件夹过滤
       if (activeFolder !== 'all') {
-        // 与文件夹数量统计共用 resolveTemplateFolder，保证数量与实际内容一致。
-        list = list.filter(t => resolveTemplateFolder(t) === activeFolder);
+        list = list.filter(t => {
+          if (t.folder) return t.folder === activeFolder;
+          const dest = t.destination || '';
+          if (activeFolder === '华东江南') return dest.includes('上海') || dest.includes('苏州') || dest.includes('杭州') || dest.includes('乌镇');
+          if (activeFolder === '川渝地区') return dest.includes('成都') || dest.includes('重庆') || dest.includes('九寨沟');
+          if (activeFolder === '云南地区') return dest.includes('云南') || dest.includes('大理') || dest.includes('丽江') || dest.includes('香格里拉');
+          if (activeFolder === '新疆西北') return dest.includes('新疆') || dest.includes('喀纳斯') || dest.includes('乌鲁木齐');
+          if (activeFolder === '陕西西安') return dest.includes('西安') || dest.includes('陕西');
+          if (activeFolder === '北京') return dest.includes('北京');
+          return dest.includes(activeFolder);
+        });
       }
 
       // 搜索过滤
@@ -3465,37 +3710,14 @@ ${daysContext}
           folders: Array.from(folderMap.keys()),
           templates: allTpls
         };
-    // 统一计算“模板实际所属文件夹”。统计和筛选必须共用这一套规则，避免出现“标签显示 1 个，但点进去是空的”。
-    function resolveTemplateFolder(t) {
-      const explicitFolder = String(t?.folder || '').trim();
-      if (explicitFolder) return explicitFolder;
-      const dest = String(t?.destination || '').trim();
-      if (!dest) return '综合定制';
-      if (dest === '北京' || dest.includes('北京')) return '北京';
-      if (dest === '华东江南' || /(上海|苏州|杭州|乌镇)/.test(dest)) return '华东江南';
-      if (dest === '川渝地区' || /(成都|重庆|九寨沟|四姑娘山|毕棚沟)/.test(dest)) return '川渝地区';
-      if (dest === '云南地区' || /(云南|大理|丽江|香格里拉|昆明|西双版纳)/.test(dest)) return '云南地区';
-      if (dest === '新疆西北' || /(新疆|喀纳斯|乌鲁木齐|喀什|伊犁)/.test(dest)) return '新疆西北';
-      if (dest === '陕西西安' || /(西安|陕西)/.test(dest)) return '陕西西安';
-      return dest.split(/[-—,，、\s/]/)[0] || '综合定制';
-    }
-
-    function getTemplateDestinationFolders(allList) {
-      const folderMap = new Map();
-      const baseFolders = ['北京', '华东江南', '川渝地区', '云南地区', '新疆西北', '陕西西安'];
-      baseFolders.forEach(f => folderMap.set(f, 0));
-      getCustomFolders().forEach(f => {
-        const name = String(f || '').trim();
-        if (name && !folderMap.has(name)) folderMap.set(name, 0);
-      });
-      allList.forEach(t => {
-        const folderName = resolveTemplateFolder(t);
-        if (folderMap.has(folderName)) folderMap.set(folderName, folderMap.get(folderName) + 1);
-      });
-      return folderMap;
-    }
-
-    // ==================== 文本导入模板
+        const blob = new Blob([JSON.stringify(pack, null, 2)], { type: 'application/json;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Klook定制游_团队模板包_v1.0_${new Date().toISOString().slice(0,10)}.json`;
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        showNotification(`✅ 已导出团队模板包，共 ${allTpls.length} 个模板，可发给同事批量导入！`);
       });
 
       // 导入模板库 JSON：兼容旧版数组、单模板，以及新版团队模板包
