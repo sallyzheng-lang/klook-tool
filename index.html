@@ -47,22 +47,15 @@
       background: #94a3b8;
     }
 
-    /* html2canvas 强效水平垂直居中修正，彻底解决导出 PNG/PDF 时文字偏向底部错位 Bug */
-    .poster-badge {
+    /* 全局胶囊标签防下沉居中规范：彻底杜绝 Emoji / 中英文混排导致的文字下沉与出格 */
+    .pill-badge {
       display: inline-flex !important;
       align-items: center !important;
       justify-content: center !important;
-      text-align: center !important;
       line-height: 1 !important;
       vertical-align: middle !important;
+      white-space: nowrap !important;
       box-sizing: border-box !important;
-      transform: none !important;
-    }
-    .poster-badge span, .poster-badge div {
-      line-height: 1 !important;
-      display: inline-flex !important;
-      align-items: center !important;
-      justify-content: center !important;
     }
 
     .export-day-badge {
@@ -70,13 +63,52 @@
       align-items: center !important;
       justify-content: center !important;
       flex: 0 0 auto !important;
-      height: 26px !important;
-      min-width: 60px !important;
-      padding: 0 10px !important;
+      height: 28px !important;
+      min-width: 62px !important;
+      padding: 0 !important;
       line-height: 1 !important;
       vertical-align: middle !important;
       white-space: nowrap !important;
       box-sizing: border-box !important;
+      transform: none !important;
+      overflow: hidden !important;
+      text-align: center !important;
+    }
+
+    /* html2canvas 对中文/Emoji 的字体基线处理容易出现视觉下沉，单独包一层固定行高文字。 */
+    .export-day-badge-text {
+      display: block !important;
+      width: 100% !important;
+      line-height: 28px !important;
+      height: 28px !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      text-align: center !important;
+      white-space: nowrap !important;
+      font-size: 12px !important;
+      font-weight: 900 !important;
+      box-sizing: border-box !important;
+      transform: translateY(0) !important;
+    }
+
+    /* 导出时再强制一次，避免 Tailwind / html2canvas 克隆节点后覆盖。 */
+    .pdf-export-fix .export-day-badge {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      height: 28px !important;
+      padding: 0 !important;
+      line-height: 1 !important;
+    }
+
+    .pdf-export-fix .export-day-badge-text {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      height: 28px !important;
+      line-height: 28px !important;
+      padding: 0 !important;
+      margin: 0 !important;
       transform: none !important;
     }
 
@@ -116,15 +148,16 @@
           <div class="flex items-center gap-2">
             <span class="text-sm font-extrabold text-slate-900 tracking-tight">Klook行程海报生成器</span>
             <span class="text-[10px] bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded font-bold">AI 智能版</span>
-            <span class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold flex items-center gap-1">
-              <span>⚡</span> <span>Gemini AI 直连就绪</span>
-            </span>
           </div>
-          <p class="text-[11px] text-slate-400">全国通用目的地 · Gemini AI 智能帮写 · 自加高清云图库 · 繁简英多语言</p>
+          <p class="text-[11px] text-slate-400">全国通用目的地 · Gemini AI 智能帮写 · 团队云图库去重 · 繁简英多语言</p>
         </div>
       </div>
 
       <div class="flex items-center flex-wrap gap-2">
+        <div class="text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1.5 rounded-lg font-bold flex items-center gap-1.5" title="Gemini AI 服务已默认直连就绪">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span>Gemini AI 直连就绪</span>
+        </div>
         <button id="btn-open-cloud-gallery-top" type="button" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1.5 rounded-lg font-bold transition flex items-center gap-1">
           <span>🖼️</span> <span>云端图库</span>
         </button>
@@ -165,11 +198,11 @@
       <div class="bg-emerald-50/80 border border-emerald-200 p-3 rounded-xl space-y-1.5">
         <div class="flex items-center justify-between">
           <span class="text-xs font-bold text-emerald-950 flex items-center gap-1.5">
-            <span>☁️</span> <span>自建团队图库 (本地离线+全员共享)</span>
+            <span>☁️</span> <span>团队公共图库（GitHub 全员共享）</span>
           </span>
-          <span id="gallery-status-badge" class="text-[10px] bg-emerald-200 text-emerald-900 px-2 py-0.5 rounded-full font-black">自建图库就绪</span>
+          <span class="text-[10px] bg-emerald-200 text-emerald-900 px-2 py-0.5 rounded-full font-black">GitHub 公共图库</span>
         </div>
-        <p class="text-[11px] text-emerald-800 leading-tight">已启用 IndexedDB 大容量图库引擎，支持自由上传与导入高清实景地标图片。</p>
+        <p class="text-[11px] text-emerald-800 leading-tight">公共实景图库统一读取 GitHub 仓库；更新仓库图片后，团队成员刷新/重新打开图库即可同步。</p>
       </div>
 
       <!-- 海报头部封面视觉设置 -->
@@ -178,17 +211,17 @@
           <label class="text-xs font-bold text-slate-800 flex items-center gap-1">
             <span>🌄</span> <span>海报头部封面视觉设置</span>
           </label>
-          <span class="text-[10px] text-slate-500 font-medium">支持自建图库/本地上传</span>
+          <span class="text-[10px] text-slate-500 font-medium">支持云图/本地上传</span>
         </div>
 
         <button id="btn-banner-cloud-picker" type="button" class="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold py-2 px-3 rounded-lg text-xs shadow-2xs transition flex items-center justify-center gap-1.5">
-          <span>☁️</span> <span>从图库自选头图</span>
+          <span>☁️</span> <span>从团队公共图库自选头图</span>
         </button>
 
         <div class="space-y-1">
           <select id="banner-source-select" class="w-full bg-white border border-slate-200 rounded-lg p-2 text-xs outline-none focus:ring-1 focus:ring-orange-500 font-medium">
             <option value="gradient">经典 Klook 渐变质感背景</option>
-            <option value="cloud">☁️ 自建团队图库 (已选)</option>
+            <option value="cloud">☁️ 团队公共图库 (GitHub)</option>
             <option value="upload">📁 本地上传精美高清横图</option>
             <option value="url">🔗 输入网络图片直链 URL</option>
           </select>
@@ -206,9 +239,9 @@
 
         <!-- 封面实时缩略图与暗度滑块 -->
         <div id="banner-preview-box" class="hidden flex items-center gap-2.5 bg-white p-2 rounded-lg border border-slate-200">
-          <img id="banner-thumb-img" src="" class="w-16 h-10 object-cover rounded shadow-2xs" alt="Banner Thumb">
+          <img id="banner-thumb-img" src="" class="w-16 h-10 object-cover rounded shadow-2xs" alt="Banner Thumb" crossorigin="anonymous">
           <div class="flex-1 min-w-0">
-            <div id="banner-thumb-desc" class="text-[11px] font-bold text-slate-800 truncate">头图已选定</div>
+            <div id="banner-thumb-desc" class="text-[11px] font-bold text-slate-800 truncate">云端头图已选定</div>
             <button id="btn-banner-reset-gradient" type="button" class="text-[10px] text-rose-600 hover:underline font-bold mt-0.5">恢复默认渐变</button>
           </div>
         </div>
@@ -390,10 +423,10 @@
       </div>
 
       <div class="text-[11px] text-amber-800 bg-amber-50/80 p-2.5 rounded-xl border border-amber-200/70 leading-snug">
-        💡 <b>提示</b>：您可以在此手动修改文案或更换图片，手动修改拥有最高优先级，刷新不覆盖。
+        💡 <b>提示</b>：系统已为您自动匹配去重实景图并提炼精准卖点。您可以在此手动修改文案或更换图片，手动修改拥有最高优先级，刷新不覆盖。
       </div>
 
-      <!-- 总体亮点编辑器 -->
+      <!-- 总体亮点编辑器 (双层结构：加粗小标题 + 细致描述) -->
       <div id="highlights-editor-container" class="bg-amber-50/60 border border-amber-200 rounded-xl p-3.5 space-y-3">
         <div class="flex items-center justify-between border-b border-amber-200/60 pb-2">
           <span class="text-xs font-bold text-amber-950 flex items-center gap-1">✨ 行程尊享亮点 (分层配置)</span>
@@ -426,7 +459,7 @@
           </button>
         </div>
         <div class="flex items-center justify-between px-1 text-[11px] text-slate-500">
-          <span>💡 1:1 完整导出当前所见海报长图，宽度贴合标准 A4 (210mm)，文字端正对齐</span>
+          <span>💡 1:1 完整导出当前所见海报长图，宽度贴合标准 A4 (210mm)，绝无断片错位</span>
           <span class="text-emerald-600 font-bold">✨ 所见即所得品质</span>
         </div>
       </div>
@@ -436,17 +469,17 @@
         
         <!-- 海报头图 Banner -->
         <div id="poster-banner" class="w-full relative overflow-hidden bg-gradient-to-br from-orange-600 via-amber-600 to-rose-700 p-6 flex flex-col justify-between text-white transition-all shadow-inner" style="min-height: 230px;">
+          <!-- 头图背景遮罩 -->
           <div id="poster-banner-overlay" class="absolute inset-0 z-0 pointer-events-none transition-all"></div>
           
           <div class="flex justify-between items-center z-10 w-full gap-2">
             <div class="flex items-center gap-2 shrink-0">
-              <span class="poster-badge bg-klook text-white font-black text-xs px-2.5 h-[22px] rounded-md tracking-wider shadow-md shrink-0">klook</span>
-              <span class="poster-badge bg-slate-900/60 text-amber-200 text-[11px] px-2.5 h-[22px] rounded-md font-extrabold border border-amber-300/40 gap-1 shadow-sm shrink-0">
-                <span class="text-xs leading-none">👑</span>
-                <span id="ui-banner-badge" class="leading-none">Klook 尊享私人定制</span>
+              <span class="pill-badge bg-klook text-white font-black text-xs px-2.5 h-[22px] rounded-md tracking-wider shadow-md shrink-0">klook</span>
+              <span class="pill-badge bg-slate-900/60 text-amber-200 text-[11px] px-2.5 h-[22px] rounded-md font-extrabold border border-amber-300/40 gap-1.5 shadow-sm shrink-0">
+                <span class="text-xs">👑</span> <span id="ui-banner-badge">Klook 尊享私人定制</span>
               </span>
             </div>
-            <span class="poster-badge text-[10px] text-amber-100/90 font-extrabold uppercase tracking-wider bg-slate-900/50 px-2.5 h-[22px] rounded shrink-0 border border-white/10">BESPOKE INBOUND</span>
+            <span class="pill-badge text-[10px] text-amber-100/90 font-extrabold uppercase tracking-wider bg-slate-900/50 px-2.5 h-[22px] rounded shrink-0 border border-white/10">BESPOKE INBOUND</span>
           </div>
 
           <div class="z-10 my-auto pt-4 pb-2">
@@ -462,15 +495,15 @@
           <!-- 封底横条：信息高亮模块 -->
           <div class="z-10 bg-slate-900/85 text-white px-4 py-2.5 -mx-6 -mb-6 mt-3 flex justify-between items-center border-t border-white/15">
             <div class="flex items-center gap-2">
-              <span id="poster-date-badge" class="poster-badge bg-gradient-to-r from-orange-500 to-amber-500 text-white text-[11px] font-extrabold px-2.5 h-[24px] rounded-md shadow-xs gap-1">
-                <span class="leading-none">📅</span> <span class="leading-none">10月12日</span>
+              <span id="poster-date-badge" class="pill-badge bg-gradient-to-r from-orange-500 to-amber-500 text-white text-[11px] font-extrabold px-3 h-6 rounded-md shadow-xs gap-1">
+                <span>📅</span> <span>10月12日</span>
               </span>
-              <span id="poster-group-badge" class="poster-badge text-[11px] text-amber-100 font-bold bg-white/15 border border-white/20 px-2.5 h-[24px] rounded-md gap-1">
-                <span class="leading-none">👥</span> <span class="leading-none">4大1小</span>
+              <span id="poster-group-badge" class="pill-badge text-[11px] text-amber-100 font-bold bg-white/15 border border-white/20 px-3 h-6 rounded-md gap-1">
+                <span>👥</span> <span>4大1小</span>
               </span>
             </div>
-            <div id="poster-price-val" class="poster-badge text-amber-300 font-black text-sm sm:text-base tracking-tight drop-shadow-xs gap-1">
-              <span class="leading-none">🏷️</span> <span class="leading-none">¥9,800 / 团</span>
+            <div id="poster-price-val" class="text-amber-300 font-black text-sm sm:text-base tracking-tight drop-shadow-xs">
+              🏷️ ¥9,800 / 团
             </div>
           </div>
         </div>
@@ -483,7 +516,7 @@
               <span class="text-xs font-black text-amber-950 flex items-center gap-1.5">
                 <span>✨</span> <span id="ui-heading-highlights">行程尊享亮点</span>
               </span>
-              <span class="poster-badge text-[10px] bg-orange-100 text-orange-700 font-black px-2 h-[20px] rounded-full">KLOOK EXCLUSIVE</span>
+              <span class="pill-badge text-[10px] bg-orange-100 text-orange-700 font-black px-2.5 h-5 rounded-full">KLOOK EXCLUSIVE</span>
             </div>
             <div id="poster-highlights-list" class="space-y-2"></div>
           </div>
@@ -519,44 +552,46 @@
           <!-- Klook 品牌宣传卡 -->
           <div class="bg-gradient-to-r from-orange-500 to-amber-500 rounded-2xl p-3.5 text-white shadow-sm space-y-1.5">
             <div class="flex items-center justify-between">
-              <span class="poster-badge bg-white/20 backdrop-blur-md text-[10px] font-black px-2.5 h-[20px] rounded-full">✨ KLOOK TRAVEL 🧳</span>
+              <span class="pill-badge bg-white/20 backdrop-blur-md text-[10px] font-black px-2.5 h-5 rounded-full gap-1">
+                <span>✨</span> <span>KLOOK TRAVEL</span> <span>🧳</span>
+              </span>
               <span class="text-xs">✈️ 🌍 📸 📍</span>
             </div>
             <p id="ui-brand-p1" class="text-[11px] font-bold leading-snug">🌟 让世界更轻松地探索中国，让每一次旅行都成为独一无二的美好记忆。</p>
             <p id="ui-brand-p2" class="text-[10px] text-amber-100 leading-snug">🚀 专属私人管家全程多语种服务，独立成团，纯玩无购物，畅游东方之美。</p>
           </div>
 
-          <!-- 联系我们 -->
+          <!-- 联系我们 / Contact Us -->
           <div class="bg-white p-3.5 rounded-2xl shadow-2xs border border-slate-100 space-y-2.5">
             <div class="flex items-center justify-between border-b border-slate-100 pb-2">
               <span class="text-xs font-extrabold text-slate-800 flex items-center gap-1.5">
                 <span>🎧</span> <span id="ui-heading-contact">专属管家服务 / CONTACT US</span>
               </span>
-              <span class="poster-badge text-[10px] bg-orange-50 text-orange-700 px-2.5 h-[20px] rounded-full font-bold">KLOOK BUTLER</span>
+              <span class="pill-badge text-[10px] bg-orange-50 text-orange-700 px-2.5 h-5 rounded-full font-bold">KLOOK BUTLER</span>
             </div>
             <div class="bg-orange-50/70 border border-orange-100 rounded-xl p-2.5 flex items-center gap-2.5">
-              <span class="text-lg">✉️</span>
+              <span class="text-xl shrink-0">✉️</span>
               <div class="min-w-0 flex-1">
-                <div class="text-[10px] text-orange-700 font-bold uppercase">Official Inbound Email</div>
-                <div class="text-xs text-slate-900 font-extrabold leading-normal break-all select-all">china_customized_travel@klook.com</div>
+                <div class="text-[10px] text-orange-700 font-bold uppercase tracking-wider">Official Inbound Email</div>
+                <div class="text-xs text-slate-900 font-black tracking-tight select-all leading-normal break-all">china_customized_travel@klook.com</div>
               </div>
             </div>
             <div class="grid grid-cols-2 gap-2 pt-0.5">
               <div class="bg-emerald-50/80 border border-emerald-300 rounded-xl p-3 flex flex-col items-center text-center">
-                <span class="poster-badge bg-emerald-600 text-white font-extrabold text-[10px] px-2.5 h-6 rounded-full mb-2 whitespace-nowrap">
-                  <span>💬</span> <span class="ml-1">WeChat 管家</span>
-                </span>
+                <div class="inline-flex items-center justify-center gap-1 bg-emerald-600 text-white font-extrabold text-[10px] px-3 h-6 rounded-full mb-2.5 whitespace-nowrap shadow-xs">
+                  <span>💬</span> <span>WeChat 管家</span>
+                </div>
                 <div class="w-20 h-20 bg-white border border-emerald-200 rounded-lg p-1 overflow-hidden shrink-0">
-                  <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https%3A%2F%2Fwork.weixin.qq.com%2Fct%2Fwcde09491d682597a45b57b9820b30194b3e" class="w-full h-full object-contain" alt="WeChat QR">
+                  <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https%3A%2F%2Fwork.weixin.qq.com%2Fct%2Fwcde09491d682597a45b57b9820b30194b3e" class="w-full h-full object-contain" alt="WeChat QR" crossorigin="anonymous">
                 </div>
                 <span id="ui-qr-wechat" class="text-[10px] text-emerald-900 font-bold mt-2">扫码添加专属微信</span>
               </div>
               <div class="bg-teal-50/80 border border-teal-300 rounded-xl p-3 flex flex-col items-center text-center">
-                <span class="poster-badge bg-teal-700 text-white font-extrabold text-[10px] px-2.5 h-6 rounded-full mb-2 whitespace-nowrap">
-                  <span>📱</span> <span class="ml-1">WhatsApp</span>
-                </span>
+                <div class="inline-flex items-center justify-center gap-1 bg-teal-700 text-white font-extrabold text-[10px] px-3 h-6 rounded-full mb-2.5 whitespace-nowrap shadow-xs">
+                  <span>📱</span> <span>WhatsApp</span>
+                </div>
                 <div class="w-20 h-20 bg-white border border-teal-200 rounded-lg p-1 overflow-hidden shrink-0">
-                  <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://wa.me/8615181778005" class="w-full h-full object-contain" alt="WhatsApp QR">
+                  <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://wa.me/8615181778005" class="w-full h-full object-contain" alt="WhatsApp QR" crossorigin="anonymous">
                 </div>
                 <span id="ui-qr-whatsapp" class="text-[10px] text-teal-900 font-bold mt-2">扫码添加 WhatsApp</span>
               </div>
@@ -573,27 +608,30 @@
     </section>
   </main>
 
-  <!-- ==================== 团队公共云端图库弹窗 (清空错乱默认图，纯净自建) ==================== -->
+  <!-- 团队公共云端图库弹窗 -->
   <div id="cloud-gallery-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
     <div class="bg-white w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[88vh] border border-slate-200">
       <div class="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
         <div>
           <h3 class="text-sm font-extrabold text-slate-900 flex items-center gap-1.5">
             <span>🖼️</span> <span>Klook 团队高清地标图库</span>
-            <span id="gallery-count-badge" class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold">自建 0 张照片</span>
+            <span id="gallery-count-badge" class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold">加载中...</span>
           </h3>
-          <p id="gallery-target-hint" class="text-xs text-slate-500">正在为当前行程挑选匹配图</p>
+          <p id="gallery-target-hint" class="text-xs text-slate-500">正在挑选匹配图</p>
         </div>
         <div class="flex items-center gap-2">
-          <button id="btn-upload-photo-to-gallery" type="button" class="text-xs bg-orange-600 hover:bg-orange-700 text-white px-3 py-1.5 rounded-lg font-bold transition flex items-center gap-1 shadow-xs">
-            <span>➕</span> <span>上传我的照片入库</span>
+          <button id="btn-open-upload-gallery-modal" type="button" class="text-xs bg-orange-600 hover:bg-orange-700 text-white font-bold px-3 py-1.5 rounded-lg shadow-sm transition flex items-center gap-1">
+            <span>➕</span> <span>上传本机临时图片</span>
           </button>
-          <button id="btn-export-gallery-pack" type="button" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1.5 rounded-lg font-bold transition flex items-center gap-1" title="导出我的图库包给同事">
+          <button id="btn-refresh-github-gallery" type="button" class="text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold px-2.5 py-1.5 rounded-lg border border-blue-200 transition flex items-center gap-1" title="重新读取 GitHub 公共图库">
+            <span>↻</span> <span>刷新公共图库</span>
+          </button>
+          <button id="btn-export-my-gallery" type="button" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-2.5 py-1.5 rounded-lg border border-slate-200 transition flex items-center gap-1" title="导出我上传的图库，可分享给团队同事">
             <span>📤</span> <span>导出图库包</span>
           </button>
-          <label class="cursor-pointer text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1.5 rounded-lg font-bold transition flex items-center gap-1" title="导入同事分享的图库包">
+          <label class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-2.5 py-1.5 rounded-lg border border-slate-200 transition flex items-center gap-1 cursor-pointer" title="导入团队图库包">
             <span>📥</span> <span>导入</span>
-            <input type="file" id="input-import-gallery-file" accept=".json" class="hidden">
+            <input type="file" id="input-import-my-gallery" accept=".json" class="hidden">
           </label>
           <button id="btn-close-gallery" type="button" class="w-7 h-7 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-600 font-bold text-sm flex items-center justify-center transition ml-1">✕</button>
         </div>
@@ -602,17 +640,21 @@
       <!-- 图库分类标签与搜索 -->
       <div class="p-3 border-b border-slate-100 flex flex-wrap items-center justify-between gap-2 bg-white">
         <div class="flex items-center gap-1.5 overflow-x-auto custom-scrollbar py-0.5" id="gallery-category-chips">
-          <button type="button" data-cat="custom" class="text-xs font-bold px-3 py-1 rounded-lg bg-orange-600 text-white shadow-2xs">⭐ 我上传的图库</button>
+          <button type="button" data-cat="custom" class="text-xs font-bold px-3 py-1 rounded-lg bg-orange-600 text-white shadow-2xs flex items-center gap-1">
+            <span>⭐ 团队公共图库</span> <span id="chip-custom-count" class="bg-white/20 text-white text-[10px] px-1.5 rounded-full">0</span>
+          </button>
           <button type="button" data-cat="all" class="text-xs font-bold px-3 py-1 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200">全部图片</button>
-          <button type="button" data-cat="北京" class="text-xs font-bold px-3 py-1 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200">北京</button>
-          <button type="button" data-cat="华东江南" class="text-xs font-bold px-3 py-1 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200">华东江南</button>
-          <button type="button" data-cat="成渝川西" class="text-xs font-bold px-3 py-1 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200">成渝川西</button>
-          <button type="button" data-cat="云南贵州" class="text-xs font-bold px-3 py-1 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200">云南贵州</button>
-          <button type="button" data-cat="新疆丝路" class="text-xs font-bold px-3 py-1 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200">新疆丝路</button>
-          <button type="button" data-cat="桂林阳朔" class="text-xs font-bold px-3 py-1 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200">桂林阳朔</button>
-          <button type="button" data-cat="陕西西安" class="text-xs font-bold px-3 py-1 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200">陕西西安</button>
+          <button type="button" data-cat="bj" class="text-xs font-bold px-3 py-1 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200">北京</button>
+          <button type="button" data-cat="hd" class="text-xs font-bold px-3 py-1 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200">华东江南</button>
+          <button type="button" data-cat="sc" class="text-xs font-bold px-3 py-1 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200">成渝川西</button>
+          <button type="button" data-cat="yn" class="text-xs font-bold px-3 py-1 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200">云南贵州</button>
+          <button type="button" data-cat="xj" class="text-xs font-bold px-3 py-1 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200">新疆丝路</button>
+          <button type="button" data-cat="gl" class="text-xs font-bold px-3 py-1 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200">桂林阳朔</button>
+          <button type="button" data-cat="xa" class="text-xs font-bold px-3 py-1 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200">陕西西安</button>
         </div>
-        <input type="text" id="gallery-search-input" placeholder="搜索地标名称或城市..." class="bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 text-xs outline-none focus:ring-1 focus:ring-orange-500 w-44">
+        <div class="flex items-center gap-2">
+          <input type="text" id="gallery-search-input" placeholder="搜索地标名称或城市..." class="bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 text-xs outline-none focus:ring-1 focus:ring-orange-500 w-44">
+        </div>
       </div>
 
       <div id="gallery-grid" class="p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 overflow-y-auto custom-scrollbar flex-1 bg-slate-50/50"></div>
@@ -624,62 +666,67 @@
     </div>
   </div>
 
-  <!-- 上传照片入库独立模态框 -->
-  <div id="upload-photo-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-[60] flex items-center justify-center p-4 hidden no-print">
-    <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden border border-slate-200 flex flex-col">
+  <!-- ==================== 自定义图片上传弹窗 ==================== -->
+  <div id="upload-image-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-[70] flex items-center justify-center p-4 hidden no-print">
+    <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden border border-slate-200">
       <div class="p-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
-        <h3 class="text-sm font-extrabold text-slate-900 flex items-center gap-1.5">
-          <span>➕</span> <span>添加照片到团队图库</span>
-        </h3>
-        <button id="btn-close-upload-photo" type="button" class="w-7 h-7 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-600 font-bold text-sm flex items-center justify-center">✕</button>
+        <div>
+          <h3 class="text-sm font-extrabold text-slate-900 flex items-center gap-1.5">
+            <span>📷</span> <span>上传图片至我的图库</span>
+          </h3>
+          <p class="text-[11px] text-slate-500 mt-0.5">支持批量上传多张照片，上传后将永久保存在您的浏览器并支持全员导出共享</p>
+        </div>
+        <button id="btn-close-upload-img" type="button" class="w-7 h-7 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-600 font-bold text-sm">✕</button>
       </div>
-      
       <div class="p-4 space-y-3.5 text-xs">
         <div>
-          <label class="block font-bold text-slate-800 mb-1">选择本地高清照片 (支持单选或批量选图)</label>
-          <input type="file" id="modal-photo-file-input" accept="image/*" multiple class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-bold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100 cursor-pointer border border-slate-200 rounded-lg p-1">
+          <label class="block font-bold text-slate-700 mb-1">选择本地照片 (支持单选或批量多选)</label>
+          <input type="file" id="modal-image-file-input" accept="image/*" multiple class="w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100 cursor-pointer border border-dashed border-orange-300 rounded-xl p-3 bg-orange-50/20">
+          <div id="modal-upload-preview-strip" class="mt-2 flex gap-2 overflow-x-auto custom-scrollbar py-1 hidden"></div>
         </div>
 
-        <div id="modal-upload-preview-strip" class="hidden flex items-center gap-2 overflow-x-auto p-2 bg-slate-50 rounded-lg border border-slate-200 custom-scrollbar"></div>
-
-        <div>
-          <label class="block font-bold text-slate-800 mb-1">地标/景点名称 (如: 故宫太和殿、慕田峪长城、洱海等)</label>
-          <input type="text" id="modal-photo-name-input" placeholder="例：故宫博物院角楼" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 font-bold text-slate-900 outline-none focus:ring-1 focus:ring-orange-500">
-        </div>
-
-        <div class="grid grid-cols-2 gap-2">
+        <div class="grid grid-cols-2 gap-2.5">
           <div>
-            <label class="block font-bold text-slate-800 mb-1">所属城市</label>
-            <input type="text" id="modal-photo-city-input" placeholder="例：北京" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 font-medium outline-none focus:ring-1 focus:ring-orange-500">
+            <label class="block font-bold text-slate-700 mb-1">景点/地标名称 (单张精准命名)</label>
+            <input type="text" id="modal-image-name-input" placeholder="如：故宫太和殿、慕田峪长城" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs font-bold text-slate-900 outline-none focus:ring-1 focus:ring-orange-500">
+            <span class="text-[10px] text-slate-400 mt-0.5 block">批量上传时若留空将默认使用图片文件名</span>
           </div>
           <div>
-            <label class="block font-bold text-slate-800 mb-1">归属区域分类</label>
-            <select id="modal-photo-cat-select" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 font-bold outline-none focus:ring-1 focus:ring-orange-500">
-              <option value="北京">北京</option>
-              <option value="华东江南">华东江南</option>
-              <option value="成渝川西">成渝川西</option>
-              <option value="云南贵州">云南贵州</option>
-              <option value="新疆丝路">新疆丝路</option>
-              <option value="桂林阳朔">桂林阳朔</option>
-              <option value="陕西西安">陕西西安</option>
-              <option value="其他">其他地区</option>
+            <label class="block font-bold text-slate-700 mb-1">所属城市 / 区域</label>
+            <input type="text" id="modal-image-city-input" placeholder="如：北京、大理、上海" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs outline-none focus:ring-1 focus:ring-orange-500">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">归属分类</label>
+            <select id="modal-image-cat-select" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs font-bold text-slate-800 outline-none focus:ring-1 focus:ring-orange-500">
+              <option value="bj">北京古都</option>
+              <option value="hd">华东江南</option>
+              <option value="sc">成渝川西</option>
+              <option value="yn">云南贵州</option>
+              <option value="xj">新疆丝路</option>
+              <option value="gl">桂林阳朔</option>
+              <option value="xa">古都西安</option>
+              <option value="other">其他地区</option>
             </select>
           </div>
-        </div>
-
-        <div class="bg-amber-50 rounded-xl p-2.5 border border-amber-200 text-[11px] text-amber-900 leading-snug">
-          💡 照片将永久存储于您的浏览器 IndexedDB 中，并在 AI 帮写和路线排程时优先自动匹配使用！
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">检索关键词 / 标签</label>
+            <input type="text" id="modal-image-tags-input" placeholder="用逗号分隔，如：紫禁城,角楼,日落" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs outline-none focus:ring-1 focus:ring-orange-500">
+          </div>
         </div>
       </div>
-
       <div class="p-3 border-t border-slate-100 bg-slate-50 flex items-center justify-end gap-2 text-xs">
-        <button id="btn-cancel-upload-photo" type="button" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-4 py-1.5 rounded-lg transition">取消</button>
-        <button id="btn-confirm-upload-photo" type="button" class="bg-orange-600 hover:bg-orange-700 text-white font-bold px-5 py-1.5 rounded-lg shadow-sm transition">确认添加入库</button>
+        <button id="btn-cancel-upload-img" type="button" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-4 py-2 rounded-lg transition">取消</button>
+        <button id="btn-confirm-upload-img" type="button" class="bg-orange-600 hover:bg-orange-700 text-white font-bold px-5 py-2 rounded-lg shadow-sm transition flex items-center gap-1">
+          <span>💾</span> <span>保存入库</span>
+        </button>
       </div>
     </div>
   </div>
 
-  <!-- 行程模版库及各种弹窗 -->
+  <!-- ==================== 团队行程模版库弹窗 ==================== -->
   <div id="template-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
     <div class="bg-white w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[88vh] border border-slate-200">
       <div class="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
@@ -688,30 +735,37 @@
             <span>📋</span> <span>Klook 团队行程模版库</span>
             <span class="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-bold">目的地文件夹模式</span>
           </h3>
-          <p class="text-xs text-slate-500">按目的地分类收纳，支持将自建行程归档与跨设备 JSON 共享</p>
+          <p class="text-xs text-slate-500">按目的地分类收纳，支持将自建行程归档与跨设备 JSON 导入导出共享</p>
         </div>
         <button id="btn-close-templates" type="button" class="w-7 h-7 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-600 font-bold text-sm flex items-center justify-center transition">✕</button>
       </div>
 
+      <!-- 搜索与导入导出说明条 -->
       <div class="p-3 border-b border-slate-100 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 bg-white">
         <div class="flex items-center gap-2 flex-1">
-          <input type="text" id="template-search-input" placeholder="输入目的地（如云南/北京）、关键词筛选..." class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs outline-none focus:ring-1 focus:ring-blue-500 flex-1">
+          <input type="text" id="template-search-input" placeholder="输入目的地（如云南/北京）、关键词快速筛选..." class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs outline-none focus:ring-1 focus:ring-blue-500 flex-1">
         </div>
         <div class="flex items-center gap-2 shrink-0">
-          <button id="btn-open-text-template-import" type="button" class="text-xs bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-1.5 rounded-lg transition flex items-center gap-1 shadow-sm">
+          <button id="btn-open-text-template-import" type="button" class="text-xs bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-1.5 rounded-lg transition flex items-center gap-1 shadow-sm" title="直接粘贴供应商、同事或聊天中的文字行程">
             <span>📄</span> <span>文本导入</span>
           </button>
-          <button id="btn-export-templates-json" type="button" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-1.5 rounded-lg transition flex items-center gap-1">
+          <button id="btn-export-templates-json" type="button" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-1.5 rounded-lg transition flex items-center gap-1" title="高级功能：导出为 .json 文件">
             <span>📤</span> <span>导出模板包</span>
           </button>
-          <label class="cursor-pointer text-xs bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200 font-bold px-3 py-1.5 rounded-lg transition flex items-center gap-1">
+          <label class="cursor-pointer text-xs bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200 font-bold px-3 py-1.5 rounded-lg transition flex items-center gap-1" title="高级功能：从 JSON 批量导入模板">
             <span>📥</span> <span>JSON批量导入</span>
             <input type="file" id="template-import-file" accept=".json,application/json" class="hidden">
           </label>
         </div>
       </div>
 
+      <!-- 目的地分类文件夹标签条 (Folder Pills) -->
       <div class="px-4 py-2 bg-slate-100/70 border-b border-slate-200/80 flex items-center gap-1.5 overflow-x-auto custom-scrollbar" id="template-folder-chips"></div>
+
+      <div class="px-4 py-1.5 bg-blue-50/60 border-b border-blue-100 text-[11px] text-blue-700 flex items-center justify-between gap-3">
+        <span>💡 <b>推荐普通客服使用「文本导入」</b>：把微信、企业微信、邮件里的行程直接复制粘贴即可。JSON 主要用于团队模板的批量备份与同步。</span>
+      </div>
+
       <div id="templates-grid" class="p-4 grid grid-cols-1 md:grid-cols-2 gap-3.5 overflow-y-auto custom-scrollbar flex-1 bg-slate-50/50"></div>
 
       <div class="p-3 border-t border-slate-100 bg-slate-50 flex items-center justify-between text-xs text-slate-500">
@@ -721,7 +775,134 @@
     </div>
   </div>
 
-  <!-- 历史快照抽屉 -->
+  <!-- ==================== 文本导入模板弹窗 ==================== -->
+  <div id="text-template-import-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-[60] flex items-center justify-center p-4 hidden no-print">
+    <div class="bg-white w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden border border-slate-200">
+      <div class="p-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+        <div>
+          <h3 class="text-sm font-extrabold text-slate-900">📄 从文本创建模板</h3>
+          <p class="text-[11px] text-slate-500 mt-1">直接粘贴供应商、同事、微信或邮件里的文字行程，系统会自动识别天数、路线、酒店、门票、用车、导游和亮点。</p>
+        </div>
+        <button id="btn-close-text-template-import" type="button" class="w-7 h-7 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-600 font-bold text-sm">✕</button>
+      </div>
+      <div class="p-4 space-y-3">
+        <textarea id="text-template-import-input" class="w-full h-64 bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs leading-6 outline-none focus:ring-2 focus:ring-blue-500 resize-y" placeholder="例如：
+北京3日｜皇城文化深度游
+目的地：北京
+主题：历史文化
+
+D1：天安门广场—故宫博物院—景山公园
+D2：慕田峪长城—鸟巢—水立方
+D3：颐和园—天坛—前门大街
+
+【酒店】
+D1-D2：北京王府井酒店
+
+【门票】
+故宫博物院、慕田峪长城、颐和园、天坛
+
+【用车】
+全程7座商务车
+
+【导游】
+中文导游
+
+【亮点】
+1. 1团1车，纯玩无购物
+2. 深度体验北京历史文化"></textarea>
+        <div class="flex items-center justify-between gap-3">
+          <div class="text-[10px] text-slate-400">支持：D1 / Day 1 / 第1天；支持“【酒店】/【门票】/【用车】/【导游】/【亮点】”等常见标题。</div>
+          <div class="flex gap-2 shrink-0">
+            <button id="btn-cancel-text-template-import" type="button" class="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold">取消</button>
+            <button id="btn-confirm-text-template-import" type="button" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-sm">✨ 识别并创建模板</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 自定义存为模版弹窗 ==================== -->
+  <div id="save-template-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
+    <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden flex flex-col border border-slate-200">
+      <div class="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+        <div>
+          <h3 class="text-sm font-extrabold text-slate-900 flex items-center gap-1.5">
+            <span>💾</span> <span>保存为团队行程模版</span>
+          </h3>
+          <p class="text-xs text-slate-500">自定义模版名称并归类至对应目的地文件夹，全员即时可见</p>
+        </div>
+        <button id="btn-close-save-tpl" type="button" class="w-7 h-7 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-600 font-bold text-sm flex items-center justify-center transition">✕</button>
+      </div>
+
+      <div class="p-4 space-y-4 bg-white text-xs">
+        <div class="space-y-1.5">
+          <label class="block font-bold text-slate-800 flex items-center justify-between">
+            <span>📝 模版名称 (建议包含天数与核心主题)</span>
+            <span class="text-[10px] text-orange-600 font-medium">支持自由命名</span>
+          </label>
+          <input type="text" id="save-tpl-name-input" placeholder="例：云南 5日 · 苍洱风花，雪山秘境—滇西优雅慢行" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs font-bold text-slate-900 outline-none focus:ring-1 focus:ring-orange-500">
+        </div>
+
+        <div class="space-y-2">
+          <label class="block font-bold text-slate-800">📁 归属目的地文件夹</label>
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <label class="flex items-center gap-2 p-2 rounded-lg border border-slate-200 cursor-pointer bg-slate-50 hover:bg-white transition" id="lbl-choose-existing-folder">
+              <input type="radio" name="folder-mode" value="existing" checked class="accent-orange-600">
+              <span class="font-bold text-slate-700 text-xs">从已有文件夹选择</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 rounded-lg border border-slate-200 cursor-pointer bg-slate-50 hover:bg-white transition" id="lbl-choose-new-folder">
+              <input type="radio" name="folder-mode" value="new" class="accent-orange-600">
+              <span class="font-bold text-orange-700 text-xs">➕ 新建目的地文件夹</span>
+            </label>
+          </div>
+
+          <div id="save-tpl-existing-box" class="space-y-1 pt-1">
+            <select id="save-tpl-folder-select" class="w-full bg-white border border-slate-200 rounded-lg p-2 text-xs font-bold text-slate-800 outline-none focus:ring-1 focus:ring-orange-500"></select>
+          </div>
+
+          <div id="save-tpl-new-box" class="hidden space-y-1.5 pt-1 bg-orange-50/60 p-3 rounded-xl border border-orange-200">
+            <span class="block text-[11px] font-bold text-orange-950">输入新文件夹名称（将自动同步至模版库分类条）：</span>
+            <input type="text" id="save-tpl-new-folder-input" placeholder="如：哈尔滨冰雪、厦门土楼、贵州黔东南、西藏青海等" class="w-full bg-white border border-orange-300 rounded-lg p-2 text-xs font-bold text-slate-900 outline-none focus:ring-1 focus:ring-orange-500">
+          </div>
+        </div>
+
+        <div class="bg-slate-50 rounded-xl p-2.5 border border-slate-200 text-[11px] text-slate-500 flex items-center gap-2">
+          <span>ℹ️</span>
+          <span>将完整保存路线排程、每日走心描述、配图、亮点以及服务包含配置。</span>
+        </div>
+      </div>
+
+      <div class="p-3 border-t border-slate-100 bg-slate-50 flex items-center justify-end gap-2 text-xs">
+        <button id="btn-cancel-save-tpl" type="button" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-4 py-2 rounded-lg transition">取消</button>
+        <button id="btn-confirm-save-tpl" type="button" class="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white font-extrabold px-5 py-2 rounded-lg shadow-sm transition flex items-center gap-1">
+          <span>💾</span> <span>确认保存并加入模版库</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 模版库内直接新建文件夹微型弹窗 ==================== -->
+  <div id="create-folder-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
+    <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden flex flex-col border border-slate-200">
+      <div class="p-3.5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+        <h3 class="text-xs font-extrabold text-slate-900 flex items-center gap-1.5">
+          <span>📁</span> <span>新建目的地文件夹</span>
+        </h3>
+        <button id="btn-close-create-folder" type="button" class="w-6 h-6 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-600 font-bold text-xs flex items-center justify-center transition">✕</button>
+      </div>
+      <div class="p-4 space-y-2 bg-white">
+        <label class="block text-xs font-bold text-slate-700">文件夹名称 (全国目的地分类)</label>
+        <input type="text" id="new-folder-name-input" placeholder="例：哈尔滨冰雪、贵州山水、厦门土楼等" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs font-bold text-slate-900 outline-none focus:ring-1 focus:ring-blue-500">
+        <p class="text-[10px] text-slate-400">新建后将直接展现在模版库顶部导航条中，方便持续补充新行程。</p>
+      </div>
+      <div class="p-3 border-t border-slate-100 bg-slate-50 flex items-center justify-end gap-2 text-xs">
+        <button id="btn-cancel-create-folder" type="button" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-3 py-1.5 rounded-lg transition">取消</button>
+        <button id="btn-confirm-create-folder" type="button" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-1.5 rounded-lg transition">确认创建</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 历史记录快照抽屉弹窗 ==================== -->
   <div id="history-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden no-print">
     <div class="bg-white w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] border border-slate-200">
       <div class="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
@@ -735,7 +916,7 @@
       </div>
 
       <div class="p-3 border-b border-slate-100 flex items-center justify-between gap-3 bg-white">
-        <input type="text" id="history-search-input" placeholder="搜索历史行程..." class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs outline-none focus:ring-1 focus:ring-amber-500 flex-1">
+        <input type="text" id="history-search-input" placeholder="搜索历史行程（如北京、云南、大理）..." class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs outline-none focus:ring-1 focus:ring-amber-500 flex-1">
         <button id="btn-clear-all-history" type="button" class="text-xs text-rose-600 hover:bg-rose-50 border border-rose-200 px-3 py-1.5 rounded-lg font-bold transition">
           清空全部历史
         </button>
@@ -754,82 +935,57 @@
   <div id="toast-container" class="fixed bottom-5 right-5 z-50 space-y-2 pointer-events-none"></div>
 
   <script>
-    /* =========================================================================
-     * 1. 彻底清空错乱的默认预置图库（PHOTO_LIBRARY = []）
-     * 彻底摒弃错乱的在线预置图，引导用户全量自主上传真实高清地标图
-     * ========================================================================= */
-    const PHOTO_LIBRARY = [];
+    const PHOTO_LIBRARY = [
+      // 北京古都
+      { id: 'p-bj-gugong', cat: 'bj', name: '故宫博物院 / 紫禁城', city: '北京', tags: ['故宫', '紫禁城', '天安门', '中轴线', '角楼'], url: 'https://images.unsplash.com/photo-1508804185872-d7badad00f7d?auto=format&fit=crop&w=1200&q=80' },
+      { id: 'p-bj-changcheng', cat: 'bj', name: '慕田峪长城雄姿', city: '北京', tags: ['长城', '慕田峪', '八达岭', '烽火台', '司马台'], url: 'https://images.unsplash.com/photo-1547981609-4b6bfe67ca0b?auto=format&fit=crop&w=1200&q=80' },
+      { id: 'p-bj-yiheyuan', cat: 'bj', name: '颐和园十七孔桥与万寿山', city: '北京', tags: ['颐和园', '园林', '昆明湖', '佛香阁', '十七孔桥'], url: 'https://images.unsplash.com/photo-1599837565318-67429bde7162?auto=format&fit=crop&w=1200&q=80' },
+      { id: 'p-bj-tiantan', cat: 'bj', name: '天坛公园祈年殿', city: '北京', tags: ['天坛', '祈年殿', '回音壁', '圜丘'], url: 'https://images.unsplash.com/photo-1599571234909-29ed5d1321d6?auto=format&fit=crop&w=1200&q=80' },
+      { id: 'p-bj-hutong', cat: 'bj', name: '什刹海与老北京胡同院落', city: '北京', tags: ['胡同', '什刹海', '南锣鼓巷', '鼓楼', '四合院'], url: 'https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=1200&q=80' },
 
-    // IndexedDB 大容量图库引擎
-    const DB_NAME = 'KlookImageGalleryDB';
-    const DB_VERSION = 1;
-    const STORE_NAME = 'custom_photos';
+      // 华东江南
+      { id: 'p-sh-waitan', cat: 'hd', name: '上海外滩与陆家嘴天际线', city: '上海', tags: ['外滩', '陆家嘴', '黄浦江', '东方明珠', '上海'], url: 'https://images.unsplash.com/photo-1505761671935-60b3a7427bad?auto=format&fit=crop&w=1200&q=80' },
+      { id: 'p-hz-xihu', cat: 'hd', name: '杭州西湖十景断桥与三潭印月', city: '杭州', tags: ['西湖', '杭州', '雷峰塔', '苏堤', '龙井'], url: 'https://images.unsplash.com/photo-1528728329032-2972f65dfb3f?auto=format&fit=crop&w=1200&q=80' },
+      { id: 'p-sz-yuanlin', cat: 'hd', name: '苏州拙政园水榭亭台', city: '苏州', tags: ['苏州', '拙政园', '留园', '平江路', '狮子林'], url: 'https://images.unsplash.com/photo-1598899134739-24c46f58b8c0?auto=format&fit=crop&w=1200&q=80' },
+      { id: 'p-wz-shuixiang', cat: 'hd', name: '乌镇西栅枕水人家摇橹船', city: '嘉兴', tags: ['乌镇', '西塘', '水乡', '古镇', '枕水'], url: 'https://images.unsplash.com/photo-1513415564515-763d91423bdd?auto=format&fit=crop&w=1200&q=80' },
 
-    function openGalleryDB() {
-      return new Promise((resolve, reject) => {
-        const req = indexedDB.open(DB_NAME, DB_VERSION);
-        req.onupgradeneeded = (e) => {
-          const db = e.target.result;
-          if (!db.objectStoreNames.contains(STORE_NAME)) {
-            db.createObjectStore(STORE_NAME, { keyPath: 'id' });
-          }
-        };
-        req.onsuccess = () => resolve(req.result);
-        req.onerror = () => reject(req.error);
-      });
-    }
+      // 成渝川西
+      { id: 'p-cd-panda', cat: 'sc', name: '成都大熊猫繁育研究基地', city: '成都', tags: ['熊猫', '大熊猫', '卧龙', '大熊猫基地', '成都'], url: 'https://images.unsplash.com/photo-1564349683136-77e08dba1ef7?auto=format&fit=crop&w=1200&q=80' },
+      { id: 'p-cq-hongyadong', cat: 'sc', name: '重庆洪崖洞江畔璀璨夜景', city: '重庆', tags: ['重庆', '洪崖洞', '李子坝', '解放碑', '山城'], url: 'https://images.unsplash.com/photo-1542051841857-5f90071e7989?auto=format&fit=crop&w=1200&q=80' },
+      { id: 'p-sc-jiuzhaigou', cat: 'sc', name: '九寨沟五花海瑶池水色', city: '阿坝', tags: ['九寨沟', '黄龙', '五花海', '川西', '海子'], url: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1200&q=80' },
+      { id: 'p-sc-siguniang', cat: 'sc', name: '四姑娘山双桥沟雪峰草甸', city: '小金', tags: ['四姑娘山', '双桥沟', '折多山', '雪山'], url: 'https://images.unsplash.com/photo-1486870591958-9b9d0d1dda99?auto=format&fit=crop&w=1200&q=80' },
 
-    async function getCustomPhotosFromDB() {
-      try {
-        const db = await openGalleryDB();
-        return new Promise((resolve, reject) => {
-          const tx = db.transaction(STORE_NAME, 'readonly');
-          const store = tx.objectStore(STORE_NAME);
-          const req = store.getAll();
-          req.onsuccess = () => resolve(req.result || []);
-          req.onerror = () => resolve([]);
-        });
-      } catch (e) {
-        return [];
-      }
-    }
+      // 云南贵州
+      { id: 'p-yn-erhai', cat: 'yn', name: '大理苍山洱海生态廊道', city: '大理', tags: ['大理', '洱海', '双廊', '崇圣寺', '喜洲'], url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80' },
+      { id: 'p-yn-yulong', cat: 'yn', name: '丽江玉龙雪山与蓝月谷', city: '丽江', tags: ['丽江', '玉龙雪山', '蓝月谷', '束河', '冰川公园'], url: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=1200&q=80' },
+      { id: 'p-yn-shangri', cat: 'yn', name: '香格里拉普达措与松赞林寺', city: '迪庆', tags: ['香格里拉', '普达措', '松赞林寺', '梅里雪山'], url: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1200&q=80' },
+      { id: 'p-gz-huangguoshu', cat: 'yn', name: '黄果树大瀑布万马奔腾', city: '安顺', tags: ['黄果树', '瀑布', '贵州', '荔波', '小七孔'], url: 'https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?auto=format&fit=crop&w=1200&q=80' },
 
-    async function saveCustomPhotoToDB(photoObj) {
-      const db = await openGalleryDB();
-      return new Promise((resolve, reject) => {
-        const tx = db.transaction(STORE_NAME, 'readwrite');
-        const store = tx.objectStore(STORE_NAME);
-        store.put(photoObj);
-        tx.oncomplete = () => resolve();
-        tx.onerror = () => reject(tx.error);
-      });
-    }
+      // 新疆丝路
+      { id: 'p-xj-kanas', cat: 'xj', name: '喀纳斯神仙湾晨雾与白桦林', city: '阿勒泰', tags: ['喀纳斯', '禾木', '白哈巴', '图瓦', '月亮湾'], url: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80' },
+      { id: 'p-xj-tianshan', cat: 'xj', name: '天山天池博格达雪峰倒影', city: '阜康', tags: ['天山', '天池', '乌鲁木齐', '博格达'], url: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1200&q=80' },
 
-    async function deleteCustomPhotoFromDB(id) {
-      const db = await openGalleryDB();
-      return new Promise((resolve, reject) => {
-        const tx = db.transaction(STORE_NAME, 'readwrite');
-        const store = tx.objectStore(STORE_NAME);
-        store.delete(id);
-        tx.oncomplete = () => resolve();
-        tx.onerror = () => reject(tx.error);
-      });
-    }
+      // 桂林山水
+      { id: 'p-gl-lijiang', cat: 'gl', name: '桂林漓江烟雨与九马画山', city: '桂林', tags: ['漓江', '阳朔', '遇龙河', '兴坪', '象鼻山'], url: 'https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=1200&q=80' },
 
-    // 官方 6 套预置精选模版
+      // 古都西安
+      { id: 'p-xa-bingmayong', cat: 'xa', name: '秦始皇兵马俑世界奇迹', city: '西安', tags: ['兵马俑', '秦始皇', '大雁塔', '城墙', '钟楼'], url: 'https://images.unsplash.com/photo-1599571234909-29ed5d1321d6?auto=format&fit=crop&w=1200&q=80' }
+    ];
+
     const PRESET_TEMPLATES = [
       {
         id: 'tpl-bj-3d',
         name: '北京 3日 · 皇城古都与长城世界遗产深度私享',
         destination: '北京',
+        folder: '北京',
         isPreset: true,
         theme: '皇城古韵与世界遗产文化探索',
         pace: '优雅舒缓 · 深度人文漫游',
         date: '10月12日',
         group: '4大1小',
         price: '¥9,800 / 团',
-        coverSource: 'gradient',
-        coverUrl: '',
+        coverSource: 'cloud',
+        coverUrl: 'https://images.unsplash.com/photo-1508804185872-d7badad00f7d?auto=format&fit=crop&w=1200&q=80',
         activeModules: ['car', 'ticket', 'guide', 'hotel', 'exp'],
         hotelText: 'D1-D2: 北京王府井希尔顿酒店 豪华客房 2间\nD3: 慕田峪长城脚下精品长城私享小院 2间',
         ticketText: '故宫博物院大门票及珍宝馆门票\n慕田峪长城门票+双程缆车票+摆渡车\n颐和园通票与天坛公园联票',
@@ -844,33 +1000,89 @@
           { title: '全程管家式贴心守护', desc: '行前贴心准备出行指南与天气预报，行程中24小时多语种在线管家秒级响应，出行无忧。' }
         ],
         days: [
-          { day: 1, route: '北京—天安门广场—故宫博物院—景山公园俯瞰紫禁城', title: '穿越中轴史诗 · 登临紫禁之巅', description: '漫步于庄严的天安门广场，开启皇城探索之旅。深入故宫博物院，在专业讲师带领下跨越深宫重门，聆听朱红墙影下的百年兴衰。午后登顶景山公园万春亭，纵览紫禁城全景，于夕阳下俯瞰壮丽恢弘的中轴线，感受千年古都的厚重与韵律。', image: '', manuallyEdited: false },
-          { day: 2, route: '慕田峪长城深度游—鸟巢与水立方夜景', title: '登临长城雄关 · 对话时空回响', description: '专属专车直达慕田峪长城，避开喧嚣，漫步于山峦之巅的青砖之上。这里林木葱郁，敌楼壮阔，您可尽情领略万里长城的雄浑气魄。入暮时分返回市区，观赏鸟巢与水立方的璀璨灯火，在现代地标的流光溢彩中感受双奥之城的时尚脉动。', image: '', manuallyEdited: false },
-          { day: 3, route: '颐和园皇家园林—天坛公园祈年殿', title: '万寿颐和烟雨 · 祈年古韵祭天', description: '前往保存完好的皇家园林颐和园，泛舟昆明湖上，远眺万寿山与佛香阁的亭台楼阁。随后造访天坛公园，漫步回音壁与圜丘，在祈年殿下领略古代东方天人合一的崇高哲学智慧，圆满收官皇城文化漫步。', image: '', manuallyEdited: false }
+          { day: 1, route: '北京—天安门广场—故宫博物院—景山公园俯瞰紫禁城', title: '穿越中轴史诗 · 登临紫禁之巅', description: '漫步于庄严的天安门广场，深入故宫博物院，在专业讲师带领下跨越深宫重门，聆听朱红墙影下的百年兴衰。午后登顶景山公园万春亭俯瞰紫禁城全貌。', image: 'https://images.unsplash.com/photo-1508804185872-d7badad00f7d?auto=format&fit=crop&w=1200&q=80', manuallyEdited: false },
+          { day: 2, route: '慕田峪长城深度游—鸟巢与水立方夜景', title: '登临长城雄关 · 对话时空回响', description: '专属专车直达慕田峪长城，漫步于山峦之巅的青砖之上，尽览万里长城雄浑气魄。傍晚返回市区打卡双奥场馆流光溢彩的夜景。', image: 'https://images.unsplash.com/photo-1547981609-4b6bfe67ca0b?auto=format&fit=crop&w=1200&q=80', manuallyEdited: false },
+          { day: 3, route: '颐和园皇家园林—天坛公园祈年殿', title: '万寿颐和烟雨 · 祈年古韵祭天', description: '前往保存完好的皇家园林颐和园，泛舟昆明湖上远眺万寿山与佛香阁。随后造访天坛公园，在祈年殿下感受古人天人合一的哲学智慧。', image: 'https://images.unsplash.com/photo-1599837565318-67429bde7162?auto=format&fit=crop&w=1200&q=80', manuallyEdited: false }
         ]
       }
     ];
 
-    // 全局响应式状态
+    const CustomPhotoDB = {
+      dbName: 'KlookPhotoDB_v1',
+      storeName: 'custom_photos',
+      
+      openDB() {
+        return new Promise((resolve, reject) => {
+          const req = indexedDB.open(this.dbName, 1);
+          req.onupgradeneeded = (e) => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains(this.storeName)) {
+              db.createObjectStore(this.storeName, { keyPath: 'id' });
+            }
+          };
+          req.onsuccess = () => resolve(req.result);
+          req.onerror = () => reject(req.error);
+        });
+      },
+
+      async getAll() {
+        try {
+          const db = await this.openDB();
+          return new Promise((resolve, reject) => {
+            const tx = db.transaction(this.storeName, 'readonly');
+            const store = tx.objectStore(this.storeName);
+            const req = store.getAll();
+            req.onsuccess = () => resolve(req.result || []);
+            req.onerror = () => reject(req.error);
+          });
+        } catch (e) {
+          console.warn('IndexedDB getAll error:', e);
+          return [];
+        }
+      },
+
+      async add(item) {
+        const db = await this.openDB();
+        return new Promise((resolve, reject) => {
+          const tx = db.transaction(this.storeName, 'readwrite');
+          const store = tx.objectStore(this.storeName);
+          const req = store.put(item);
+          req.onsuccess = () => resolve(item);
+          req.onerror = () => reject(req.error);
+        });
+      },
+
+      async delete(id) {
+        const db = await this.openDB();
+        return new Promise((resolve, reject) => {
+          const tx = db.transaction(this.storeName, 'readwrite');
+          const store = tx.objectStore(this.storeName);
+          const req = store.delete(id);
+          req.onsuccess = () => resolve();
+          req.onerror = () => reject(req.error);
+        });
+      }
+    };
+
     let state = {
       lang: 'zh-CN',
       destination: '北京',
       theme: '皇城古韵与世界遗产文化探索',
       pace: '优雅舒缓 · 深度人文漫游',
-      itineraryText: `Day 1: 北京—天安门广场—故宫博物院—景山公园俯瞰紫禁城\nDay 2: 慕田峪长城深度游—鸟巢与水立方夜景\nDay 3: 颐和园皇家园林—天坛公园祈年殿`,
+      itineraryText: `Day 1: 北京—天安门广场—故宫博物院—景山公园俯瞰紫禁城\nDay 2: 慕田峪长城深度游—鸟巢与水立方夜景\nDay 3: 颐和园皇家园林—天坛祈年殿`,
       date: '10月12日',
       group: '4大1小',
       price: '¥9,800 / 团',
-      bannerSource: 'gradient',
-      bannerUrl: '',
+      bannerSource: 'cloud',
+      bannerUrl: 'https://images.unsplash.com/photo-1508804185872-d7badad00f7d?auto=format&fit=crop&w=1200&q=80',
       bannerOverlay: 20,
       activeModules: ['car', 'ticket', 'guide', 'hotel', 'exp'],
       hotelText: 'D1-D2: 北京王府井希尔顿酒店 豪华客房 2间\nD3: 慕田峪长城脚下精品长城私享小院 2间',
-      ticketText: '故宫博物院大门票及珍宝馆门票\n慕田峪长城门票+双程缆车票+接驳车\n颐和园大门票及天坛公园联票',
-      trafficText: '全程专属7座别克GL8商务专车（含油费、过路费、司机津贴）\n包含首都国际机场/大兴机场专车接送机',
+      ticketText: '故宫博物院大门票及珍宝馆门票\n慕田峪长城门票+双程缆车票+摆渡车\n颐和园通票与天坛公园联票',
+      trafficText: '全程专属7座别克GL8商务专车（含油费、过路费、司机津贴）\n首都国际机场/大兴机场专车24小时接送机',
       guideText: '北京专属资深优秀双语/中文文化向导全程陪同讲解（8小时/天）',
-      expText: '慕田峪长城缆车落日咖啡体验、精美老北京传统伴手礼包',
-      exclusionsText: '往返大交通、正餐餐费（导游协助推荐打卡特色餐厅）、个人额外消费',
+      expText: '慕田峪长城缆车落日咖啡漫步体验\n精美老北京传统伴手礼礼盒',
+      exclusionsText: '往返大交通、正餐餐费（向导协助推荐打卡特色餐厅）、个人额外消费',
       cancellationText: '出发前7天支持全额无损退改；48小时内退订需扣除首日车辆调度损失。',
       overallHighlights: [
         { title: '1单1团 · 纯玩私家专属', desc: '全流程专属专车与金牌文博向导导航，拒绝走马观花与任何隐形购物，按客人节奏舒心游玩。' },
@@ -880,15 +1092,50 @@
       days: []
     };
 
-    const translationCache = { 'zh-HK': null, 'en': null };
+    const translationCache = {
+      'zh-HK': null,
+      'en': null
+    };
 
-    // UI 固定词条多语言字典
+    const HK_DICTIONARY = [
+      ['私人定制', '私人訂制'], ['私人订制', '私人訂制'], ['定制游', '訂制遊'],
+      ['门票', '門券'], ['大门票', '入場門券'], ['导游', '導賞員'],
+      ['向导', '專屬導賞員'], ['包车', '專車包車'], ['专车', '專車服務'],
+      ['接送机', '機場專車接送'], ['酒店', '酒店住宿'], ['住宿', '品質住宿'],
+      ['退改政策', '退款與改期政策'], ['费用包含', '費用包含及明細'],
+      ['服务包含', '服務包含及說明'], ['费用不含', '費用不包含'],
+      ['特色体验', '尊尚特色體驗'], ['缆车', '纜車'], ['摆渡车', '接駁穿梭車'],
+      ['接驳车', '穿梭巴士'], ['体验', '體驗'], ['品质', '品質'],
+      ['详细行程', '詳細行程安排'], ['联系我们', '聯絡我們']
+    ];
+
+    function translateTextToHK(text) {
+      if (!text) return '';
+      let res = text;
+      HK_DICTIONARY.forEach(([s, t]) => { res = res.replaceAll(s, t); });
+      const charMap = {
+        '国': '國', '团': '團', '独': '獨', '车': '車', '金': '金', '牌': '牌',
+        '绝': '絕', '隐': '隱', '购': '購', '物': '物', '节': '節', '奏': '奏',
+        '选': '選', '轴': '軸', '殿': '殿', '秘': '秘', '讲': '講', '术': '術',
+        '与': '與', '贴': '貼', '备': '備', '预': '預', '报': '報', '时': '時',
+        '级': '級', '应': '應', '忧': '憂', '景': '景', '区': '區', '观': '觀',
+        '联': '聯', '票': '票', '双': '雙', '程': '程', '通': '通', '导': '導',
+        '赏': '賞', '历': '歷', '史': '史', '学': '學', '传': '傳', '统': '統',
+        '礼': '禮', '盒': '盒', '费': '費', '损': '損', '失': '失', '退': '退',
+        '订': '訂', '调': '調', '发': '發', '数': '數', '价': '價', '格': '格',
+        '极': '極', '致': '致', '漫': '漫', '游': '遊', '优': '優', '雅': '雅',
+        '风': '風', '韵': '韻', '遗': '遺', '产': '產', '探': '探', '索': '索',
+        '护': '護', '航': '航', '纯': '純', '玩': '玩', '私': '私', '家': '家',
+        '专': '專', '属': '屬', '享': '享', '尊': '尊', '崇': '崇', '甄': '甄'
+      };
+      return res.split('').map(c => charMap[c] || c).join('');
+    }
+
     const UI_I18N = {
       'zh-CN': {
         bannerTag: 'EXCLUSIVE BESPOKE JOURNEY',
         bannerBadge: 'Klook 尊享私人定制',
         bannerSub: '1单1团 · 私享尊崇 · 甄选深度慢调',
-        dateBadge: '出发日期',
         headingHighlights: '行程尊享亮点',
         headingItinerary: '详细行程安排',
         headingInclusions: '服务包含与说明',
@@ -905,7 +1152,6 @@
         bannerTag: 'EXCLUSIVE BESPOKE JOURNEY',
         bannerBadge: 'Klook 尊享私人訂制',
         bannerSub: '1單1團 · 私享尊崇 · 甄選深度慢調',
-        dateBadge: '出發日期',
         headingHighlights: '行程尊享亮點',
         headingItinerary: '詳細行程安排',
         headingInclusions: '服務包含及說明',
@@ -922,7 +1168,6 @@
         bannerTag: 'EXCLUSIVE BESPOKE JOURNEY',
         bannerBadge: 'Klook Bespoke Private Tour',
         bannerSub: 'Private Group · Exclusive Butler · In-Depth Exploration',
-        dateBadge: 'Departure Date',
         headingHighlights: 'CURATED HIGHLIGHTS',
         headingItinerary: 'DETAILED ITINERARY',
         headingInclusions: 'INCLUSIONS & SERVICES',
@@ -939,7 +1184,12 @@
 
     function escapeHtml(str) {
       if (!str) return '';
-      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
     }
 
     function showNotification(msg, icon = '✅') {
@@ -949,7 +1199,11 @@
       toast.className = 'bg-slate-900/90 backdrop-blur-md text-white px-4 py-2.5 rounded-xl shadow-xl border border-slate-700/60 text-xs font-bold flex items-center gap-2 transform transition-all duration-300 translate-y-2 opacity-0 pointer-events-auto';
       toast.innerHTML = `<span class="text-base">${icon}</span> <span>${escapeHtml(msg)}</span>`;
       container.appendChild(toast);
-      requestAnimationFrame(() => toast.classList.remove('translate-y-2', 'opacity-0'));
+
+      requestAnimationFrame(() => {
+        toast.classList.remove('translate-y-2', 'opacity-0');
+      });
+
       setTimeout(() => {
         toast.classList.add('opacity-0', 'translate-y-2');
         setTimeout(() => toast.remove(), 300);
@@ -961,8 +1215,12 @@
       const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
       const parsedDays = [];
       let currentDayNum = 1;
+
       const dayPrefixRegex = /^(?:Day\s*|D|第\s*)?(\d+)(?:天)?(?:[\s:：、.－—\-]+|\s+)(.*)$/i;
+      const datePrefixRegex = /^(?:\d{4}[-/年])?(\d{1,2})[-/月](\d{1,2})[日号]?(?:[\s:：、.－—\-]+|\s+)(.*)$/;
+
       lines.forEach((line) => {
+        let matched = false;
         const matchDay = line.match(dayPrefixRegex);
         if (matchDay && matchDay[1]) {
           const num = parseInt(matchDay[1], 10);
@@ -970,33 +1228,333 @@
           if (route) {
             parsedDays.push({ day: num, route: route });
             currentDayNum = num + 1;
+            matched = true;
           }
-        } else if (line.length > 2) {
+        }
+
+        if (!matched) {
+          const matchDate = line.match(datePrefixRegex);
+          if (matchDate) {
+            const route = matchDate[3]?.trim() || '';
+            if (route) {
+              parsedDays.push({ day: currentDayNum, route: route });
+              currentDayNum++;
+              matched = true;
+            }
+          }
+        }
+
+        if (!matched && line.length > 2) {
           parsedDays.push({ day: currentDayNum, route: line });
           currentDayNum++;
         }
       });
+
       return parsedDays;
     }
 
-    // 智能配图匹配逻辑（只匹配用户已上传的真图）
-    async function matchPhotoForRoute(route, usedUrls = new Set()) {
-      const customPhotos = await getCustomPhotosFromDB();
-      if (!customPhotos || customPhotos.length === 0) return '';
-      
-      const r = route.toLowerCase();
-      const matched = customPhotos.find(p => !usedUrls.has(p.url) && (r.includes(p.name.toLowerCase()) || r.includes(p.city.toLowerCase())));
-      if (matched) {
-        usedUrls.add(matched.url);
-        return matched.url;
+    const DestinationEngine = {
+      detectDestination(text, days) {
+        if (text && text.trim()) return text.trim();
+        const full = (days || []).map(d => d.route).join(' ');
+        if (/故宫|天安门|长城|颐和园|天坛|北京/i.test(full)) return '北京';
+        if (/外滩|陆家嘴|豫园|上海/i.test(full)) return '上海';
+        if (/西湖|灵隐寺|千岛湖|杭州/i.test(full)) return '杭州';
+        if (/拙政园|留园|平江路|苏州/i.test(full)) return '苏州';
+        if (/乌镇|西塘|南浔|嘉兴/i.test(full)) return '江南水乡';
+        if (/大熊猫|都江堰|青城山|宽窄巷子|成都/i.test(full)) return '成都';
+        if (/洪崖洞|李子坝|解放碑|磁器口|重庆/i.test(full)) return '重庆';
+        if (/兵马俑|大雁塔|华清宫|明城墙|西安/i.test(full)) return '西安';
+        if (/大理|洱海|双廊|崇圣寺/i.test(full)) return '大理';
+        if (/丽江|玉龙雪山|蓝月谷|束河/i.test(full)) return '丽江';
+        if (/香格里拉|普达措|松赞林寺/i.test(full)) return '香格里拉';
+        if (/喀纳斯|禾木|天池|吐鲁番|新疆/i.test(full)) return '新疆';
+        if (/漓江|阳朔|遇龙河|象鼻山|桂林/i.test(full)) return '桂林';
+        if (/九寨沟|黄龙|四姑娘山|稻城亚丁/i.test(full)) return '川西秘境';
+        return '中国';
+      },
+
+      generateFallbackHighlights(dest) {
+        const d = dest || '中国';
+        if (d.includes('北京')) {
+          return [
+            { title: '1单1团 · 皇城中轴文博专属', desc: '特邀资深文博学者全程伴游，深度解读紫禁城六百年皇家美学与规制秘辛。' },
+            { title: '慕田峪长城 VIP 缆车夕阳漫步', desc: '避开观光人潮，从容登临万顷苍翠长城雄关，近距离触摸千年青砖敌楼。' },
+            { title: '什刹海胡同非遗匠人私家探访', desc: '乘专属人力黄包车穿行青砖灰瓦，深入四合院亲手体验传统木版水印或面塑。' }
+          ];
+        }
+        if (d.includes('云南') || d.includes('大理') || d.includes('丽江')) {
+          return [
+            { title: '大理苍山洱海生态廊道骑行', desc: '沿湖岸骑行呼吸纯净高原微风，将双廊落日与喜洲金黄稻田尽收眼底。' },
+            { title: '玉龙雪山万年冰川大索道直达', desc: '专车直抵雪山脚下，搭乘VIP通道索道登上冰川公园，仰望雄浑雪峰。' },
+            { title: '白族扎染与纳西东巴文化对话', desc: '深入千年古村探访国家级非遗传承人，亲手体验纯植物手工染织艺术。' }
+          ];
+        }
+        if (d.includes('新疆')) {
+          return [
+            { title: '禾木图瓦古村落木屋晨雾漫调', desc: '独家入住尖顶图瓦原木木屋，登顶观景平台捕捉炊烟袅袅的原始水墨仙境。' },
+            { title: '喀纳斯湖三湾私享漫步与变色奇景', desc: '沿神仙湾与月亮湾木栈道轻松徒步，饱览阿尔泰山深处万亩金色白桦林。' },
+            { title: '天山博格达雪峰与天池高山胜境', desc: '专属越野商务车直达景区核心，俯瞰倒映雪峰的碧水瑶池。' }
+          ];
+        }
+        return [
+          { title: '1单1团 · 私家纯玩定制', desc: '专属专车随行，拒绝赶场与隐藏购物，根据客人专属节奏从容品味目的地。' },
+          { title: '金牌向导深度人文讲解', desc: '严选当地高素质金牌文化向导，告别千篇一律背台词，为您讲述鲜活的城市故事。' },
+          { title: '行前到行后全流程无忧守护', desc: '行前定制专属手册，行中24小时多语种管家极速响应，全家舒适安心出游。' }
+        ];
+      }
+    };
+
+    const IMAGE_ENGINE_CONFIG = {
+      githubTreeApi: 'https://api.github.com/repos/sallyzheng-lang/klook-tool/git/trees/main?recursive=1',
+      githubRawBase: 'https://raw.githubusercontent.com/sallyzheng-lang/klook-tool/main/',
+      githubManifestPath: 'gallery-manifest.json',
+      githubCacheKey: 'klook_github_image_index_v2',
+      githubCacheTTL: 10 * 60 * 1000
+    };
+
+    let githubImageIndex = null;
+    let githubImageIndexLoadedAt = 0;
+
+    function normalizeImageText(value = '') {
+      return String(value)
+        .toLowerCase()
+        .replace(/%20/g, ' ')
+        .replace(/[._()[\]{}\-—_/\\]+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
+    function imageTextTokens(value = '') {
+      const normalized = normalizeImageText(value);
+      if (!normalized) return [];
+      const stopWords = new Set([
+        '中国','旅游','旅行','景区','景点','一日游','二日游','三日游','四日游','五日游','六日游','七日游',
+        '专车','送机','接机','出发','返回','前往','抵达','入住','酒店','自由活动','全天','上午','下午','晚上',
+        'day','d1','d2','d3','d4','d5','d6','d7','d8','the','and','of','to','trip','tour','travel','china'
+      ]);
+      return normalized.split(/[^a-z0-9\u3400-\u9fff]+/i).filter(t => t && t.length >= 2 && !stopWords.has(t));
+    }
+
+    function getRouteSearchTerms(route = '') {
+      const raw = String(route || '');
+      const tokens = imageTextTokens(raw);
+      const terms = [];
+
+      const add = (v) => {
+        const x = String(v || '').trim();
+        if (x && x.length >= 2 && !terms.includes(x)) terms.push(x);
+      };
+      add(raw.replace(/^(D|Day)\s*\d+\s*[:：]?/i, ''));
+
+      const knownTerms = [
+        '故宫','长城','慕田峪','八达岭','颐和园','天坛','什刹海','胡同','鸟巢','水立方','天安门',
+        '外滩','陆家嘴','豫园','西湖','雷峰塔','灵隐寺','拙政园','平江路','乌镇','西塘',
+        '熊猫','大熊猫','熊猫基地','都江堰','青城山','洪崖洞','解放碑','李子坝','九寨沟','黄龙','四姑娘山','双桥沟',
+        '洱海','大理古城','双廊','苍山','玉龙雪山','蓝月谷','丽江古城','香格里拉','普达措','松赞林寺',
+        '喀纳斯','禾木','白哈巴','天山','天池','喀什','吐鲁番','五彩滩',
+        '漓江','阳朔','遇龙河','兴坪','兵马俑','大雁塔','大唐不夜城','西安城墙'
+      ];
+      knownTerms.forEach(term => { if (raw.includes(term)) add(term); });
+      tokens.forEach(t => add(t));
+      return terms.slice(0, 10);
+    }
+
+    function prettifyGitHubImageName(value = '') {
+      let decoded = String(value || '');
+      try { decoded = decodeURIComponent(decoded); } catch {}
+      return decoded
+        .replace(/\.[^.]+$/, '')
+        .replace(/^\d+[\s._-]*/, '')
+        .replace(/[._-]+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
+    async function loadGitHubImageIndex(forceRefresh = false) {
+      if (!forceRefresh && Array.isArray(githubImageIndex) && Date.now() - githubImageIndexLoadedAt < IMAGE_ENGINE_CONFIG.githubCacheTTL) return githubImageIndex;
+
+      try {
+        const raw = localStorage.getItem(IMAGE_ENGINE_CONFIG.githubCacheKey);
+        if (!forceRefresh && raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed?.savedAt && Array.isArray(parsed.items) && Date.now() - parsed.savedAt < IMAGE_ENGINE_CONFIG.githubCacheTTL) {
+            githubImageIndex = parsed.items;
+            githubImageIndexLoadedAt = parsed.savedAt || Date.now();
+            return githubImageIndex;
+          }
+        }
+      } catch {}
+
+      try {
+        const response = await fetch(IMAGE_ENGINE_CONFIG.githubTreeApi, {
+          headers: { 'Accept': 'application/vnd.github+json' },
+          cache: 'no-store'
+        });
+        if (!response.ok) throw new Error(`GitHub API ${response.status}`);
+        const data = await response.json();
+        const tree = Array.isArray(data.tree) ? data.tree : [];
+
+        const imageItems = tree
+          .filter(item => item.type === 'blob' && /\.(jpe?g|png|webp)$/i.test(item.path))
+          .map(item => ({
+            id: `gh-${item.path}`,
+            path: item.path,
+            sha: item.sha || '',
+            name: prettifyGitHubImageName(item.path.split('/').pop() || ''),
+            url: IMAGE_ENGINE_CONFIG.githubRawBase + item.path.split('/').map(encodeURIComponent).join('/') + (item.sha ? `?v=${item.sha.slice(0, 12)}` : ''),
+            isGitHub: true,
+            isCustom: false
+          }));
+
+        // 如果仓库里存在 gallery-manifest.json，则以 manifest 中的名称/城市/分类/标签为准；
+        // 图片仍以 GitHub 实际文件路径为准，因此“名称”和“图片”永远绑定在同一对象上。
+        const manifestNode = tree.find(item => item.type === 'blob' && item.path === IMAGE_ENGINE_CONFIG.githubManifestPath);
+        let manifest = [];
+        if (manifestNode) {
+          try {
+            const manifestUrl = IMAGE_ENGINE_CONFIG.githubRawBase + IMAGE_ENGINE_CONFIG.githubManifestPath + `?v=${manifestNode.sha || Date.now()}`;
+            const mr = await fetch(manifestUrl, { cache: 'no-store' });
+            if (mr.ok) {
+              const parsed = await mr.json();
+              manifest = Array.isArray(parsed) ? parsed : (Array.isArray(parsed?.photos) ? parsed.photos : []);
+            }
+          } catch (manifestErr) {
+            console.warn('GitHub gallery manifest unavailable, using filenames:', manifestErr);
+          }
+        }
+
+        const byPath = new Map(imageItems.map(item => [item.path, item]));
+        const byFileName = new Map(imageItems.map(item => [item.path.split('/').pop(), item]));
+
+        if (manifest.length) {
+          for (const meta of manifest) {
+            const file = String(meta?.file || meta?.path || '').replace(/^\.?\//, '');
+            const item = byPath.get(file) || byFileName.get(file);
+            if (!item) continue;
+            if (meta.name) item.name = String(meta.name).trim();
+            if (meta.city) item.city = String(meta.city).trim();
+            if (meta.cat) item.cat = String(meta.cat).trim();
+            if (Array.isArray(meta.tags)) item.tags = [...new Set(meta.tags.map(String).map(x => x.trim()).filter(Boolean))];
+            item.id = meta.id ? String(meta.id) : item.id;
+          }
+        }
+
+        const items = imageItems
+          .map(item => ({
+            ...item,
+            city: item.city || '实景',
+            cat: item.cat || 'all',
+            tags: [...new Set([item.name, item.city || '', ...(item.tags || [])].filter(Boolean))]
+          }))
+          .filter((item, index, arr) => arr.findIndex(x => x.url === item.url) === index);
+
+        githubImageIndex = items;
+        githubImageIndexLoadedAt = Date.now();
+        localStorage.setItem(IMAGE_ENGINE_CONFIG.githubCacheKey, JSON.stringify({ savedAt: Date.now(), items }));
+        return items;
+      } catch (err) {
+        console.warn('GitHub image index load failed:', err);
+        // 即使 GitHub 暂时不可用，也优先返回上一次缓存，避免 AI 配图整个失效。
+        try {
+          const raw = localStorage.getItem(IMAGE_ENGINE_CONFIG.githubCacheKey);
+          const parsed = raw ? JSON.parse(raw) : null;
+          if (Array.isArray(parsed?.items)) {
+            githubImageIndex = parsed.items;
+            githubImageIndexLoadedAt = parsed.savedAt || Date.now();
+            return githubImageIndex;
+          }
+        } catch {}
+        return [];
+      }
+    }
+
+    function findLocalFallbackImage(route, usedUrls) {
+      if (!Array.isArray(PHOTO_LIBRARY) || !PHOTO_LIBRARY.length) return '';
+      const terms = getRouteSearchTerms(route);
+      const scored = PHOTO_LIBRARY
+        .filter(p => p?.url && !usedUrls.has(p.url))
+        .map(p => {
+          let score = 0;
+          const haystack = normalizeImageText(`${p.name} ${p.city} ${(p.tags || []).join(' ')}`);
+          terms.forEach(t => {
+            const nt = normalizeImageText(t);
+            if (nt && haystack.includes(nt)) score += 50;
+          });
+          return { p, score };
+        })
+        .sort((a, b) => b.score - a.score);
+
+      const hit = scored.find(x => x.score > 0)?.p || scored[0]?.p;
+      if (hit) {
+        usedUrls.add(hit.url);
+        return hit.url;
       }
       return '';
+    }
+
+    async function matchPhotoForRoute(route, usedUrls = new Set()) {
+      const terms = getRouteSearchTerms(route);
+
+      // 1) GitHub 公共图库优先：所有用户看到的是同一套图片来源。
+      const githubItems = await loadGitHubImageIndex();
+      const scoredGh = githubItems
+        .filter(item => item?.url && !usedUrls.has(item.url))
+        .map(item => {
+          let score = 0;
+          const haystack = normalizeImageText(`${item.name} ${item.city || ''} ${(item.tags || []).join(' ')} ${item.path || ''}`);
+          terms.forEach(t => {
+            const nt = normalizeImageText(t);
+            if (!nt) return;
+            if (normalizeImageText(item.name) === nt) score += 180;
+            else if (haystack.includes(nt)) score += 70;
+          });
+          return { item, score };
+        })
+        .filter(x => x.score > 0)
+        .sort((a, b) => b.score - a.score);
+
+      if (scoredGh.length) {
+        const chosen = scoredGh[0].item.url;
+        usedUrls.add(chosen);
+        return chosen;
+      }
+
+      // 2) 本机“我的图库”仅作为个人兜底，不再抢占公共 GitHub 图片。
+      try {
+        const customPhotos = await CustomPhotoDB.getAll();
+        const scoredCustom = customPhotos
+          .filter(item => item?.url && !usedUrls.has(item.url))
+          .map(item => {
+            let score = 0;
+            const haystack = normalizeImageText(`${item.name} ${item.city || ''} ${(item.tags || []).join(' ')}`);
+            terms.forEach(t => {
+              const nt = normalizeImageText(t);
+              if (nt && haystack.includes(nt)) score += 60;
+            });
+            return { item, score };
+          })
+          .filter(x => x.score > 0)
+          .sort((a, b) => b.score - a.score);
+
+        if (scoredCustom.length) {
+          const chosen = scoredCustom[0].item.url;
+          usedUrls.add(chosen);
+          return chosen;
+        }
+      } catch (err) {
+        console.warn('Custom photo check failed:', err);
+      }
+
+      // 3) 旧版内置图库最后兜底，兼容已有模板与历史行程。
+      return findLocalFallbackImage(route, usedUrls);
     }
 
     async function assignUniqueImagesToDays(days, existingDays = []) {
       const usedUrls = new Set();
       const oldMap = new Map((existingDays || []).map(d => [d.day, d]));
       const result = [];
+
       for (const day of days || []) {
         const oldDay = oldMap.get(day.day);
         if (oldDay?.manuallyEdited && oldDay.image) {
@@ -1004,18 +1562,19 @@
           result.push({ ...day, image: oldDay.image, manuallyEdited: true });
           continue;
         }
+
         const image = await matchPhotoForRoute(day.route, usedUrls);
         result.push({ ...day, image, manuallyEdited: false });
       }
+
       return result;
     }
 
-    // 呼叫 Gemini AI 生成全套定制行程
     async function callGeminiAIItinerary(parsedDays) {
       if (!parsedDays || parsedDays.length === 0) return null;
       const apiKey = "";
       const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
-      const systemPrompt = `你是一位服务于 Klook 国际入境高端定制游的资深总监与金牌文案专家。请为输入的行程生成严谨优美的中文精炼文案及JSON输出。`;
+      const systemPrompt = `你是一位服务于 Klook 国际入境高端定制游的资深总监与金牌文案专家。请根据提供的行程路线，提炼3个具象特色卖点(overallHighlights: [{title, desc}])，以及每日卡片标题(title)与实景文案(description)。严格返回纯JSON。`;
       const daysContext = parsedDays.map(d => `Day ${d.day}: ${d.route}`).join('\n');
       const userQuery = `目的地：${state.destination || '根据路线推断'}\n每日排程：\n${daysContext}`;
 
@@ -1053,30 +1612,197 @@
       };
 
       try {
-        const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
         const jsonText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-        return JSON.parse(jsonText);
+        return jsonText ? JSON.parse(jsonText) : null;
       } catch (err) {
+        console.warn('Gemini API call failed, falling back to local engine:', err);
         return null;
       }
     }
 
-    // 渲染海报实时预览
+    async function callGeminiHighlightsOnly() {
+      const btn = document.getElementById('btn-ai-highlights');
+      const oldText = btn.innerHTML;
+      btn.disabled = true;
+      showNotification('AI 正在深度分析本线路核心卖点与亮点...', '⏳');
+
+      const apiKey = "";
+      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+      const daysContext = state.days.map(d => `Day ${d.day}: ${d.route}`).join('\n');
+      const payload = {
+        contents: [{ parts: [{ text: `目的地：${state.destination}\n路线：\n${daysContext}\n请针对实际路线提炼3条尊享特色卖点。` }] }],
+        systemInstruction: { parts: [{ text: "提炼3条高端定制卖点，返回JSON: {overallHighlights: [{title, desc}]}" }] },
+        generationConfig: { responseMimeType: "application/json" }
+      };
+
+      try {
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        const jsonText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        const parsed = JSON.parse(jsonText);
+        if (parsed?.overallHighlights) {
+          state.overallHighlights = parsed.overallHighlights;
+          renderMiddleCardEditors();
+          renderPosterPreview();
+          saveDraftToLocalStorage();
+          showNotification('✨ AI 已成功提炼本线路专属卖点！');
+        }
+      } catch (err) {
+        state.overallHighlights = DestinationEngine.generateFallbackHighlights(state.destination || '中国');
+        renderMiddleCardEditors();
+        renderPosterPreview();
+        showNotification('已根据线路精选加载推荐卖点', 'ℹ️');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = oldText;
+      }
+    }
+
+    async function callGeminiPolishDay(dayNum) {
+      const targetDay = state.days.find(d => d.day === dayNum);
+      if (!targetDay) return;
+
+      showNotification(`AI 正在为 Day ${dayNum} 润色精彩文案...`, '⏳');
+      const apiKey = "";
+      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+      const payload = {
+        contents: [{ parts: [{ text: `游览路线：${targetDay.route}。请仅就该路线编写高端定制标题与实景描述。` }] }],
+        systemInstruction: { parts: [{ text: "撰写高端旅游卡片标题(title)与80-120字描述(description)，返回JSON: {title, description}" }] },
+        generationConfig: { responseMimeType: "application/json" }
+      };
+
+      try {
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        const jsonText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        const resObj = JSON.parse(jsonText);
+        if (resObj?.title && resObj?.description) {
+          targetDay.title = resObj.title;
+          targetDay.description = resObj.description;
+          targetDay.manuallyEdited = true;
+          renderMiddleCardEditors();
+          renderPosterPreview();
+          saveDraftToLocalStorage();
+          showNotification(`✨ Day ${dayNum} AI 润色成功！`);
+        }
+      } catch (err) {
+        targetDay.title = `臻选探访 · ${targetDay.route.split(/[-—,\s/]/)[0]}`;
+        targetDay.description = `专车舒适直达【${targetDay.route}】，金牌专属向导深度解读其历史底蕴与自然风光，感受东方美学生活。`;
+        targetDay.manuallyEdited = true;
+        renderMiddleCardEditors();
+        renderPosterPreview();
+        saveDraftToLocalStorage();
+        showNotification(`Day ${dayNum} 文案已润色！`, '✨');
+      }
+    }
+
+    async function callGeminiTranslateEntireTrip(targetLang) {
+      if (targetLang === 'zh-CN') {
+        state.lang = 'zh-CN';
+        renderPosterPreview();
+        return;
+      }
+
+      if (targetLang === 'zh-HK') {
+        state.lang = 'zh-HK';
+        renderPosterPreview();
+        showNotification('已切换至港式繁体中文');
+        return;
+      }
+
+      const spinner = document.getElementById('ai-translate-spinner');
+      if (spinner) spinner.classList.remove('hidden');
+      showNotification('AI 正在为您整套意译行程...', '⏳');
+
+      const apiKey = "";
+      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+      const payloadContent = {
+        destination: state.destination,
+        theme: state.theme,
+        pace: state.pace,
+        overallHighlights: state.overallHighlights,
+        days: state.days.map(d => ({ day: d.day, route: d.route, title: d.title, description: d.description })),
+        hotelText: state.hotelText,
+        ticketText: state.ticketText,
+        trafficText: state.trafficText,
+        guideText: state.guideText,
+        expText: state.expText,
+        exclusionsText: state.exclusionsText,
+        cancellationText: state.cancellationText
+      };
+
+      try {
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: JSON.stringify(payloadContent) }] }],
+            systemInstruction: { parts: [{ text: "Translate this customized travel JSON into elegant luxury travel English. Output identical JSON schema." }] },
+            generationConfig: { responseMimeType: "application/json" }
+          })
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        const jsonText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        translationCache[targetLang] = JSON.parse(jsonText);
+        state.lang = targetLang;
+        renderPosterPreview();
+        showNotification('✅ AI 英语翻译已完成！');
+      } catch (err) {
+        state.lang = targetLang;
+        renderPosterPreview();
+        showNotification('已切换至英文视图', 'ℹ️');
+      } finally {
+        if (spinner) spinner.classList.add('hidden');
+      }
+    }
+
     function renderPosterPreview() {
       const lang = state.lang;
       const ui = UI_I18N[lang] || UI_I18N['zh-CN'];
+      const cached = translationCache[lang];
+
+      let destName = cached?.destination || state.destination || '中国';
+      if (!cached && lang === 'zh-HK') destName = translateTextToHK(destName);
       
-      let destName = state.destination || '中国';
-      document.getElementById('poster-title').textContent = `${destName} · 私人定制游`;
+      let mainTitleText = `${destName} · 私人定制游`;
+      if (lang === 'zh-HK') mainTitleText = `${destName} · 私人訂制遊`;
+      else if (lang === 'en') mainTitleText = `${destName} · Private Bespoke Tour`;
+      document.getElementById('poster-title').textContent = mainTitleText;
+
       document.getElementById('ui-banner-badge').textContent = ui.bannerBadge;
       document.getElementById('ui-banner-subtag').textContent = ui.bannerTag;
-      document.getElementById('poster-subtitle').textContent = state.theme || ui.bannerSub;
 
-      document.getElementById('poster-date-badge').innerHTML = `<span class="leading-none">📅</span> <span class="leading-none">${escapeHtml(state.date || '随心定制')}</span>`;
-      document.getElementById('poster-group-badge').innerHTML = `<span class="leading-none">👥</span> <span class="leading-none">${escapeHtml(state.group || '独立成团')}</span>`;
-      document.getElementById('poster-price-val').innerHTML = `<span class="leading-none">🏷️</span> <span class="leading-none">${escapeHtml(state.price || '¥9,800 / 团')}</span>`;
+      let subText = cached?.theme || state.theme || ui.bannerSub;
+      if (!cached && lang === 'zh-HK') subText = translateTextToHK(subText);
+      document.getElementById('poster-subtitle').textContent = subText;
+
+      document.getElementById('poster-date-badge').innerHTML = state.date 
+        ? `<span>📅</span> <span>${escapeHtml(state.date)}</span>` 
+        : `<span>📅</span> <span>${lang === 'en' ? 'Flexible' : '随心定制'}</span>`;
+        
+      document.getElementById('poster-group-badge').innerHTML = state.group 
+        ? `<span>👥</span> <span>${escapeHtml(state.group)}</span>` 
+        : `<span>👥</span> <span>${lang === 'en' ? 'Private Group' : '独立成团'}</span>`;
+        
+      document.getElementById('poster-price-val').textContent = state.price ? `🏷️ ${state.price}` : (lang === 'en' ? '🏷️ Bespoke Quote' : '🏷️ 尊享定制');
 
       const posterBanner = document.getElementById('poster-banner');
       const bannerOverlay = document.getElementById('poster-banner-overlay');
@@ -1093,94 +1819,171 @@
         posterBanner.style.backgroundPosition = 'center';
       }
 
-      // 总体亮点渲染
       document.getElementById('ui-heading-highlights').textContent = ui.headingHighlights;
       const hlList = document.getElementById('poster-highlights-list');
       hlList.innerHTML = '';
-      (state.overallHighlights || []).forEach(h => {
+
+      const highlightsToRender = cached?.overallHighlights || state.overallHighlights || [];
+      highlightsToRender.forEach(h => {
+        let t = h.title || '';
+        let d = h.desc || '';
+        if (!cached && lang === 'zh-HK') {
+          t = translateTextToHK(t);
+          d = translateTextToHK(d);
+        }
         const item = document.createElement('div');
         item.className = 'flex items-start gap-2.5 bg-white p-3 rounded-xl border border-amber-100 shadow-2xs';
         item.innerHTML = `
           <div class="w-4 h-4 rounded-full bg-gradient-to-tr from-orange-500 to-amber-500 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-2xs">
-            <svg class="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+            <svg class="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+            </svg>
           </div>
           <div class="space-y-0.5 flex-1 min-w-0">
-            <div class="font-extrabold text-slate-900 text-xs leading-snug">${escapeHtml(h.title)}</div>
-            <div class="text-[11px] text-slate-600 leading-relaxed text-justify">${escapeHtml(h.desc)}</div>
+            <div class="font-extrabold text-slate-900 text-xs leading-snug">${escapeHtml(t)}</div>
+            <div class="text-[11px] text-slate-600 leading-relaxed text-justify">${escapeHtml(d)}</div>
           </div>
         `;
         hlList.appendChild(item);
       });
 
-      // 每日卡片渲染
       document.getElementById('ui-heading-itinerary').textContent = ui.headingItinerary;
       const dailyList = document.getElementById('poster-daily-list');
       dailyList.innerHTML = '';
 
       state.days.forEach(d => {
+        const transDay = cached?.days?.find(cd => cd.day === d.day);
+        let route = transDay?.route || d.route;
+        let title = transDay?.title || d.title;
+        let desc = transDay?.description || d.description;
+
+        if (!cached && lang === 'zh-HK') {
+          route = translateTextToHK(route);
+          title = translateTextToHK(title);
+          desc = translateTextToHK(desc);
+        }
+
         const dayCard = document.createElement('div');
         dayCard.className = 'bg-white rounded-2xl border border-slate-100 shadow-2xs overflow-hidden p-3.5 space-y-2.5';
         
         let imgHtml = '';
         if (d.image) {
-          imgHtml = `<div class="w-full aspect-video rounded-xl overflow-hidden shadow-2xs border border-slate-100"><img src="${escapeHtml(d.image)}" class="w-full h-full object-cover" alt="Day ${d.day}"></div>`;
+          imgHtml = `
+            <div class="w-full aspect-video rounded-xl overflow-hidden shadow-2xs border border-slate-100">
+              <img src="${escapeHtml(d.image)}" class="w-full h-full object-cover" alt="Day ${d.day}" crossorigin="anonymous" onerror="this.style.display='none'">
+            </div>
+          `;
         }
 
         dayCard.innerHTML = `
           <div class="export-day-header gap-2.5">
-            <span class="export-day-badge poster-badge bg-orange-600 text-white text-xs font-black rounded-md shadow-2xs">
-              Day ${d.day}
-            </span>
+            <span class="export-day-badge bg-orange-600 text-white text-xs font-black rounded-md shadow-2xs"><span class="export-day-badge-text">Day ${d.day}</span></span>
             <span class="export-day-route font-extrabold text-slate-900 text-xs break-words">
-              ${escapeHtml(d.route)}
+              ${escapeHtml(route)}
             </span>
           </div>
+
           ${imgHtml}
+
           <div class="space-y-1">
-            <div class="font-bold text-slate-800 text-xs">${escapeHtml(d.title)}</div>
-            <div class="text-[11px] text-slate-600 leading-relaxed text-justify">${escapeHtml(d.description)}</div>
+            <div class="font-bold text-slate-800 text-xs">
+              ${escapeHtml(title)}
+            </div>
+            <div class="text-[11px] text-slate-600 leading-relaxed text-justify">
+              ${escapeHtml(desc)}
+            </div>
           </div>
         `;
         dailyList.appendChild(dayCard);
       });
 
-      // 服务包含等设置
       document.getElementById('ui-heading-inclusions').textContent = ui.headingInclusions;
       const incList = document.getElementById('poster-inclusions-dynamic-list');
       incList.innerHTML = '';
 
-      if (state.activeModules.includes('hotel') && state.hotelText.trim()) {
-        const item = document.createElement('div');
-        item.className = 'flex items-start gap-2 bg-orange-50/50 p-2 rounded-xl border border-orange-100/80';
-        item.innerHTML = `<span class="text-sm shrink-0">🏨</span><div class="leading-relaxed"><span class="font-bold text-slate-900">品质住宿：</span><span class="text-slate-700 font-medium whitespace-pre-line">${escapeHtml(state.hotelText)}</span></div>`;
-        incList.appendChild(item);
+      const hasHotel = state.activeModules.includes('hotel') && state.hotelText.trim();
+      let displayHotel = cached?.hotelText || state.hotelText;
+      if (!cached && lang === 'zh-HK') displayHotel = translateTextToHK(displayHotel);
+
+      if (hasHotel) {
+        const hItem = document.createElement('div');
+        hItem.className = 'flex items-start gap-2 bg-orange-50/50 p-2 rounded-xl border border-orange-100/80';
+        const label = lang === 'en' ? 'Quality Accommodation: ' : (lang === 'zh-HK' ? '品質住宿：' : '品质住宿：');
+        hItem.innerHTML = `<span class="text-sm shrink-0">🏨</span><div class="leading-relaxed"><span class="font-bold text-slate-900">${label}</span><span class="text-slate-700 font-medium whitespace-pre-line">${escapeHtml(displayHotel)}</span></div>`;
+        incList.appendChild(hItem);
       }
+
       if (state.activeModules.includes('ticket') && state.ticketText.trim()) {
+        let txt = cached?.ticketText || state.ticketText;
+        if (!cached && lang === 'zh-HK') txt = translateTextToHK(txt);
         const item = document.createElement('div');
         item.className = 'flex items-start gap-2';
-        item.innerHTML = `<span class="text-sm shrink-0">🎫</span><div class="leading-relaxed"><span class="font-bold text-slate-900">景点门票：</span><span class="text-slate-600 whitespace-pre-line">${escapeHtml(state.ticketText)}</span></div>`;
-        incList.appendChild(item);
-      }
-      if (state.activeModules.includes('car') && state.trafficText.trim()) {
-        const item = document.createElement('div');
-        item.className = 'flex items-start gap-2';
-        item.innerHTML = `<span class="text-sm shrink-0">🚗</span><div class="leading-relaxed"><span class="font-bold text-slate-900">车辆交通：</span><span class="text-slate-600 whitespace-pre-line">${escapeHtml(state.trafficText)}</span></div>`;
-        incList.appendChild(item);
-      }
-      if (state.activeModules.includes('guide') && state.guideText.trim()) {
-        const item = document.createElement('div');
-        item.className = 'flex items-start gap-2';
-        item.innerHTML = `<span class="text-sm shrink-0">🧭</span><div class="leading-relaxed"><span class="font-bold text-slate-900">专属导游：</span><span class="text-slate-600 whitespace-pre-line">${escapeHtml(state.guideText)}</span></div>`;
+        const label = lang === 'en' ? 'Admission Tickets: ' : (lang === 'zh-HK' ? '景點門券：' : '景点门票：');
+        item.innerHTML = `<span class="text-sm shrink-0">🎫</span><div class="leading-relaxed"><span class="font-bold text-slate-900">${label}</span><span class="text-slate-600 whitespace-pre-line">${escapeHtml(txt)}</span></div>`;
         incList.appendChild(item);
       }
 
-      document.getElementById('poster-exclusions-text').textContent = state.exclusionsText || '';
-      document.getElementById('poster-exclusions-box').classList.toggle('hidden', !state.exclusionsText.trim());
-      document.getElementById('poster-cancellation-text').textContent = state.cancellationText || '';
-      document.getElementById('poster-cancellation-box').classList.toggle('hidden', !state.cancellationText.trim());
+      if (state.activeModules.includes('car') && state.trafficText.trim()) {
+        let txt = cached?.trafficText || state.trafficText;
+        if (!cached && lang === 'zh-HK') txt = translateTextToHK(txt);
+        const item = document.createElement('div');
+        item.className = 'flex items-start gap-2';
+        const label = lang === 'en' ? 'Private Vehicle: ' : (lang === 'zh-HK' ? '專車交通：' : '车辆交通：');
+        item.innerHTML = `<span class="text-sm shrink-0">🚗</span><div class="leading-relaxed"><span class="font-bold text-slate-900">${label}</span><span class="text-slate-600 whitespace-pre-line">${escapeHtml(txt)}</span></div>`;
+        incList.appendChild(item);
+      }
+
+      if (state.activeModules.includes('guide') && state.guideText.trim()) {
+        let txt = cached?.guideText || state.guideText;
+        if (!cached && lang === 'zh-HK') txt = translateTextToHK(txt);
+        const item = document.createElement('div');
+        item.className = 'flex items-start gap-2';
+        const label = lang === 'en' ? 'Bespoke Guide: ' : (lang === 'zh-HK' ? '專屬向導/導賞：' : '专属导游：');
+        item.innerHTML = `<span class="text-sm shrink-0">🧭</span><div class="leading-relaxed"><span class="font-bold text-slate-900">${label}</span><span class="text-slate-600 whitespace-pre-line">${escapeHtml(txt)}</span></div>`;
+        incList.appendChild(item);
+      }
+
+      if (state.activeModules.includes('exp') && state.expText.trim()) {
+        let txt = cached?.expText || state.expText;
+        if (!cached && lang === 'zh-HK') txt = translateTextToHK(txt);
+        const item = document.createElement('div');
+        item.className = 'flex items-start gap-2';
+        const label = lang === 'en' ? 'Curated Experience: ' : (lang === 'zh-HK' ? '尊尚體驗：' : '特色体验：');
+        item.innerHTML = `<span class="text-sm shrink-0">🎁</span><div class="leading-relaxed"><span class="font-bold text-slate-900">${label}</span><span class="text-slate-600 whitespace-pre-line">${escapeHtml(txt)}</span></div>`;
+        incList.appendChild(item);
+      }
+
+      document.getElementById('ui-lbl-exclusions').textContent = ui.lblExclusions;
+      document.getElementById('ui-lbl-cancellation').textContent = ui.lblCancellation;
+
+      const exclBox = document.getElementById('poster-exclusions-box');
+      let exclTxt = cached?.exclusionsText || state.exclusionsText;
+      if (!cached && lang === 'zh-HK') exclTxt = translateTextToHK(exclTxt);
+      if (exclTxt.trim()) {
+        exclBox.classList.remove('hidden');
+        document.getElementById('poster-exclusions-text').textContent = exclTxt;
+      } else {
+        exclBox.classList.add('hidden');
+      }
+
+      const cancBox = document.getElementById('poster-cancellation-box');
+      let cancTxt = cached?.cancellationText || state.cancellationText;
+      if (!cached && lang === 'zh-HK') cancTxt = translateTextToHK(cancTxt);
+      if (cancTxt.trim()) {
+        cancBox.classList.remove('hidden');
+        document.getElementById('poster-cancellation-text').textContent = cancTxt;
+      } else {
+        cancBox.classList.add('hidden');
+      }
+
+      document.getElementById('ui-brand-p1').textContent = ui.brandP1;
+      document.getElementById('ui-brand-p2').textContent = ui.brandP2;
+      document.getElementById('ui-heading-contact').textContent = ui.headingContact;
+      document.getElementById('ui-qr-wechat').textContent = ui.qrWechat;
+      document.getElementById('ui-qr-whatsapp').textContent = ui.qrWhatsapp;
+      document.getElementById('ui-footer-sub').textContent = ui.footerSub;
     }
 
-    // 渲染中间栏每日卡片与亮点输入项
     function renderMiddleCardEditors() {
       const hlInputsContainer = document.getElementById('highlights-inputs-list');
       hlInputsContainer.innerHTML = '';
@@ -1188,8 +1991,12 @@
         const row = document.createElement('div');
         row.className = 'bg-white p-3 rounded-xl border border-amber-200/80 space-y-1.5 shadow-2xs';
         row.innerHTML = `
-          <input type="text" data-hl-title-idx="${idx}" value="${escapeHtml(hl.title)}" placeholder="标题" class="w-full bg-slate-50 border border-slate-200 rounded-md p-1.5 text-xs font-bold text-slate-900 outline-none">
-          <textarea rows="2" data-hl-desc-idx="${idx}" placeholder="详细说明..." class="w-full bg-slate-50 border border-slate-200 rounded-md p-1.5 text-xs text-slate-700 outline-none leading-relaxed">${escapeHtml(hl.desc)}</textarea>
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold text-amber-900">亮点 ${idx + 1}</span>
+            <span class="text-[10px] text-slate-400">加粗小标题 + 细致描述</span>
+          </div>
+          <input type="text" data-hl-title-idx="${idx}" value="${escapeHtml(hl.title)}" placeholder="核心标题" class="w-full bg-slate-50 border border-slate-200 rounded-md p-1.5 text-xs font-bold text-slate-900 outline-none focus:ring-1 focus:ring-orange-500">
+          <textarea rows="2" data-hl-desc-idx="${idx}" placeholder="细致说明..." class="w-full bg-slate-50 border border-slate-200 rounded-md p-1.5 text-xs text-slate-700 outline-none focus:ring-1 focus:ring-orange-500 leading-relaxed">${escapeHtml(hl.desc)}</textarea>
         `;
         hlInputsContainer.appendChild(row);
       });
@@ -1198,14 +2005,20 @@
         inp.addEventListener('input', (e) => {
           const i = parseInt(e.target.getAttribute('data-hl-title-idx'), 10);
           state.overallHighlights[i].title = e.target.value;
+          translationCache['zh-HK'] = null;
+          translationCache['en'] = null;
           renderPosterPreview();
+          saveDraftToLocalStorage();
         });
       });
       hlInputsContainer.querySelectorAll('[data-hl-desc-idx]').forEach(inp => {
         inp.addEventListener('input', (e) => {
           const i = parseInt(e.target.getAttribute('data-hl-desc-idx'), 10);
           state.overallHighlights[i].desc = e.target.value;
+          translationCache['zh-HK'] = null;
+          translationCache['en'] = null;
           renderPosterPreview();
+          saveDraftToLocalStorage();
         });
       });
 
@@ -1218,16 +2031,16 @@
         
         let photoThumb = d.image ? `
           <div class="relative w-full aspect-video rounded-xl overflow-hidden border border-slate-200 bg-slate-100 group">
-            <img src="${escapeHtml(d.image)}" class="w-full h-full object-cover">
+            <img src="${escapeHtml(d.image)}" class="w-full h-full object-cover" alt="Day ${d.day}" crossorigin="anonymous">
             <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-2">
-              <button type="button" data-pick-lib-day="${d.day}" class="bg-white text-slate-800 text-[11px] font-bold px-2.5 py-1 rounded shadow">换图</button>
-              <button type="button" data-remove-img-day="${d.day}" class="bg-rose-600 text-white text-[11px] font-bold px-2.5 py-1 rounded shadow">移除</button>
+              <button type="button" data-pick-lib-day="${d.day}" class="bg-white/90 hover:bg-white text-slate-800 text-[11px] font-bold px-2.5 py-1 rounded-md shadow">换图</button>
+              <button type="button" data-remove-img-day="${d.day}" class="bg-rose-600 text-white text-[11px] font-bold px-2.5 py-1 rounded-md shadow">移除</button>
             </div>
           </div>
         ` : `
-          <div class="w-full h-20 rounded-xl border-2 border-dashed border-slate-200 flex items-center justify-center text-slate-400 text-xs bg-slate-50 gap-2">
-            <span>暂无配图</span>
-            <button type="button" data-pick-lib-day="${d.day}" class="text-[10px] bg-orange-50 text-orange-700 font-bold px-2 py-1 rounded border border-orange-200">
+          <div class="w-full h-24 rounded-xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-400 gap-1 bg-slate-50">
+            <span class="text-xs">暂无配图</span>
+            <button type="button" data-pick-lib-day="${d.day}" class="text-[10px] bg-orange-50 hover:bg-orange-100 text-orange-700 font-bold px-2 py-0.5 rounded border border-orange-200">
               🎨 从图库自选配图
             </button>
           </div>
@@ -1235,12 +2048,40 @@
 
         card.innerHTML = `
           <div class="flex items-center justify-between border-b border-slate-100 pb-2">
-            <span class="export-day-badge poster-badge bg-orange-600 text-white text-xs font-black rounded">Day ${d.day}</span>
-            <span class="text-xs font-bold text-slate-900 truncate">${escapeHtml(d.route)}</span>
+            <div class="flex items-center gap-1.5 min-w-0">
+              <span class="export-day-badge bg-orange-600 text-white text-xs font-black rounded shadow-2xs"><span class="export-day-badge-text">Day ${d.day}</span></span>
+              <span class="text-xs font-bold text-slate-900 truncate" title="${escapeHtml(d.route)}">${escapeHtml(d.route)}</span>
+            </div>
+            <button type="button" data-polish-day="${d.day}" class="text-[10px] bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold px-2 py-0.5 rounded transition flex items-center gap-0.5 shrink-0">
+              <span>✨</span> <span>AI润色</span>
+            </button>
           </div>
-          <input type="text" data-day-title="${d.day}" value="${escapeHtml(d.title)}" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-xs font-bold">
-          <textarea rows="3" data-day-desc="${d.day}" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs leading-relaxed">${escapeHtml(d.description)}</textarea>
-          ${photoThumb}
+
+          <div class="space-y-1">
+            <span class="block text-[10px] font-bold text-slate-500">每日卡片标题</span>
+            <input type="text" data-day-title="${d.day}" value="${escapeHtml(d.title)}" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-xs font-bold text-slate-900 outline-none focus:ring-1 focus:ring-orange-500">
+          </div>
+
+          <div class="space-y-1">
+            <span class="block text-[10px] font-bold text-slate-500">每日实景走心文案</span>
+            <textarea rows="3" data-day-desc="${d.day}" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs text-slate-700 outline-none focus:ring-1 focus:ring-orange-500 leading-relaxed">${escapeHtml(d.description)}</textarea>
+          </div>
+
+          <div class="space-y-1.5 pt-1">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-bold text-slate-500">当天实景照片 (16:9 横版)</span>
+              <div class="flex items-center gap-1.5">
+                <button type="button" data-pick-lib-day="${d.day}" class="text-[10px] bg-slate-100 hover:bg-slate-200 text-slate-700 px-2 py-0.5 rounded font-bold transition flex items-center gap-0.5">
+                  <span>🎨</span> 图库挑选
+                </button>
+                <label class="cursor-pointer text-[10px] bg-slate-100 hover:bg-slate-200 text-slate-700 px-2 py-0.5 rounded font-bold transition">
+                  <span>📁</span> 本地上传
+                  <input type="file" accept="image/*" data-day-file="${d.day}" class="hidden">
+                </label>
+              </div>
+            </div>
+            ${photoThumb}
+          </div>
         `;
         dayContainer.appendChild(card);
       });
@@ -1249,32 +2090,585 @@
         inp.addEventListener('input', (e) => {
           const dNum = parseInt(e.target.getAttribute('data-day-title'), 10);
           const item = state.days.find(d => d.day === dNum);
-          if (item) { item.title = e.target.value; renderPosterPreview(); }
+          if (item) {
+            item.title = e.target.value;
+            item.manuallyEdited = true;
+            renderPosterPreview();
+            saveDraftToLocalStorage();
+          }
         });
       });
+
       dayContainer.querySelectorAll('[data-day-desc]').forEach(inp => {
         inp.addEventListener('input', (e) => {
           const dNum = parseInt(e.target.getAttribute('data-day-desc'), 10);
           const item = state.days.find(d => d.day === dNum);
-          if (item) { item.description = e.target.value; renderPosterPreview(); }
+          if (item) {
+            item.description = e.target.value;
+            item.manuallyEdited = true;
+            renderPosterPreview();
+            saveDraftToLocalStorage();
+          }
         });
       });
+
+      dayContainer.querySelectorAll('[data-polish-day]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const dNum = parseInt(e.currentTarget.getAttribute('data-polish-day'), 10);
+          callGeminiPolishDay(dNum);
+        });
+      });
+
       dayContainer.querySelectorAll('[data-pick-lib-day]').forEach(btn => {
         btn.addEventListener('click', (e) => {
           const dNum = parseInt(e.currentTarget.getAttribute('data-pick-lib-day'), 10);
           openCloudGalleryModal(`day-${dNum}`);
         });
       });
+
       dayContainer.querySelectorAll('[data-remove-img-day]').forEach(btn => {
         btn.addEventListener('click', (e) => {
           const dNum = parseInt(e.currentTarget.getAttribute('data-remove-img-day'), 10);
           const item = state.days.find(d => d.day === dNum);
-          if (item) { item.image = ''; renderMiddleCardEditors(); renderPosterPreview(); }
+          if (item) {
+            item.image = '';
+            renderMiddleCardEditors();
+            renderPosterPreview();
+            saveDraftToLocalStorage();
+          }
+        });
+      });
+
+      dayContainer.querySelectorAll('[data-day-file]').forEach(inp => {
+        inp.addEventListener('change', (e) => {
+          const dNum = parseInt(e.target.getAttribute('data-day-file'), 10);
+          const file = e.target.files?.[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = (re) => {
+            const item = state.days.find(d => d.day === dNum);
+            if (item) {
+              item.image = re.target.result;
+              renderMiddleCardEditors();
+              renderPosterPreview();
+              saveDraftToLocalStorage();
+              showNotification(`Day ${dNum} 图片上传成功！`);
+            }
+          };
+          reader.readAsDataURL(file);
         });
       });
     }
 
-    // 从表单控件同步至 State
+    async function syncAndGenerateLocal() {
+      readFormInputs();
+      const parsed = parseItineraryText(state.itineraryText);
+      if (parsed.length === 0) {
+        showNotification('请先输入行程路线', '⚠️');
+        return;
+      }
+
+      state.destination = DestinationEngine.detectDestination(state.destination, parsed);
+      document.getElementById('field-destination').value = state.destination;
+
+      showNotification('正在智能匹配配图...', '⏳');
+      const existingDays = Array.isArray(state.days) ? state.days : [];
+      state.days = await assignUniqueImagesToDays(parsed.map(p => ({
+        day: p.day,
+        route: p.route,
+        title: `探索 · ${p.route.split(/[-—,\s/]/)[0] || '核心胜境'}`,
+        description: `专属专车平稳直达，在金牌向导带领下深度领略【${p.route}】的独特风光与人文内涵，按客人专属节奏舒心游览。`,
+        image: '',
+        manuallyEdited: false
+      })), existingDays);
+
+      state.overallHighlights = DestinationEngine.generateFallbackHighlights(state.destination);
+      updateBannerSourceOptions();
+      renderMiddleCardEditors();
+      renderPosterPreview();
+      saveDraftToLocalStorage();
+      showNotification('✅ 路线解析与配图同步成功！');
+    }
+
+    async function handleAIGenerateAll() {
+      readFormInputs();
+      const parsed = parseItineraryText(state.itineraryText);
+      if (parsed.length === 0) {
+        showNotification('请在文本框中输入行程路线后再调用 AI', '⚠️');
+        return;
+      }
+
+      const btn = document.getElementById('btn-ai-generate-all');
+      const spinner = document.getElementById('ai-gen-spinner');
+      btn.disabled = true;
+      btn.classList.add('opacity-80');
+      spinner.classList.remove('hidden');
+
+      showNotification('正在构思全套定制行程文案与亮点...', '⏳');
+      const aiResult = await callGeminiAIItinerary(parsed);
+
+      btn.disabled = false;
+      btn.classList.remove('opacity-80');
+      spinner.classList.add('hidden');
+
+      if (aiResult) {
+        if (aiResult.destination && !state.destination.trim()) {
+          state.destination = aiResult.destination;
+          document.getElementById('field-destination').value = state.destination;
+        }
+        if (aiResult.theme) {
+          state.theme = aiResult.theme;
+          document.getElementById('field-theme').value = state.theme;
+        }
+        if (aiResult.pace) {
+          state.pace = aiResult.pace;
+          document.getElementById('field-pace').value = state.pace;
+        }
+        if (aiResult.overallHighlights && Array.isArray(aiResult.overallHighlights)) {
+          state.overallHighlights = aiResult.overallHighlights;
+        }
+
+        const existingDays = Array.isArray(state.days) ? state.days : [];
+        const generatedDays = parsed.map(p => {
+          const aiDay = aiResult.days?.find(ad => ad.day === p.day);
+          return {
+            day: p.day,
+            route: p.route,
+            title: aiDay?.title || `探索 · ${p.route.split(/[-—,\s/]/)[0]}`,
+            description: aiDay?.description || `专车前往【${p.route}】，金牌向导为您讲述深厚人文脉络，尽享纯玩私密惬意时光。`,
+            image: '',
+            manuallyEdited: false
+          };
+        });
+        state.days = await assignUniqueImagesToDays(generatedDays, existingDays);
+
+        updateBannerSourceOptions();
+        renderMiddleCardEditors();
+        renderPosterPreview();
+        saveDraftToLocalStorage();
+        showNotification('✨ AI 帮写已完成！全套高端定制文案已同步');
+      } else {
+        syncAndGenerateLocal();
+      }
+    }
+
+    function getCustomTemplates() {
+      try {
+        const raw = localStorage.getItem('klook_custom_templates_v2');
+        return raw ? JSON.parse(raw) : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveCustomTemplates(list) {
+      localStorage.setItem('klook_custom_templates_v2', JSON.stringify(list));
+    }
+
+    function getAllTemplates() {
+      return [...PRESET_TEMPLATES, ...getCustomTemplates()];
+    }
+
+    function getCustomFolders() {
+      try {
+        const raw = localStorage.getItem('klook_custom_folders_v2');
+        return raw ? JSON.parse(raw) : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveCustomFolders(list) {
+      localStorage.setItem('klook_custom_folders_v2', JSON.stringify(list));
+    }
+
+    let currentTemplateFolder = 'all';
+
+    function getTemplateDestinationFolders(allList) {
+      const folderMap = new Map();
+      const baseFolders = ['北京', '华东江南', '川渝地区', '云南地区', '新疆西北', '陕西西安'];
+      baseFolders.forEach(f => folderMap.set(f, 0));
+
+      getCustomFolders().forEach(f => {
+        if (!folderMap.has(f)) folderMap.set(f, 0);
+      });
+
+      allList.forEach(t => {
+        let folderName = (t.folder || '').trim();
+        if (!folderName) {
+          const dest = t.destination || '';
+          if (dest.includes('北京')) folderName = '北京';
+          else if (dest.includes('上海') || dest.includes('苏州') || dest.includes('杭州') || dest.includes('乌镇')) folderName = '华东江南';
+          else if (dest.includes('成都') || dest.includes('重庆') || dest.includes('九寨沟')) folderName = '川渝地区';
+          else if (dest.includes('云南') || dest.includes('大理') || dest.includes('丽江') || dest.includes('香格里拉')) folderName = '云南地区';
+          else if (dest.includes('新疆') || dest.includes('喀纳斯') || dest.includes('乌鲁木齐')) folderName = '新疆西北';
+          else if (dest.includes('西安') || dest.includes('陕西')) folderName = '陕西西安';
+          else folderName = dest.split(/[-—,\s/]/)[0] || '综合定制';
+        }
+        if (folderMap.has(folderName)) {
+          folderMap.set(folderName, folderMap.get(folderName) + 1);
+        }
+      });
+
+      return folderMap;
+    }
+
+    function inferTemplateFolder(destination) {
+      const dest = String(destination || '').trim();
+      if (dest.includes('北京')) return '北京';
+      if (/(上海|苏州|杭州|乌镇)/.test(dest)) return '华东江南';
+      if (/(成都|重庆|九寨沟|四姑娘山)/.test(dest)) return '川渝地区';
+      if (/(云南|大理|丽江|香格里拉|西双版纳)/.test(dest)) return '云南地区';
+      if (/(新疆|喀纳斯|乌鲁木齐|喀什)/.test(dest)) return '新疆西北';
+      if (/(西安|陕西)/.test(dest)) return '陕西西安';
+      return dest.split(/[-—,，、\s/]/)[0] || '综合定制';
+    }
+
+    function parseTextTemplate(text) {
+      const lines = String(text || '')
+        .replace(/\r\n/g, '\n')
+        .replace(/\r/g, '\n')
+        .split('\n')
+        .map(line => line.trim())
+        .filter(line => line.length > 0);
+
+      if (!lines.length) return { error: '请先粘贴一段行程文本。' };
+
+      const dayRegex = /^(?:D|Day\s*)(\d+)\s*[:：\-—]?\s*(.+)$/i;
+      const cnDayRegex = /^第\s*(\d+)\s*天\s*[:：\-—]?\s*(.+)$/;
+      const sectionMap = {
+        '酒店': 'hotelText', '住宿': 'hotelText',
+        '门票': 'ticketText', '门票及体验': 'ticketText', '景点门票': 'ticketText',
+        '用车': 'trafficText', '交通': 'trafficText', '车辆': 'trafficText',
+        '导游': 'guideText', '向导': 'guideText',
+        '体验': 'expText', '特色体验': 'expText',
+        '费用不含': 'exclusionsText', '不含': 'exclusionsText',
+        '退改政策': 'cancellationText', '取消政策': 'cancellationText',
+        '亮点': 'overallHighlights', '行程亮点': 'overallHighlights'
+      };
+
+      const result = {
+        name: lines[0].replace(/^[【\[]|[】\]]$/g, '').trim(),
+        destination: '', theme: '', pace: '', date: '', group: '', price: '',
+        hotelText: '', ticketText: '', trafficText: '', guideText: '', expText: '',
+        exclusionsText: '', cancellationText: '', overallHighlights: [], days: []
+      };
+
+      let currentSection = '';
+      const sectionBuffers = {};
+      let currentDay = null;
+
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        const dayMatch = line.match(dayRegex) || line.match(cnDayRegex);
+        if (dayMatch) {
+          const dayNum = Number(dayMatch[1]);
+          const route = dayMatch[2].trim();
+          currentDay = { day: dayNum, route, title: `探索 · ${route.split(/[-—,，、/]/)[0].trim()}`, description: `专属用车前往【${route}】，结合当地人文与风景体验，轻松完成第${dayNum}天行程。`, image: '' };
+          result.days.push(currentDay);
+          currentSection = '';
+          continue;
+        }
+
+        const sectionMatch = line.match(/^[【\[](.+?)[】\]]\s*$/);
+        if (sectionMatch) {
+          const key = sectionMatch[1].replace(/[：:]\s*$/, '').trim();
+          currentSection = sectionMap[key] || '';
+          continue;
+        }
+
+        const metaMatch = line.match(/^(目的地|主题|旅行主题|节奏|出行日期|日期|人数|团队人数|价格|报价)\s*[:：]\s*(.+)$/);
+        if (metaMatch) {
+          const key = metaMatch[1];
+          const val = metaMatch[2].trim();
+          if (key === '目的地') result.destination = val;
+          else if (key === '主题' || key === '旅行主题') result.theme = val;
+          else if (key === '节奏') result.pace = val;
+          else if (key === '出行日期' || key === '日期') result.date = val;
+          else if (key === '人数' || key === '团队人数') result.group = val;
+          else if (key === '价格' || key === '报价') result.price = val;
+          continue;
+        }
+
+        if (currentDay && !currentSection) {
+          currentDay.description = currentDay.description ? `${currentDay.description}\n${line}` : line;
+          continue;
+        }
+
+        if (currentSection === 'overallHighlights') {
+          const cleaned = line.replace(/^\d+[\.、]\s*/, '').replace(/^[-•·]\s*/, '').trim();
+          if (cleaned) result.overallHighlights.push({ title: cleaned.split(/[：:]/)[0].slice(0, 24), desc: cleaned });
+          continue;
+        }
+
+        if (currentSection) {
+          if (!sectionBuffers[currentSection]) sectionBuffers[currentSection] = [];
+          sectionBuffers[currentSection].push(line);
+        }
+      }
+
+      Object.keys(sectionBuffers).forEach(key => {
+        result[key] = sectionBuffers[key].join('\n').trim();
+      });
+
+      if (!result.days.length) return { error: '未能识别到每日行程。请使用 D1 / Day 1 / 第1天 格式标记每天路线。' };
+      if (!result.destination && result.days.length) {
+        result.destination = result.days[0].route.split(/[-—,，、/]/)[0].trim();
+      }
+      return result;
+    }
+
+    function createTemplateFromParsedText(parsed) {
+      const targetFolder = inferTemplateFolder(parsed.destination);
+      return {
+        id: 'custom-tpl-text-' + Date.now(),
+        name: parsed.name || `${parsed.destination} ${parsed.days.length}日 · 定制行程`,
+        isPreset: false,
+        folder: targetFolder,
+        destination: parsed.destination,
+        theme: parsed.theme || '定制深度游',
+        pace: parsed.pace || '舒缓从容',
+        date: parsed.date || '',
+        group: parsed.group || '',
+        price: parsed.price || '',
+        coverSource: 'cloud',
+        coverUrl: '',
+        activeModules: ['car', 'ticket', 'guide', 'hotel', 'exp'],
+        hotelText: parsed.hotelText || '',
+        ticketText: parsed.ticketText || '',
+        trafficText: parsed.trafficText || '',
+        guideText: parsed.guideText || '',
+        expText: parsed.expText || '',
+        exclusionsText: parsed.exclusionsText || '',
+        cancellationText: parsed.cancellationText || '',
+        overallHighlights: parsed.overallHighlights || [],
+        days: parsed.days || []
+      };
+    }
+
+    function renderTemplatesModal(activeFolder = currentTemplateFolder, query = '') {
+      currentTemplateFolder = activeFolder;
+      const allTemplates = getAllTemplates();
+      const folderMap = getTemplateDestinationFolders(allTemplates);
+
+      const folderChipsContainer = document.getElementById('template-folder-chips');
+      if (folderChipsContainer) {
+        folderChipsContainer.innerHTML = '';
+        
+        const allBtn = document.createElement('button');
+        allBtn.type = 'button';
+        allBtn.className = `text-xs font-bold px-3 py-1 rounded-lg transition whitespace-nowrap flex items-center gap-1 shrink-0 ${activeFolder === 'all' ? 'bg-blue-600 text-white shadow-xs' : 'bg-white text-slate-700 hover:bg-slate-200 border border-slate-200'}`;
+        allBtn.innerHTML = `<span>📁 全部模版</span> <span class="text-[9px] ${activeFolder === 'all' ? 'bg-white/20' : 'bg-slate-100'} px-1.5 py-0.2 rounded-full">${allTemplates.length}</span>`;
+        allBtn.addEventListener('click', () => renderTemplatesModal('all', document.getElementById('template-search-input').value));
+        folderChipsContainer.appendChild(allBtn);
+
+        folderMap.forEach((count, fName) => {
+          const fBtn = document.createElement('button');
+          fBtn.type = 'button';
+          const isActive = activeFolder === fName;
+          fBtn.className = `text-xs font-bold px-3 py-1 rounded-lg transition whitespace-nowrap flex items-center gap-1 shrink-0 ${isActive ? 'bg-blue-600 text-white shadow-xs' : 'bg-white text-slate-700 hover:bg-slate-200 border border-slate-200'}`;
+          fBtn.innerHTML = `<span>📁 ${escapeHtml(fName)}</span> <span class="text-[9px] ${isActive ? 'bg-white/20' : 'bg-slate-100'} px-1.5 py-0.2 rounded-full">${count}</span>`;
+          fBtn.addEventListener('click', () => renderTemplatesModal(fName, document.getElementById('template-search-input').value));
+          folderChipsContainer.appendChild(fBtn);
+        });
+
+        const addFolderBtn = document.createElement('button');
+        addFolderBtn.type = 'button';
+        addFolderBtn.className = 'text-xs font-bold px-3 py-1 rounded-lg transition whitespace-nowrap flex items-center gap-1 shrink-0 bg-blue-50 text-blue-700 hover:bg-blue-100 border border-dashed border-blue-300 shadow-2xs';
+        addFolderBtn.innerHTML = `<span>➕</span> <span>新建文件夹</span>`;
+        addFolderBtn.addEventListener('click', () => {
+          document.getElementById('new-folder-name-input').value = '';
+          document.getElementById('create-folder-modal').classList.remove('hidden');
+          document.getElementById('new-folder-name-input').focus();
+        });
+        folderChipsContainer.appendChild(addFolderBtn);
+      }
+
+      const grid = document.getElementById('templates-grid');
+      grid.innerHTML = '';
+      let list = allTemplates;
+
+      if (activeFolder !== 'all') {
+        list = list.filter(t => (t.folder || t.destination || '').includes(activeFolder));
+      }
+
+      if (query.trim()) {
+        const q = query.toLowerCase().trim();
+        list = list.filter(t => 
+          (t.name && t.name.toLowerCase().includes(q)) ||
+          (t.destination && t.destination.toLowerCase().includes(q)) ||
+          (t.theme && t.theme.toLowerCase().includes(q))
+        );
+      }
+
+      if (list.length === 0) {
+        grid.innerHTML = `<div class="col-span-2 text-center py-12 text-slate-400 text-xs bg-white rounded-xl border border-dashed border-slate-200">当前文件夹暂无模版</div>`;
+        return;
+      }
+
+      list.forEach(tpl => {
+        const card = document.createElement('div');
+        card.className = 'bg-white rounded-xl border border-slate-200/80 p-4 shadow-2xs hover:border-blue-500 transition flex flex-col justify-between space-y-3';
+        const isPreset = tpl.isPreset;
+
+        card.innerHTML = `
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-xs font-black text-slate-900 truncate" title="${escapeHtml(tpl.name)}">📁 ${escapeHtml(tpl.name)}</span>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded ${isPreset ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'} whitespace-nowrap">
+                ${isPreset ? '⭐ 官方精选' : '👤 团队自建'}
+              </span>
+            </div>
+            <div class="text-[11px] text-slate-500 flex items-center gap-2">
+              <span>📅 ${tpl.days?.length || 1} 天</span>
+              <span class="text-orange-600 font-bold">🏷️ ${escapeHtml(tpl.price || '尊享定制')}</span>
+            </div>
+          </div>
+          <div class="flex items-center justify-between pt-2 border-t border-slate-100">
+            <button type="button" data-apply-tpl="${tpl.id}" class="text-xs bg-blue-600 hover:bg-blue-700 text-white font-bold px-3.5 py-1.5 rounded-lg transition flex items-center gap-1">
+              <span>🚀</span> <span>一键套用</span>
+            </button>
+            ${!isPreset ? `<button type="button" data-del-tpl="${tpl.id}" class="text-[11px] text-rose-500 hover:text-rose-700 px-2 py-1">删除</button>` : ''}
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+
+      grid.querySelectorAll('[data-apply-tpl]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const id = e.currentTarget.getAttribute('data-apply-tpl');
+          const tpl = list.find(t => t.id === id);
+          if (tpl) {
+            applyTemplateToState(tpl);
+            document.getElementById('template-modal').classList.add('hidden');
+            showNotification(`已套用模版：【${tpl.name}】！`);
+          }
+        });
+      });
+
+      grid.querySelectorAll('[data-del-tpl]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const id = e.currentTarget.getAttribute('data-del-tpl');
+          saveCustomTemplates(getCustomTemplates().filter(t => t.id !== id));
+          renderTemplatesModal(currentTemplateFolder, document.getElementById('template-search-input').value);
+          showNotification('已删除该模版');
+        });
+      });
+    }
+
+    function applyTemplateToState(tpl) {
+      state.destination = tpl.destination || '中国';
+      state.theme = tpl.theme || '';
+      state.pace = tpl.pace || '';
+      state.date = tpl.date || '10月12日';
+      state.group = tpl.group || '4人私享团';
+      state.price = tpl.price || '¥9,800 / 团';
+      state.bannerSource = tpl.coverSource || 'cloud';
+      state.bannerUrl = tpl.coverUrl || '';
+      state.activeModules = tpl.activeModules ? [...tpl.activeModules] : ['car', 'ticket', 'guide', 'hotel', 'exp'];
+      state.hotelText = tpl.hotelText || '';
+      state.ticketText = tpl.ticketText || '';
+      state.trafficText = tpl.trafficText || '';
+      state.guideText = tpl.guideText || '';
+      state.expText = tpl.expText || '';
+      state.exclusionsText = tpl.exclusionsText || '';
+      state.cancellationText = tpl.cancellationText || '';
+      state.overallHighlights = tpl.overallHighlights ? JSON.parse(JSON.stringify(tpl.overallHighlights)) : [];
+      state.days = tpl.days ? JSON.parse(JSON.stringify(tpl.days)) : [];
+      state.itineraryText = state.days.map(d => `Day ${d.day}: ${d.route}`).join('\n');
+
+      populateFormInputs();
+      updateBannerSourceOptions();
+      renderMiddleCardEditors();
+      renderPosterPreview();
+      saveDraftToLocalStorage();
+    }
+
+    function getHistoryList() {
+      try {
+        const raw = localStorage.getItem('klook_itinerary_history_v2');
+        return raw ? JSON.parse(raw) : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveHistoryList(list) {
+      localStorage.setItem('klook_itinerary_history_v2', JSON.stringify(list));
+      updateHistoryBadge();
+    }
+
+    function updateHistoryBadge() {
+      const badge = document.getElementById('top-history-badge');
+      if (badge) badge.textContent = getHistoryList().length;
+    }
+
+    function createHistorySnapshot(desc = '手动保存') {
+      readFormInputs();
+      const snapshot = {
+        id: 'hist-' + Date.now(),
+        savedAt: new Date().toLocaleString('zh-CN', { hour12: false }),
+        desc: desc,
+        state: JSON.parse(JSON.stringify(state))
+      };
+      const list = getHistoryList();
+      list.unshift(snapshot);
+      if (list.length > 25) list.pop();
+      saveHistoryList(list);
+    }
+
+    function renderHistoryModal(query = '') {
+      const list = getHistoryList();
+      const container = document.getElementById('history-list-container');
+      container.innerHTML = '';
+
+      let filtered = list;
+      if (query.trim()) {
+        const q = query.toLowerCase();
+        filtered = list.filter(h => (h.state.destination || '').toLowerCase().includes(q) || (h.desc || '').toLowerCase().includes(q));
+      }
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="text-center py-10 text-slate-400 text-xs bg-white rounded-xl border border-dashed border-slate-200">暂无历史归档记录</div>`;
+        return;
+      }
+
+      filtered.forEach(h => {
+        const row = document.createElement('div');
+        row.className = 'bg-white border border-slate-200/80 rounded-xl p-3 shadow-2xs hover:border-amber-400 transition flex items-center justify-between gap-3';
+        row.innerHTML = `
+          <div class="min-w-0 flex-1 space-y-0.5">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-black text-slate-900 truncate">【${escapeHtml(h.state.destination || '中国')}】${escapeHtml(h.state.theme || '定制游')}</span>
+              <span class="text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.2 rounded font-bold">${escapeHtml(h.desc)}</span>
+            </div>
+            <div class="text-[11px] text-slate-400">🕒 ${h.savedAt}</div>
+          </div>
+          <button type="button" data-restore-hist="${h.id}" class="text-xs bg-amber-500 hover:bg-amber-600 text-white font-bold px-3 py-1.5 rounded-lg transition shadow-2xs flex items-center gap-0.5">
+            <span>📥</span> 恢复
+          </button>
+        `;
+        container.appendChild(row);
+      });
+
+      container.querySelectorAll('[data-restore-hist]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const id = e.currentTarget.getAttribute('data-restore-hist');
+          const target = list.find(h => h.id === id);
+          if (target?.state) {
+            state = JSON.parse(JSON.stringify(target.state));
+            populateFormInputs();
+            updateBannerSourceOptions();
+            renderMiddleCardEditors();
+            renderPosterPreview();
+            saveDraftToLocalStorage();
+            document.getElementById('history-modal').classList.add('hidden');
+            showNotification(`已恢复到【${target.savedAt}】的快照！`);
+          }
+        });
+      });
+    }
+
     function readFormInputs() {
       state.destination = document.getElementById('field-destination').value.trim();
       state.theme = document.getElementById('field-theme').value.trim();
@@ -1315,294 +2709,885 @@
       document.querySelectorAll('input[name="pkg-module"]').forEach(cb => {
         cb.checked = state.activeModules.includes(cb.value);
       });
+
+      document.getElementById('banner-source-select').value = state.bannerSource;
+      document.getElementById('banner-overlay-slider').value = state.bannerOverlay;
+      document.getElementById('banner-overlay-val').textContent = `${state.bannerOverlay}%`;
+
+      syncModuleVisibility();
+    }
+
+    function saveDraftToLocalStorage() {
+      try {
+        localStorage.setItem('klook_poster_draft_state_v2', JSON.stringify(state));
+      } catch (e) {}
+    }
+
+    function loadDraftFromLocalStorage() {
+      try {
+        const raw = localStorage.getItem('klook_poster_draft_state_v2');
+        if (raw) {
+          const loaded = JSON.parse(raw);
+          if (loaded && loaded.days?.length > 0) state = { ...state, ...loaded };
+        }
+      } catch (e) {}
+    }
+
+    function syncModuleVisibility() {
+      document.getElementById('hotel-input-block').style.display = state.activeModules.includes('hotel') ? 'block' : 'none';
+      document.getElementById('ticket-input-block').style.display = state.activeModules.includes('ticket') ? 'block' : 'none';
+      document.getElementById('car-input-block').style.display = state.activeModules.includes('car') ? 'block' : 'none';
+      document.getElementById('guide-input-block').style.display = state.activeModules.includes('guide') ? 'block' : 'none';
+      document.getElementById('exp-input-block').style.display = state.activeModules.includes('exp') ? 'block' : 'none';
+    }
+
+    function updateBannerSourceOptions() {
+      const select = document.getElementById('banner-source-select');
+      Array.from(select.options).forEach(opt => {
+        if (opt.value.startsWith('day-')) opt.remove();
+      });
+
+      state.days.forEach(d => {
+        if (d.image) {
+          const opt = document.createElement('option');
+          opt.value = `day-${d.day}`;
+          opt.textContent = `⭐ 选用 Day ${d.day} 照片作为封面 (${d.route.split(/[-—,\s/]/)[0] || '胜景'})`;
+          select.appendChild(opt);
+        }
+      });
+
+      select.value = state.bannerSource;
+      syncBannerControlsVisibility();
+    }
+
+    function syncBannerControlsVisibility() {
+      const src = state.bannerSource;
+      const uploadBox = document.getElementById('banner-upload-box');
+      const urlBox = document.getElementById('banner-url-box');
+      const previewBox = document.getElementById('banner-preview-box');
+      const thumbImg = document.getElementById('banner-thumb-img');
+
+      uploadBox.classList.add('hidden');
+      urlBox.classList.add('hidden');
+      previewBox.classList.add('hidden');
+
+      if (src === 'upload') uploadBox.classList.remove('hidden');
+      else if (src === 'url') urlBox.classList.remove('hidden');
+
+      if (state.bannerUrl && src !== 'gradient') {
+        previewBox.classList.remove('hidden');
+        thumbImg.src = state.bannerUrl;
+      }
     }
 
     let galleryTarget = 'banner';
+    let currentGalleryCategory = 'custom';
+    let pendingUploadFiles = [];
 
-    async function openCloudGalleryModal(target = 'banner') {
+    function openCloudGalleryModal(target = 'banner') {
       galleryTarget = target;
       const modal = document.getElementById('cloud-gallery-modal');
       const hint = document.getElementById('gallery-target-hint');
-      if (target === 'banner') {
-        hint.textContent = '正在为【海报头部封面】挑选高清横图';
-      } else {
-        const dNum = target.replace('day-', '');
-        hint.textContent = `正在为【Day ${dNum} 行程卡片】挑选精准配图`;
-      }
-      await renderGalleryGrid('custom', '');
+      if (target === 'banner') hint.textContent = '正在为【海报头部封面】挑选高清横图';
+      else hint.textContent = `正在为【Day ${target.replace('day-', '')} 行程卡片】挑选精准配图`;
+      
+      loadGitHubImageIndex().finally(() => renderGalleryGrid('custom', ''));
       modal.classList.remove('hidden');
     }
 
-    async function renderGalleryGrid(cat = 'custom', query = '') {
+    async function renderGalleryGrid(cat = currentGalleryCategory, query = '') {
+      currentGalleryCategory = cat;
       const grid = document.getElementById('gallery-grid');
-      grid.innerHTML = '';
+      grid.innerHTML = '<div class="col-span-4 text-center py-10 text-xs text-slate-400">正在加载图库...</div>';
 
-      const customPhotos = await getCustomPhotosFromDB();
-      document.getElementById('gallery-count-badge').textContent = `自建 ${customPhotos.length} 张照片`;
-      document.getElementById('gallery-status-badge').textContent = `自建库 ${customPhotos.length} 张图`;
+      const customPhotos = await CustomPhotoDB.getAll();
+      const customCountBadge = document.getElementById('chip-custom-count');
+      if (customCountBadge) customCountBadge.textContent = customPhotos.length;
 
-      let list = customPhotos;
-      if (cat !== 'all' && cat !== 'custom') {
-        list = list.filter(p => p.cat === cat);
+      const topCountBadge = document.getElementById('gallery-count-badge');
+      if (topCountBadge) {
+        topCountBadge.textContent = `公共 GitHub ${githubImageIndex?.length || 0} 张 / 本机 ${customPhotos.length} 张`;
       }
+
+      document.querySelectorAll('#gallery-category-chips button').forEach(btn => {
+        const bCat = btn.getAttribute('data-cat');
+        if (bCat === cat) {
+          btn.className = 'text-xs font-bold px-3 py-1 rounded-lg bg-orange-600 text-white shadow-2xs flex items-center gap-1';
+        } else {
+          btn.className = 'text-xs font-bold px-3 py-1 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 flex items-center gap-1';
+        }
+      });
+
+      const githubPhotos = Array.isArray(githubImageIndex) ? githubImageIndex : await loadGitHubImageIndex();
+      let list = [];
+      if (cat === 'custom') {
+        // “自建”现在优先展示 GitHub 团队公共图库；本机上传作为第二组来源。
+        list = [...githubPhotos, ...customPhotos];
+      } else if (cat === 'all') {
+        list = [...githubPhotos, ...customPhotos, ...PHOTO_LIBRARY];
+      } else {
+        list = [...githubPhotos, ...customPhotos, ...PHOTO_LIBRARY].filter(p => p.cat === cat);
+      }
+
+      // URL 去重，避免 GitHub 与旧内置图库使用同一图片时出现两张重复卡片。
+      list = list.filter((p, index, arr) => p?.url && arr.findIndex(x => x?.url === p.url) === index);
+
       if (query.trim()) {
         const q = query.toLowerCase();
-        list = list.filter(p => p.name.toLowerCase().includes(q) || p.city.toLowerCase().includes(q));
+        list = list.filter(p => 
+          p.name.toLowerCase().includes(q) || 
+          (p.city && p.city.toLowerCase().includes(q)) ||
+          (p.tags && p.tags.some(t => t.toLowerCase().includes(q)))
+        );
       }
 
-      // 如果没有任何上传图片，显示清空后的提示面板
+      grid.innerHTML = '';
+
       if (list.length === 0) {
-        grid.innerHTML = `
-          <div class="col-span-4 text-center py-12 text-slate-400 text-xs bg-white rounded-2xl border border-dashed border-slate-200 p-6 space-y-3">
-            <div class="text-3xl">🖼️</div>
-            <div class="font-bold text-slate-700">团队图库暂无合适照片</div>
-            <p class="text-[11px] text-slate-400 max-w-sm mx-auto">所有旧版错乱预置图已全部删除。请点击上方「➕ 上传我的照片入库」添加真实高清实景图片！</p>
-            <button type="button" id="btn-empty-upload-trigger" class="inline-flex items-center gap-1 bg-orange-600 hover:bg-orange-700 text-white font-bold px-4 py-2 rounded-xl text-xs shadow-sm transition">
-              <span>➕ 上传照片入库</span>
-            </button>
-          </div>
-        `;
-        document.getElementById('btn-empty-upload-trigger')?.addEventListener('click', openUploadModal);
+        if (cat === 'custom') {
+          grid.innerHTML = `
+            <div class="col-span-2 sm:col-span-3 md:col-span-4 text-center py-16 bg-white rounded-2xl border border-dashed border-slate-200 p-6 space-y-3">
+              <div class="text-3xl">📷</div>
+              <div class="text-xs font-bold text-slate-800">您还没有上传自己的地标实景图</div>
+              <p class="text-[11px] text-slate-400 max-w-sm mx-auto">建议点击右上角「➕ 上传本机临时图片」上传您自己的景点实景图，彻底告别图文不符。</p>
+              <button type="button" id="btn-empty-trigger-upload" class="bg-orange-600 hover:bg-orange-700 text-white font-bold px-4 py-2 rounded-xl text-xs shadow-sm transition">
+                ➕ 立即上传我的第一批照片
+              </button>
+            </div>
+          `;
+          document.getElementById('btn-empty-trigger-upload')?.addEventListener('click', () => {
+            document.getElementById('upload-image-modal').classList.remove('hidden');
+          });
+        } else {
+          grid.innerHTML = `<div class="col-span-4 text-center py-12 text-slate-400 text-xs">没有找到符合关键词的地标图片</div>`;
+        }
         return;
       }
 
       list.forEach(item => {
+        const isCustom = Boolean(item.isCustom);
+        const isGitHub = Boolean(item.isGitHub);
         const card = document.createElement('div');
-        card.className = 'bg-white rounded-xl overflow-hidden border border-slate-200 shadow-2xs hover:border-orange-500 transition cursor-pointer flex flex-col group relative';
+        card.className = 'bg-white rounded-xl overflow-hidden border border-slate-200/80 shadow-2xs hover:border-orange-500 transition flex flex-col group relative';
+        
         card.innerHTML = `
-          <div class="relative w-full aspect-video bg-slate-100 overflow-hidden">
-            <img src="${item.url}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" alt="${item.name}">
-            <span class="absolute bottom-1 right-1 bg-black/60 text-white text-[9px] px-1.5 py-0.5 rounded font-bold">${escapeHtml(item.city || '自建')}</span>
-            <button type="button" data-del-photo="${item.id}" class="absolute top-1 right-1 w-6 h-6 bg-rose-600/80 hover:bg-rose-600 text-white rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition shadow">✕</button>
+          <div class="relative w-full aspect-video bg-slate-100 overflow-hidden cursor-pointer">
+            <img src="${item.url}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" alt="${escapeHtml(item.name)}" loading="lazy" crossorigin="anonymous">
+            <span class="absolute bottom-1 right-1 bg-black/60 text-white text-[9px] px-1.5 py-0.5 rounded font-bold">${escapeHtml(item.city || '实景')}</span>
+            ${isGitHub ? `<span class="absolute top-1 left-1 bg-blue-600 text-white text-[9px] font-bold px-1.5 py-0.2 rounded shadow">团队公共</span>` : (isCustom ? `<span class="absolute top-1 left-1 bg-emerald-600 text-white text-[9px] font-bold px-1.5 py-0.2 rounded shadow">本机上传</span>` : '')}
           </div>
-          <div class="p-2 flex items-center justify-between">
-            <span class="text-xs font-bold text-slate-800 truncate" title="${item.name}">${escapeHtml(item.name)}</span>
-            <span class="text-[10px] text-orange-600 font-extrabold group-hover:underline">选取</span>
+          <div class="p-2 flex items-center justify-between gap-1">
+            <span class="text-xs font-bold text-slate-800 truncate" title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</span>
+            <div class="flex items-center gap-1 shrink-0">
+              ${isCustom ? `
+                <button type="button" data-del-custom-img="${item.id}" class="text-[10px] text-rose-500 hover:text-rose-700 p-1 font-bold" title="从我的图库删除">
+                  🗑️
+                </button>
+              ` : ''}
+              <button type="button" data-select-img="${item.id}" class="text-[10px] bg-orange-50 hover:bg-orange-100 text-orange-700 font-extrabold px-2 py-0.5 rounded border border-orange-200">
+                选用
+              </button>
+            </div>
           </div>
         `;
 
-        card.querySelector('[data-del-photo]')?.addEventListener('click', async (e) => {
-          e.stopPropagation();
-          await deleteCustomPhotoFromDB(item.id);
-          showNotification('已从图库移除该照片');
-          renderGalleryGrid(cat, query);
-        });
-
-        card.addEventListener('click', () => {
+        const selectAction = () => {
           if (galleryTarget === 'banner') {
             state.bannerSource = 'cloud';
             state.bannerUrl = item.url;
+            updateBannerSourceOptions();
             renderPosterPreview();
+            saveDraftToLocalStorage();
             showNotification(`已设为海报头图：【${item.name}】`);
           } else if (galleryTarget.startsWith('day-')) {
             const dNum = parseInt(galleryTarget.replace('day-', ''), 10);
             const targetDay = state.days.find(d => d.day === dNum);
             if (targetDay) {
               targetDay.image = item.url;
+              targetDay.manuallyEdited = true;
               renderMiddleCardEditors();
               renderPosterPreview();
+              saveDraftToLocalStorage();
               showNotification(`Day ${dNum} 已应用配图：【${item.name}】`);
             }
           }
           document.getElementById('cloud-gallery-modal').classList.add('hidden');
-        });
+        };
+
+        card.querySelector('img').addEventListener('click', selectAction);
+        card.querySelector('[data-select-img]').addEventListener('click', selectAction);
+
+        const delBtn = card.querySelector('[data-del-custom-img]');
+        if (delBtn) {
+          delBtn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            await CustomPhotoDB.delete(item.id);
+            showNotification(`已删除图片【${item.name}】`);
+            renderGalleryGrid(currentGalleryCategory, document.getElementById('gallery-search-input').value);
+          });
+        }
 
         grid.appendChild(card);
       });
     }
 
-    // 上传图片入库逻辑
-    const openUploadModal = () => document.getElementById('upload-photo-modal').classList.remove('hidden');
-    const closeUploadModal = () => document.getElementById('upload-photo-modal').classList.add('hidden');
+    function handleImageFilesSelected(files) {
+      pendingUploadFiles = Array.from(files);
+      const previewStrip = document.getElementById('modal-upload-preview-strip');
+      previewStrip.innerHTML = '';
 
-    let pendingUploadFiles = [];
-    document.getElementById('modal-photo-file-input').addEventListener('change', (e) => {
-      pendingUploadFiles = Array.from(e.target.files || []);
-      const strip = document.getElementById('modal-upload-preview-strip');
-      strip.innerHTML = '';
-      if (pendingUploadFiles.length > 0) {
-        strip.classList.remove('hidden');
-        pendingUploadFiles.forEach(f => {
-          const reader = new FileReader();
-          reader.onload = (re) => {
-            const img = document.createElement('img');
-            img.src = re.target.result;
-            img.className = 'w-12 h-12 object-cover rounded border border-slate-200 shrink-0';
-            strip.appendChild(img);
-          };
-          reader.readAsDataURL(f);
-        });
-        if (!document.getElementById('modal-photo-name-input').value && pendingUploadFiles[0]) {
-          document.getElementById('modal-photo-name-input').value = pendingUploadFiles[0].name.replace(/\.[^.]+$/, '');
-        }
-      } else {
-        strip.classList.add('hidden');
-      }
-    });
-
-    document.getElementById('btn-confirm-upload-photo').addEventListener('click', async () => {
       if (pendingUploadFiles.length === 0) {
-        showNotification('请先选择本地照片文件', '⚠️');
+        previewStrip.classList.add('hidden');
         return;
       }
-      const pName = document.getElementById('modal-photo-name-input').value.trim() || '自建地标';
-      const pCity = document.getElementById('modal-photo-city-input').value.trim() || state.destination || '通用';
-      const pCat = document.getElementById('modal-photo-cat-select').value || '其他';
 
-      for (let i = 0; i < pendingUploadFiles.length; i++) {
-        const file = pendingUploadFiles[i];
-        const dataUrl = await new Promise(res => {
-          const reader = new FileReader();
-          reader.onload = re => res(re.target.result);
-          reader.readAsDataURL(file);
-        });
+      previewStrip.classList.remove('hidden');
 
-        const photoObj = {
-          id: 'photo-' + Date.now() + '-' + i,
-          name: pendingUploadFiles.length === 1 ? pName : `${pName}_${i+1}`,
-          city: pCity,
-          cat: pCat,
-          url: dataUrl
-        };
-        await saveCustomPhotoToDB(photoObj);
+      if (pendingUploadFiles.length === 1) {
+        const cleanName = pendingUploadFiles[0].name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
+        document.getElementById('modal-image-name-input').value = cleanName;
       }
 
-      showNotification(`✅ 已成功上传 ${pendingUploadFiles.length} 张照片入库！`);
-      pendingUploadFiles = [];
-      document.getElementById('modal-photo-file-input').value = '';
-      document.getElementById('modal-upload-preview-strip').classList.add('hidden');
-      closeUploadModal();
-      renderGalleryGrid('custom', '');
-    });
+      pendingUploadFiles.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = document.createElement('img');
+          img.src = e.target.result;
+          img.className = 'w-14 h-10 object-cover rounded border border-slate-200 shrink-0';
+          previewStrip.appendChild(img);
+        };
+        reader.readAsDataURL(file);
+      });
+    }
 
-    // 导出长图与 PDF
+    async function executeSaveCustomPhotos() {
+      if (pendingUploadFiles.length === 0) {
+        showNotification('请先选择需要上传的照片', '⚠️');
+        return;
+      }
+
+      const inputName = document.getElementById('modal-image-name-input').value.trim();
+      const city = document.getElementById('modal-image-city-input').value.trim() || '通用';
+      const cat = document.getElementById('modal-image-cat-select').value;
+      const tagsStr = document.getElementById('modal-image-tags-input').value.trim();
+      const tags = tagsStr ? tagsStr.split(/[,，\s]+/).filter(Boolean) : [];
+
+      const btn = document.getElementById('btn-confirm-upload-img');
+      btn.disabled = true;
+      btn.textContent = '保存中...';
+
+      let count = 0;
+      for (const file of pendingUploadFiles) {
+        const dataUrl = await new Promise(resolve => {
+          const r = new FileReader();
+          r.onload = e => resolve(e.target.result);
+          r.readAsDataURL(file);
+        });
+
+        const photoName = pendingUploadFiles.length === 1 && inputName 
+          ? inputName 
+          : file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
+
+        const photoItem = {
+          id: 'my-photo-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
+          isCustom: true,
+          name: photoName,
+          city: city,
+          cat: cat,
+          tags: [...tags, photoName, city],
+          url: dataUrl,
+          createdAt: Date.now()
+        };
+
+        await CustomPhotoDB.add(photoItem);
+        count++;
+      }
+
+      btn.disabled = false;
+      btn.textContent = '保存入库';
+      pendingUploadFiles = [];
+      document.getElementById('modal-image-file-input').value = '';
+      document.getElementById('modal-upload-preview-strip').classList.add('hidden');
+      document.getElementById('upload-image-modal').classList.add('hidden');
+
+      showNotification(`✅ 已添加 ${count} 张图片到本机临时图库。若要让全员同步，请将图片放入 GitHub 公共图库仓库。`);
+      renderGalleryGrid('custom', '');
+    }
+
     async function waitForPosterImages(poster) {
       const images = Array.from(poster.querySelectorAll('img'));
-      await Promise.all(images.map(img => {
-        if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+      const timeoutPromise = new Promise(resolve => setTimeout(resolve, 3500));
+      
+      const loadPromises = images.map(img => {
+        if (img.complete) return Promise.resolve();
         return new Promise(resolve => {
-          const done = () => resolve();
+          const done = () => {
+            img.removeEventListener('load', done);
+            img.removeEventListener('error', done);
+            resolve();
+          };
           img.addEventListener('load', done, { once: true });
           img.addEventListener('error', done, { once: true });
         });
-      }));
+      });
+
+      await Promise.race([Promise.all(loadPromises), timeoutPromise]);
       await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
     }
 
     async function exportLongImage() {
       const poster = document.getElementById('export-poster');
+      const btn = document.getElementById('btn-export-img');
+      const oldHtml = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = `<span>⏳</span> <span>正在渲染高清长图...</span>`;
+
       showNotification('正在生成高清长图，请稍候...', '⏳');
+      createHistorySnapshot('导出高清长图前自动归档');
+
       try {
         await waitForPosterImages(poster);
-        const canvas = await html2canvas(poster, { scale: 2.5, useCORS: true, allowTaint: true, backgroundColor: '#f8fafc' });
+        const canvas = await html2canvas(poster, {
+          scale: 2.2,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#f8fafc',
+          logging: false
+        });
+
         const image = canvas.toDataURL('image/png');
         const a = document.createElement('a');
         a.href = image;
-        a.download = `Klook定制行程_${state.destination || '深度游'}_${Date.now()}.png`;
+        a.download = `Klook定制行程_${state.destination || '行程'}_${Date.now()}.png`;
         a.click();
-        showNotification('✅ 高清长图已成功导出！');
+        showNotification('✅ 高清长图已成功导出并保存！');
       } catch (err) {
-        showNotification('导出失败，请重试', '⚠️');
+        console.error('Export image error:', err);
+        showNotification('长图导出失败，建议尝试导出 PDF 或检查网络。', '⚠️');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = oldHtml;
       }
     }
 
     async function printToPDF() {
       const poster = document.getElementById('export-poster');
-      showNotification('正在生成贴合 A4 宽度的完整长图 PDF...', '⏳');
+      const btn = document.getElementById('btn-export-pdf');
+      const oldHtml = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = `<span>⏳</span> <span>正在生成 A4 宽长图 PDF...</span>`;
+
+      showNotification('正在生成贴合 A4 宽度的完整长图 PDF，请稍候...', '⏳');
+      createHistorySnapshot('导出 A4 长图 PDF 前自动归档');
+
+      let exportClone = null;
       try {
-        await waitForPosterImages(poster);
-        const canvas = await html2canvas(poster, { scale: 2.5, useCORS: true, allowTaint: true, backgroundColor: '#f8fafc' });
+        // 不直接改动用户正在编辑的海报，而是复制一个专门用于导出的节点。
+        exportClone = poster.cloneNode(true);
+        exportClone.classList.add('pdf-export-fix');
+        exportClone.style.width = `${poster.getBoundingClientRect().width}px`;
+        exportClone.style.maxWidth = 'none';
+        exportClone.style.position = 'fixed';
+        exportClone.style.left = '-100000px';
+        exportClone.style.top = '0';
+        exportClone.style.margin = '0';
+        exportClone.style.boxShadow = 'none';
+        exportClone.style.borderRadius = '0';
+        exportClone.style.visibility = 'visible';
+        exportClone.style.pointerEvents = 'none';
+        document.body.appendChild(exportClone);
+
+        // 强制导出副本内 Day 标签的几何尺寸，绕开 html2canvas 的字体基线差异。
+        exportClone.querySelectorAll('.export-day-badge').forEach(badge => {
+          badge.style.display = 'flex';
+          badge.style.alignItems = 'center';
+          badge.style.justifyContent = 'center';
+          badge.style.height = '28px';
+          badge.style.padding = '0';
+          const text = badge.querySelector('.export-day-badge-text');
+          if (text) {
+            text.style.display = 'flex';
+            text.style.alignItems = 'center';
+            text.style.justifyContent = 'center';
+            text.style.height = '28px';
+            text.style.lineHeight = '28px';
+            text.style.margin = '0';
+            text.style.padding = '0';
+          }
+        });
+
+        await waitForPosterImages(exportClone);
+        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+
+        const canvas = await html2canvas(exportClone, {
+          scale: 2.2,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#f8fafc',
+          logging: false,
+          imageTimeout: 10000,
+          removeContainer: true
+        });
+
         const { jsPDF } = window.jspdf;
         const a4WidthMm = 210;
         const totalHeightMm = (canvas.height * a4WidthMm) / canvas.width;
-        const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: [a4WidthMm, totalHeightMm] });
-        const imgData = canvas.toDataURL('image/jpeg', 0.98);
-        pdf.addImage(imgData, 'JPEG', 0, 0, a4WidthMm, totalHeightMm, '', 'FAST');
+
+        const pdf = new jsPDF({
+          orientation: 'p',
+          unit: 'mm',
+          format: [a4WidthMm, totalHeightMm],
+          compress: true
+        });
+
+        const imgData = canvas.toDataURL('image/jpeg', 0.95);
+        pdf.addImage(imgData, 'JPEG', 0, 0, a4WidthMm, totalHeightMm, undefined, 'FAST');
         pdf.save(`Klook定制行程_${state.destination || '行程'}_A4长图版.pdf`);
-        showNotification('✅ 贴合 A4 宽度的长图 PDF 已生成下载！');
+        showNotification('✅ PDF 已生成：Day 标签已按导出专用规则垂直居中。');
       } catch (err) {
-        showNotification('PDF 生成失败，正在为您调起打印窗口...', '⚠️');
+        console.error('PDF export error:', err);
+        showNotification('PDF 生成受阻，正在为您调起系统打印窗口...', '⚠️');
         window.print();
+      } finally {
+        if (exportClone?.parentNode) exportClone.parentNode.removeChild(exportClone);
+        btn.disabled = false;
+        btn.innerHTML = oldHtml;
       }
     }
 
-    // 初始化事件绑定
-    document.addEventListener('DOMContentLoaded', async () => {
-      const parsed = parseItineraryText(state.itineraryText);
-      state.days = await assignUniqueImagesToDays(parsed.map(p => ({
-        day: p.day, route: p.route,
-        title: `探索 · ${p.route.split(/[-—,\s/]/)[0] || '核心胜境'}`,
-        description: `专车直达，金牌向导带领下深度领略【${p.route}】风光，舒心游览。`,
-        image: '', manuallyEdited: false
-      })));
+    document.addEventListener('DOMContentLoaded', () => {
+      loadDraftFromLocalStorage();
+
+      if (!state.days || state.days.length === 0) {
+        state.days = PRESET_TEMPLATES[0].days;
+      }
 
       populateFormInputs();
+      updateBannerSourceOptions();
       renderMiddleCardEditors();
       renderPosterPreview();
+      updateHistoryBadge();
+      // 预热公共 GitHub 图库索引；失败不影响海报编辑。
+      loadGitHubImageIndex().catch(() => {});
 
-      document.getElementById('btn-ai-generate-all').addEventListener('click', async () => {
+      // AI 核心与同步按钮
+      document.getElementById('btn-ai-generate-all')?.addEventListener('click', handleAIGenerateAll);
+      document.getElementById('btn-local-sync')?.addEventListener('click', syncAndGenerateLocal);
+
+      document.getElementById('btn-add-day-line')?.addEventListener('click', () => {
+        const lines = document.getElementById('field-itinerary').value.split('\n');
+        document.getElementById('field-itinerary').value += `\nDay ${lines.length + 1}: `;
+        document.getElementById('field-itinerary').focus();
+      });
+
+      document.getElementById('btn-clear-itinerary')?.addEventListener('click', () => {
+        document.getElementById('field-itinerary').value = '';
+      });
+
+      document.getElementById('btn-auto-detect-theme')?.addEventListener('click', () => {
         readFormInputs();
-        const pDays = parseItineraryText(state.itineraryText);
-        if (!pDays.length) { showNotification('请先输入行程路线', '⚠️'); return; }
-        showNotification('Gemini AI 正在深度构思全套定制行程...', '⏳');
-        const res = await callGeminiAIItinerary(pDays);
-        if (res) {
-          if (res.destination) { state.destination = res.destination; document.getElementById('field-destination').value = res.destination; }
-          if (res.theme) { state.theme = res.theme; document.getElementById('field-theme').value = res.theme; }
-          if (res.pace) { state.pace = res.pace; document.getElementById('field-pace').value = res.pace; }
-          if (res.overallHighlights) state.overallHighlights = res.overallHighlights;
-          
-          const genDays = pDays.map(p => {
-            const aiD = res.days?.find(ad => ad.day === p.day);
-            return { day: p.day, route: p.route, title: aiD?.title || `探索 · ${p.route.split(/[-—,\s/]/)[0]}`, description: aiD?.description || `专车前往【${p.route}】，尽享私密惬意时光。`, image: '', manuallyEdited: false };
+        const parsed = parseItineraryText(state.itineraryText);
+        state.destination = DestinationEngine.detectDestination(state.destination, parsed);
+        document.getElementById('field-destination').value = state.destination;
+        if (state.destination.includes('北京')) {
+          state.theme = '皇城古韵与世界遗产文化探索';
+          state.pace = '优雅舒缓 · 深度人文漫游';
+        } else if (state.destination.includes('云南') || state.destination.includes('大理')) {
+          state.theme = '彩云之南 · 高原雪山与白族风情';
+          state.pace = '慢调治愈 · 自由呼吸纯净氧气';
+        } else if (state.destination.includes('新疆')) {
+          state.theme = '大美新疆 · 原始森林与雪山浩瀚';
+          state.pace = '深度探索 · 大地壮美风光';
+        } else {
+          state.theme = `${state.destination} · 私家定制深度游`;
+          state.pace = '从容舒适 · 专属节奏';
+        }
+        document.getElementById('field-theme').value = state.theme;
+        document.getElementById('field-pace').value = state.pace;
+        renderPosterPreview();
+        saveDraftToLocalStorage();
+        showNotification('已根据目的地与路线识别旅行主题！');
+      });
+
+      document.getElementById('btn-reset-highlights')?.addEventListener('click', () => {
+        state.overallHighlights = DestinationEngine.generateFallbackHighlights(state.destination || '中国');
+        translationCache['zh-HK'] = null;
+        translationCache['en'] = null;
+        renderMiddleCardEditors();
+        renderPosterPreview();
+        saveDraftToLocalStorage();
+        showNotification('亮点已重置为专属默认推荐');
+      });
+
+      document.getElementById('btn-ai-highlights')?.addEventListener('click', callGeminiHighlightsOnly);
+
+      // 表单字段输入监听
+      [
+        'field-destination', 'field-theme', 'field-pace', 'field-date',
+        'field-group', 'field-price', 'field-hotel', 'field-tickets',
+        'field-traffic', 'field-guide', 'field-exp', 'field-exclusions', 'field-cancellation'
+      ].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.addEventListener('input', () => {
+            readFormInputs();
+            translationCache['zh-HK'] = null;
+            translationCache['en'] = null;
+            renderPosterPreview();
+            saveDraftToLocalStorage();
           });
-          state.days = await assignUniqueImagesToDays(genDays, state.days);
-          renderMiddleCardEditors();
-          renderPosterPreview();
-          showNotification('✨ AI 帮写已完成！全套高端定制文案已同步');
         }
       });
 
-      document.getElementById('btn-local-sync').addEventListener('click', async () => {
-        readFormInputs();
-        const pDays = parseItineraryText(state.itineraryText);
-        state.days = await assignUniqueImagesToDays(pDays.map(p => ({
-          day: p.day, route: p.route,
-          title: `探索 · ${p.route.split(/[-—,\s/]/)[0] || '胜景'}`,
-          description: `专车前往【${p.route}】，舒适游览。`,
-          image: '', manuallyEdited: false
-        })), state.days);
-        renderMiddleCardEditors();
-        renderPosterPreview();
-        showNotification('✅ 路线解析与海报同步成功！');
-      });
-
-      document.getElementById('btn-open-cloud-gallery-top').addEventListener('click', () => openCloudGalleryModal('banner'));
-      document.getElementById('btn-banner-cloud-picker').addEventListener('click', () => openCloudGalleryModal('banner'));
-      document.getElementById('btn-close-gallery').addEventListener('click', () => document.getElementById('cloud-gallery-modal').classList.add('hidden'));
-      document.getElementById('btn-close-gallery-footer').addEventListener('click', () => document.getElementById('cloud-gallery-modal').classList.add('hidden'));
-      document.getElementById('btn-upload-photo-to-gallery').addEventListener('click', openUploadModal);
-      document.getElementById('btn-close-upload-photo').addEventListener('click', closeUploadModal);
-      document.getElementById('btn-cancel-upload-photo').addEventListener('click', closeUploadModal);
-
-      document.getElementById('gallery-category-chips').querySelectorAll('button').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          document.querySelectorAll('#gallery-category-chips button').forEach(b => b.className = 'text-xs font-bold px-3 py-1 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200');
-          e.currentTarget.className = 'text-xs font-bold px-3 py-1 rounded-lg bg-orange-600 text-white shadow-2xs';
-          renderGalleryGrid(e.currentTarget.getAttribute('data-cat'), document.getElementById('gallery-search-input').value);
-        });
-      });
-
-      document.getElementById('btn-export-img').addEventListener('click', exportLongImage);
-      document.getElementById('btn-export-pdf').addEventListener('click', printToPDF);
-
-      // 表单输入即时监听
-      ['field-destination', 'field-theme', 'field-pace', 'field-date', 'field-group', 'field-price', 'field-hotel', 'field-tickets', 'field-traffic', 'field-guide', 'field-exp', 'field-exclusions', 'field-cancellation'].forEach(id => {
-        document.getElementById(id)?.addEventListener('input', () => {
+      // 服务模块勾选联动
+      document.querySelectorAll('input[name="pkg-module"]').forEach(cb => {
+        cb.addEventListener('change', () => {
           readFormInputs();
+          syncModuleVisibility();
+          translationCache['zh-HK'] = null;
+          translationCache['en'] = null;
           renderPosterPreview();
+          saveDraftToLocalStorage();
         });
       });
+
+      // 语言切换与 AI 翻译
+      document.getElementById('lang-select')?.addEventListener('change', (e) => {
+        callGeminiTranslateEntireTrip(e.target.value);
+      });
+      document.getElementById('btn-trigger-ai-translate')?.addEventListener('click', () => {
+        const l = document.getElementById('lang-select').value;
+        callGeminiTranslateEntireTrip(l);
+      });
+
+      // 头图来源与滑块
+      document.getElementById('banner-source-select')?.addEventListener('change', (e) => {
+        state.bannerSource = e.target.value;
+        if (state.bannerSource.startsWith('day-')) {
+          const dNum = parseInt(state.bannerSource.replace('day-', ''), 10);
+          const matchedDay = state.days.find(d => d.day === dNum);
+          if (matchedDay && matchedDay.image) {
+            state.bannerUrl = matchedDay.image;
+          }
+        }
+        syncBannerControlsVisibility();
+        renderPosterPreview();
+        saveDraftToLocalStorage();
+      });
+
+      document.getElementById('banner-file-input')?.addEventListener('change', (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (re) => {
+          state.bannerUrl = re.target.result;
+          state.bannerSource = 'upload';
+          syncBannerControlsVisibility();
+          renderPosterPreview();
+          saveDraftToLocalStorage();
+          showNotification('头图上传成功！');
+        };
+        reader.readAsDataURL(file);
+      });
+
+      document.getElementById('banner-url-input')?.addEventListener('input', (e) => {
+        state.bannerUrl = e.target.value.trim();
+        renderPosterPreview();
+        saveDraftToLocalStorage();
+      });
+
+      document.getElementById('banner-overlay-slider')?.addEventListener('input', (e) => {
+        state.bannerOverlay = parseInt(e.target.value, 10);
+        document.getElementById('banner-overlay-val').textContent = `${state.bannerOverlay}%`;
+        renderPosterPreview();
+        saveDraftToLocalStorage();
+      });
+
+      document.getElementById('btn-banner-reset-gradient')?.addEventListener('click', () => {
+        state.bannerSource = 'gradient';
+        document.getElementById('banner-source-select').value = 'gradient';
+        syncBannerControlsVisibility();
+        renderPosterPreview();
+        saveDraftToLocalStorage();
+      });
+
+      // 图库弹窗触发
+      document.getElementById('btn-open-cloud-gallery-top')?.addEventListener('click', () => openCloudGalleryModal('banner'));
+      document.getElementById('btn-banner-cloud-picker')?.addEventListener('click', () => openCloudGalleryModal('banner'));
+      document.getElementById('btn-close-gallery')?.addEventListener('click', () => document.getElementById('cloud-gallery-modal').classList.add('hidden'));
+      document.getElementById('btn-close-gallery-footer')?.addEventListener('click', () => document.getElementById('cloud-gallery-modal').classList.add('hidden'));
+      document.getElementById('btn-refresh-github-gallery')?.addEventListener('click', async () => {
+        const btn = document.getElementById('btn-refresh-github-gallery');
+        const old = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span>⏳</span> <span>刷新中...</span>';
+        try {
+          await loadGitHubImageIndex(true);
+          await renderGalleryGrid(currentGalleryCategory, document.getElementById('gallery-search-input').value);
+          showNotification(`✅ 公共图库已刷新，共 ${githubImageIndex?.length || 0} 张图片。`);
+        } catch (err) {
+          showNotification('公共图库刷新失败，请稍后重试。', '⚠️');
+        } finally {
+          btn.disabled = false;
+          btn.innerHTML = old;
+        }
+      });
+
+      // 图库分类与搜索
+      document.getElementById('gallery-category-chips')?.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const cat = e.currentTarget.getAttribute('data-cat');
+          renderGalleryGrid(cat, document.getElementById('gallery-search-input').value);
+        });
+      });
+
+      document.getElementById('gallery-search-input')?.addEventListener('input', (e) => {
+        renderGalleryGrid(currentGalleryCategory, e.target.value);
+      });
+
+      // 自定义照片上传
+      document.getElementById('btn-open-upload-gallery-modal')?.addEventListener('click', () => {
+        document.getElementById('modal-image-file-input').value = '';
+        document.getElementById('modal-image-name-input').value = '';
+        document.getElementById('modal-upload-preview-strip').classList.add('hidden');
+        pendingUploadFiles = [];
+        document.getElementById('upload-image-modal').classList.remove('hidden');
+      });
+
+      const closeUploadImgModal = () => document.getElementById('upload-image-modal').classList.add('hidden');
+      document.getElementById('btn-close-upload-img')?.addEventListener('click', closeUploadImgModal);
+      document.getElementById('btn-cancel-upload-img')?.addEventListener('click', closeUploadImgModal);
+
+      document.getElementById('modal-image-file-input')?.addEventListener('change', (e) => {
+        handleImageFilesSelected(e.target.files);
+      });
+
+      document.getElementById('btn-confirm-upload-img')?.addEventListener('click', executeSaveCustomPhotos);
+
+      // 图库包导出与导入
+      document.getElementById('btn-export-my-gallery')?.addEventListener('click', async () => {
+        const photos = await CustomPhotoDB.getAll();
+        if (photos.length === 0) {
+          showNotification('您当前还没有上传任何自定义图片，无需导出', '⚠️');
+          return;
+        }
+        const pack = {
+          version: '1.0',
+          exportedAt: new Date().toISOString(),
+          type: 'klook-custom-gallery-pack',
+          photos: photos
+        };
+        const blob = new Blob([JSON.stringify(pack)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `Klook自建实景图库包_${Date.now()}.json`;
+        a.click();
+        showNotification(`✅ 已导出 ${photos.length} 张自定义图片数据包！`);
+      });
+
+      document.getElementById('input-import-my-gallery')?.addEventListener('change', (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = async (re) => {
+          try {
+            const data = JSON.parse(re.target.result);
+            const incomingPhotos = Array.isArray(data) ? data : data.photos;
+            if (!Array.isArray(incomingPhotos) || incomingPhotos.length === 0) {
+              throw new Error('No photos found in JSON');
+            }
+            let count = 0;
+            for (const p of incomingPhotos) {
+              if (p.url && p.name) {
+                await CustomPhotoDB.add({
+                  ...p,
+                  id: p.id || ('imported-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6)),
+                  isCustom: true
+                });
+                count++;
+              }
+            }
+            showNotification(`✅ 成功导入 ${count} 张团队实景照片！`);
+            renderGalleryGrid('custom', '');
+            e.target.value = '';
+          } catch (err) {
+            console.error('Import photos failed:', err);
+            showNotification('图库文件格式错误，导入失败', '⚠️');
+            e.target.value = '';
+          }
+        };
+        reader.readAsText(file);
+      });
+
+      // 模版库
+      document.getElementById('btn-open-templates-top')?.addEventListener('click', () => {
+        renderTemplatesModal('all', '');
+        document.getElementById('template-modal').classList.remove('hidden');
+      });
+      document.getElementById('btn-close-templates')?.addEventListener('click', () => document.getElementById('template-modal').classList.add('hidden'));
+      document.getElementById('btn-close-templates-footer')?.addEventListener('click', () => document.getElementById('template-modal').classList.add('hidden'));
+      document.getElementById('template-search-input')?.addEventListener('input', (e) => renderTemplatesModal(currentTemplateFolder, e.target.value));
+
+      // 文本导入模版
+      document.getElementById('btn-open-text-template-import')?.addEventListener('click', () => {
+        document.getElementById('text-template-import-input').value = '';
+        document.getElementById('text-template-import-modal').classList.remove('hidden');
+      });
+      document.getElementById('btn-close-text-template-import')?.addEventListener('click', () => document.getElementById('text-template-import-modal').classList.add('hidden'));
+      document.getElementById('btn-cancel-text-template-import')?.addEventListener('click', () => document.getElementById('text-template-import-modal').classList.add('hidden'));
+      document.getElementById('btn-confirm-text-template-import')?.addEventListener('click', () => {
+        const rawText = document.getElementById('text-template-import-input').value.trim();
+        const parsed = parseTextTemplate(rawText);
+        if (parsed.error) {
+          showNotification(parsed.error, '⚠️');
+          return;
+        }
+        const tpl = createTemplateFromParsedText(parsed);
+        const custom = getCustomTemplates();
+        custom.unshift(tpl);
+        saveCustomTemplates(custom);
+        document.getElementById('text-template-import-modal').classList.add('hidden');
+        renderTemplatesModal(tpl.folder, '');
+        showNotification(`✅ 已成功识别并创建模版「${tpl.name}」！`);
+      });
+
+      // 存为团队模版
+      document.getElementById('btn-save-as-template')?.addEventListener('click', () => {
+        readFormInputs();
+        const daysCount = state.days?.length || 1;
+        document.getElementById('save-tpl-name-input').value = `${state.destination || '中国'} ${daysCount}日 · ${state.theme || '定制深度游'}`;
+        
+        const allTemplates = getAllTemplates();
+        const folderMap = getTemplateDestinationFolders(allTemplates);
+        const folderSelect = document.getElementById('save-tpl-folder-select');
+        folderSelect.innerHTML = '';
+
+        let matchedFolder = '综合定制';
+        const curDest = state.destination || '';
+        folderMap.forEach((_, fName) => {
+          const opt = document.createElement('option');
+          opt.value = fName;
+          opt.textContent = `📁 ${fName}`;
+          folderSelect.appendChild(opt);
+          if (curDest.includes(fName) || fName.includes(curDest)) {
+            matchedFolder = fName;
+          }
+        });
+
+        folderSelect.value = matchedFolder;
+        document.getElementById('save-template-modal').classList.remove('hidden');
+      });
+
+      document.getElementById('btn-close-save-tpl')?.addEventListener('click', () => document.getElementById('save-template-modal').classList.add('hidden'));
+      document.getElementById('btn-cancel-save-tpl')?.addEventListener('click', () => document.getElementById('save-template-modal').classList.add('hidden'));
+      
+      document.querySelectorAll('input[name="folder-mode"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+          if (e.target.value === 'new') {
+            document.getElementById('save-tpl-existing-box').classList.add('hidden');
+            document.getElementById('save-tpl-new-box').classList.remove('hidden');
+            document.getElementById('save-tpl-new-folder-input').focus();
+          } else {
+            document.getElementById('save-tpl-existing-box').classList.remove('hidden');
+            document.getElementById('save-tpl-new-box').classList.add('hidden');
+          }
+        });
+      });
+
+      document.getElementById('btn-confirm-save-tpl')?.addEventListener('click', () => {
+        readFormInputs();
+        const tplName = document.getElementById('save-tpl-name-input').value.trim() || `${state.destination || '中国'} 定制游`;
+        const folderMode = document.querySelector('input[name="folder-mode"]:checked')?.value || 'existing';
+        
+        let targetFolder = '综合定制';
+        if (folderMode === 'new') {
+          const newFolderName = document.getElementById('save-tpl-new-folder-input').value.trim();
+          if (!newFolderName) {
+            showNotification('请输入新文件夹名称', '⚠️');
+            return;
+          }
+          targetFolder = newFolderName;
+          const customFolders = getCustomFolders();
+          if (!customFolders.includes(targetFolder)) {
+            customFolders.push(targetFolder);
+            saveCustomFolders(customFolders);
+          }
+        } else {
+          targetFolder = document.getElementById('save-tpl-folder-select').value || '综合定制';
+        }
+
+        const newTpl = {
+          id: 'custom-tpl-' + Date.now(),
+          name: tplName,
+          isPreset: false,
+          folder: targetFolder,
+          destination: state.destination || targetFolder,
+          theme: state.theme,
+          pace: state.pace,
+          date: state.date,
+          group: state.group,
+          price: state.price,
+          coverSource: state.bannerSource,
+          coverUrl: state.bannerUrl,
+          activeModules: [...state.activeModules],
+          hotelText: state.hotelText,
+          ticketText: state.ticketText,
+          trafficText: state.trafficText,
+          guideText: state.guideText,
+          expText: state.expText,
+          exclusionsText: state.exclusionsText,
+          cancellationText: state.cancellationText,
+          overallHighlights: JSON.parse(JSON.stringify(state.overallHighlights)),
+          days: JSON.parse(JSON.stringify(state.days))
+        };
+
+        const custom = getCustomTemplates();
+        custom.unshift(newTpl);
+        saveCustomTemplates(custom);
+        document.getElementById('save-template-modal').classList.add('hidden');
+        showNotification(`✅ 模版【${tplName}】已保存并归档！`);
+      });
+
+      // 新建文件夹
+      document.getElementById('btn-close-create-folder')?.addEventListener('click', () => document.getElementById('create-folder-modal').classList.add('hidden'));
+      document.getElementById('btn-cancel-create-folder')?.addEventListener('click', () => document.getElementById('create-folder-modal').classList.add('hidden'));
+      document.getElementById('btn-confirm-create-folder')?.addEventListener('click', () => {
+        const folderName = document.getElementById('new-folder-name-input').value.trim();
+        if (!folderName) {
+          showNotification('请输入文件夹名称', '⚠️');
+          return;
+        }
+        const customFolders = getCustomFolders();
+        if (!customFolders.includes(folderName)) {
+          customFolders.push(folderName);
+          saveCustomFolders(customFolders);
+          showNotification(`✅ 已成功新建目的地文件夹【${folderName}】！`);
+        }
+        document.getElementById('create-folder-modal').classList.add('hidden');
+        renderTemplatesModal(folderName, '');
+      });
+
+      // 历史记录
+      document.getElementById('btn-open-history-top')?.addEventListener('click', () => {
+        renderHistoryModal('');
+        document.getElementById('history-modal').classList.remove('hidden');
+      });
+      document.getElementById('btn-close-history')?.addEventListener('click', () => document.getElementById('history-modal').classList.add('hidden'));
+      document.getElementById('btn-close-history-footer')?.addEventListener('click', () => document.getElementById('history-modal').classList.add('hidden'));
+      document.getElementById('btn-quick-save-top')?.addEventListener('click', () => {
+        createHistorySnapshot('手动快捷保存');
+        showNotification('✅ 已成功归档至历史快照！');
+      });
+      document.getElementById('history-search-input')?.addEventListener('input', (e) => renderHistoryModal(e.target.value));
+      document.getElementById('btn-clear-all-history')?.addEventListener('click', () => {
+        saveHistoryList([]);
+        renderHistoryModal('');
+        showNotification('已清空全部历史记录');
+      });
+
+      // 导出按钮
+      document.getElementById('btn-export-img')?.addEventListener('click', exportLongImage);
+      document.getElementById('btn-export-pdf')?.addEventListener('click', printToPDF);
     });
   </script>
 </body>
