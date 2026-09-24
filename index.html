@@ -365,7 +365,7 @@
             <div class="text-xs font-extrabold text-amber-950 flex items-center gap-1.5">📑 报价单专属核算设置</div>
             <div class="text-[10px] text-amber-800 mt-0.5">单价 × 数量 = 小计，自动合并与无错位汇总</div>
           </div>
-          <span id="quote-total-editor" class="text-sm font-black text-orange-600">¥0</span>
+          <span id="quote-total-editor" class="text-sm font-black text-orange-600">¥CNY 0</span>
         </div>
 
         <div class="grid grid-cols-2 gap-2">
@@ -472,7 +472,7 @@
           </div>
           <div>
             <span class="block text-[10px] text-slate-500 font-bold mb-0.5">定制团报价</span>
-            <input type="text" id="field-price" class="w-full border border-slate-200 rounded-lg p-1.5 text-xs outline-none bg-slate-50 font-bold text-orange-600" placeholder="例: ¥9,800 / 团">
+            <input type="text" id="field-price" class="w-full border border-slate-200 rounded-lg p-1.5 text-xs outline-none bg-slate-50 font-bold text-orange-600" placeholder="例: ¥CNY 9,800 / 团">
           </div>
         </div>
       </div>
@@ -610,7 +610,7 @@
                 <span>👥</span> <span>4大1小</span>
               </span>
             </div>
-            <div id="poster-price-val" class="text-amber-300 font-black text-sm sm:text-base tracking-tight drop-shadow-xs">🏷️ ¥9,800 / 团</div>
+            <div id="poster-price-val" class="text-amber-300 font-black text-sm sm:text-base tracking-tight drop-shadow-xs">🏷️ ¥CNY 9,800 / 团</div>
           </div>
         </div>
 
@@ -767,7 +767,7 @@
       itineraryText: `Day 1: 北京—天安门广场—故宫博物院—景山公园俯瞰紫禁城\nDay 2: 慕田峪长城深度游—鸟巢与水立方夜景\nDay 3: 颐和园皇家园林—天坛祈年殿`,
       date: '2026-09-24',
       group: '4大1小',
-      price: '¥9,800 / 团',
+      price: '¥CNY 9,800 / 团',
       bannerSource: 'cloud',
       bannerUrl: 'https://images.unsplash.com/photo-1508804185872-d7badad00f7d?auto=format&fit=crop&w=1200&q=80',
       bannerOverlay: 20,
@@ -844,7 +844,7 @@
 
     function money(v) {
       const n = Number(v) || 0;
-      return `¥${n.toLocaleString('zh-CN', { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 })}`;
+      return `¥CNY ${n.toLocaleString('zh-CN', { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 })}`;
     }
 
     function quoteTotal() {
