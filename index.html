@@ -713,7 +713,7 @@
           <span id="quote-total-editor" class="text-sm font-black text-orange-600">¥0</span>
         </div>
 
-        <div class="grid grid-cols-3 gap-2">
+        <div class="grid grid-cols-2 gap-2">
           <div>
             <span class="block text-[10px] text-slate-600 font-bold mb-0.5">报价单标题</span>
             <input id="field-quote-title" type="text" class="w-full border border-slate-200 rounded-lg p-1.5 text-xs bg-white outline-none focus:ring-1 focus:ring-orange-500" placeholder="例：地接报价单">
@@ -726,7 +726,10 @@
             <span class="block text-[10px] text-slate-600 font-bold mb-0.5">出行人数</span>
             <input id="field-quote-group" type="text" class="w-full border border-slate-200 rounded-lg p-1.5 text-xs bg-white outline-none focus:ring-1 focus:ring-orange-500" placeholder="例: 4大1小">
           </div>
-
+          <div>
+            <span class="block text-[10px] text-slate-600 font-bold mb-0.5">出发日期</span>
+            <input id="field-quote-depart-date" type="text" class="w-full border border-slate-200 rounded-lg p-1.5 text-xs bg-white outline-none focus:ring-1 focus:ring-orange-500" placeholder="例: 2026-10-12">
+          </div>
         </div>
 
         <div class="quote-company-card space-y-2">
@@ -2653,7 +2656,7 @@ D1-D2：北京王府井酒店
       const metaDefaults = {
         title: state.destination ? `${state.destination} 定制报价单` : '定制游报价单',
         subtitle: state.destination ? `${state.destination} · 演示线路` : '',
-        docNo: '', quoteDate: todayStr, validUntil: '', orientation: 'portrait', currency: '¥',
+        docNo: '', quoteDate: todayStr, departDate: state.date || '', validUntil: '', orientation: 'portrait', currency: '¥',
         showUnitPrice: true, showQty: true, mergeProjects: true, taxEnabled: false, taxRate: 0, feeEnabled: false, feeRate: 0,
         logo: '', companyName: '', phone: '', email: '', address: '',
         coverUrl: state.bannerUrl || '', coverMode: 'poster',
@@ -2807,6 +2810,7 @@ D1-D2：北京王府井酒店
         'field-quote-title': state.quoteMeta.title,
         'field-quote-subtitle': state.quoteMeta.subtitle,
         'field-quote-group': state.group,
+        'field-quote-depart-date': state.quoteMeta.departDate,
         'field-quote-no': state.quoteMeta.docNo,
         'field-quote-date': state.quoteMeta.quoteDate,
         'field-quote-valid-until-2': state.quoteMeta.validUntil,
@@ -2900,7 +2904,7 @@ D1-D2：北京王府井酒店
       if (!state.quoteMeta) state.quoteMeta = {};
       const map = {
         title:'field-quote-title', subtitle:'field-quote-subtitle', docNo:'field-quote-no', validUntil:'field-quote-valid-until-2',
-        quoteDate:'field-quote-date', serviceStandard:'field-quote-service-standard', features:'field-quote-features', exclusions:'field-quote-exclusions',
+        quoteDate:'field-quote-date', departDate:'field-quote-depart-date', serviceStandard:'field-quote-service-standard', features:'field-quote-features', exclusions:'field-quote-exclusions',
         shopping:'field-quote-shopping', orderNotes:'field-quote-order-notes', remarks:'field-quote-remarks'
       };
       Object.entries(map).forEach(([key,id]) => {
@@ -3036,7 +3040,7 @@ D1-D2：北京王府井酒店
       const rawGroup = String(state.group || '').trim();
       const title = localizeQuoteText(meta.title || (rawDestination ? `${rawDestination} 定制报价单` : '定制游报价单'));
       const subtitle = localizeQuoteText(meta.subtitle || '');
-      const rawDepartureDate = String(meta.quoteDate || state.date || '').trim();
+      const rawDepartureDate = String(meta.departDate || meta.quoteDate || state.date || '').trim();
       const departureDate = localizeQuoteText(rawDepartureDate);
       const nights = Math.max(0, days.length - 1);
       const dayNightText = days.length ? `${days.length}天${nights}晚` : '';
@@ -4854,7 +4858,7 @@ D1-D2：北京王府井酒店
         renderQuotationPreview();
         saveDraftToLocalStorage();
       });
-      ['field-quote-title','field-quote-subtitle','field-quote-no','field-quote-date','field-quote-valid-until-2','field-quote-service-standard','field-quote-features','field-quote-exclusions','field-quote-shopping','field-quote-order-notes','field-quote-remarks'].forEach(id => {
+      ['field-quote-title','field-quote-subtitle','field-quote-depart-date','field-quote-no','field-quote-date','field-quote-valid-until-2','field-quote-service-standard','field-quote-features','field-quote-exclusions','field-quote-shopping','field-quote-order-notes','field-quote-remarks'].forEach(id => {
         document.getElementById(id)?.addEventListener('input', () => {
           if (state.outputMode !== 'quotation') return;
           readQuotationMetaFromDOM();
